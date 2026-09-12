@@ -19,6 +19,16 @@ type BoardPayload = {
   volumes?: Record<string, number>;
 };
 
+type TokenInfoEnrich = {
+  usdPrice?: number | null;
+  mcap?: number | null;
+  fdv?: number | null;
+  liquidity?: number | null;
+  volume24h?: number | null;
+  change24h?: number | null;
+  icon?: string | null;
+};
+
 function ethicsHeaders(extra?: HeadersInit): HeadersInit {
   return {
     Accept: "application/json",
@@ -71,11 +81,68 @@ function numOrNull(v: unknown): number | null {
   return v;
 }
 
+async function mapPool<T, R>(
+  items: T[],
+  concurrency: number,
+  fn: (item: T) => Promise<R>,
+): Promise<R[]> {
+  const out: R[] = new Array(items.length);
+  let i = 0;
+  async function worker() {
+    while (i < items.length) {
+      const idx = i++;
+      out[idx] = await fn(items[idx]);
+    }
+  }
+  const n = Math.min(concurrency, Math.max(1, items.length));
+  await Promise.all(Array.from({ length: n }, () => worker()));
+  return out;
+}
+
+async function fetchTokenInfo(mint: string): Promise<TokenInfoEnrich | null> {
+  try {
+    const res = await fetch(
+      `${ETHICS_ORIGIN}/api/launches/token-info?mint=${encodeURIComponent(mint)}`,
+      { headers: ethicsHeaders(), cache: "no-store" },
+    );
+    if (!res.ok) return null;
+    const data = (await res.json()) as {
+      pools?: Array<{
+        volume24h?: number;
+        liquidity?: number;
+        baseAsset?: {
+          usdPrice?: number;
+          mcap?: number;
+          fdv?: number;
+          liquidity?: number;
+          icon?: string;
+          stats24h?: { priceChange?: number };
+        };
+      }>;
+    };
+    const pool = data.pools?.[0];
+    if (!pool) return null;
+    const b = pool.baseAsset ?? {};
+    return {
+      usdPrice: numOrNull(b.usdPrice),
+      mcap: numOrNull(b.mcap),
+      fdv: numOrNull(b.fdv),
+      liquidity: numOrNull(b.liquidity ?? pool.liquidity),
+      volume24h: numOrNull(pool.volume24h),
+      change24h: numOrNull(b.stats24h?.priceChange),
+      icon: typeof b.icon === "string" ? b.icon : null,
+    };
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Live Ethics launches as shown on ethics.ltd.
- * Identity: GET /api/launches
- * Metrics: GET /api/launches/board + POST /api/launches/enrich
- * Missing metrics stay null — never invented.
+ * Identity + icons: GET /api/launches
+ * Board mcap/vol: GET /api/launches/board + POST enrich
+ * Price / % / liq: GET /api/launches/token-info?mint=… (concurrent; missing stay null)
+ * Spark/range/holders: not on these public endpoints — stay null.
  */
 export async function fetchEthicsTokens(): Promise<TokenRow[]> {
   const [all, board] = await Promise.all([
@@ -101,27 +168,45 @@ export async function fetchEthicsTokens(): Promise<TokenRow[]> {
     Object.assign(mcaps, enriched.mcaps ?? {});
     Object.assign(volumes, enriched.volumes ?? {});
   } catch {
-    // Board metrics alone are still prod data; enrich is best-effort.
+    // board metrics alone still prod
   }
+
+  // Prefer enriching board + high-volume mints first, then the rest.
+  const boardSet = new Set((board.launches ?? []).map((l) => l.mint));
+  const ordered = [
+    ...mints.filter((m) => boardSet.has(m)),
+    ...mints.filter((m) => !boardSet.has(m)),
+  ];
+
+  const detailsList = await mapPool(ordered, 10, fetchTokenInfo);
+  const details = new Map<string, TokenInfoEnrich | null>();
+  ordered.forEach((m, i) => details.set(m, detailsList[i] ?? null));
 
   const rows: TokenRow[] = [];
   const seen = new Set<string>();
   for (const l of launches) {
     if (!l?.mint || seen.has(l.mint)) continue;
     seen.add(l.mint);
+    const d = details.get(l.mint);
+    const mcap =
+      numOrNull(d?.mcap) ?? numOrNull(mcaps[l.mint]);
+    const fdv = numOrNull(d?.fdv) ?? mcap;
+    const vol =
+      numOrNull(d?.volume24h) ?? numOrNull(volumes[l.mint]);
     rows.push({
       id: `ethics-${l.mint}`,
       launchpadId: "ethics",
       symbol: String(l.symbol || "").trim() || l.mint.slice(0, 6),
       name: String(l.name || "").trim() || l.symbol || l.mint.slice(0, 8),
       mint: l.mint,
+      icon: d?.icon || l.icon || null,
       status: mapStatus(l.launchPath),
-      priceUsd: null,
-      change24hPct: null,
-      mcapUsd: numOrNull(mcaps[l.mint]),
-      fdvUsd: numOrNull(mcaps[l.mint]),
-      volume24hUsd: numOrNull(volumes[l.mint]),
-      liquidityUsd: null,
+      priceUsd: numOrNull(d?.usdPrice),
+      change24hPct: numOrNull(d?.change24h),
+      mcapUsd: mcap,
+      fdvUsd: fdv,
+      volume24hUsd: vol,
+      liquidityUsd: numOrNull(d?.liquidity),
       holders: null,
       holdersDelta24h: null,
       ageHours: ageHoursFrom(l.createdAt),
@@ -133,7 +218,6 @@ export async function fetchEthicsTokens(): Promise<TokenRow[]> {
     });
   }
 
-  // Rank by volume then mcap (missing sink)
   rows.sort((a, b) => {
     const av = a.volume24hUsd ?? -1;
     const bv = b.volume24hUsd ?? -1;

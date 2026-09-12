@@ -261,11 +261,20 @@ export function TokenScreener({
                     <td className="col-name">
                       <span
                         className="token-avatar"
-                        style={{
-                          background: `linear-gradient(145deg, hsl(${h} 72% 48%), hsl(${(h + 36) % 360} 50% 26%))`,
-                        }}
+                        style={
+                          t.icon
+                            ? undefined
+                            : {
+                                background: `linear-gradient(145deg, hsl(${h} 72% 48%), hsl(${(h + 36) % 360} 50% 26%))`,
+                              }
+                        }
                       >
-                        {initials(t.symbol)}
+                        {t.icon ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={t.icon} alt="" />
+                        ) : (
+                          initials(t.symbol)
+                        )}
                       </span>
                       <span className="token-meta">
                         <span className="token-title">

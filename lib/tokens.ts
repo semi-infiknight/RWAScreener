@@ -11,6 +11,8 @@ export type TokenRow = {
   status: TokenStatus;
   /** Solana mint when known (Bags real rows). */
   mint?: string;
+  /** Token image URL when the pad API provides one. */
+  icon?: string | null;
   priceUsd: number | null;
   change24hPct: number | null;
   mcapUsd: number | null;

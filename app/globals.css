@@ -1137,3 +1137,14 @@ td.col-name { display: flex; }
   .aarna-meta { grid-template-columns: 1fr; }
   .aarna-connect-btns a { flex: 1; min-width: 0; }
 }
+
+
+.token-avatar {
+  overflow: hidden;
+}
+.token-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
