@@ -18,3 +18,7 @@ Seed badged quote mints → DBC pools after cutoff → group by config/fee_claim
 
 ## Stack
 Next.js + Postgres + Helius webhooks + @meteora-ag/dynamic-bonding-curve-sdk worker.
+
+## Deploy
+Railway project **`rwascreener`** (`7ede8677-ff5f-44cf-911e-fa8bb4100695`, env `production`).
+Web + worker + Postgres land here. Do **not** deploy into `oracle`.

@@ -48,13 +48,21 @@ A pool is **in** the screener iff all of:
 | Layer | Choice |
 | --- | --- |
 | Web | Next.js App Router + Tailwind |
-| DB | Postgres (Neon or Supabase) |
+| DB | Postgres on Railway |
 | Chain | Helius RPC + enhanced webhooks on DBC program |
 | Decode | `@meteora-ag/dynamic-bonding-curve-sdk` ≥ 1.5.12 (0.2.1 IDL) |
 | Worker | Node/TS in `apps/indexer` — backfill, webhook consumer, checker |
-| Host | Vercel (web) + Railway/Fly (worker) — or both Railway |
+| Host | Railway project **rwascreener** (web + worker + Postgres) |
 
 Skip v1: Geyser, Dune, Bitquery-as-SoT, Redis (add if webhook queue needs it).
+
+### 4.1 Hosting lock (2026-09-12)
+- **Project:** `rwascreener` (`7ede8677-ff5f-44cf-911e-fa8bb4100695`)
+- **Workspace:** captmathur's Projects
+- **Environment:** `production` (`643b2079-4821-412c-beaa-c33524e93705`)
+- **Local:** repo linked with `railway link`
+- **Services today:** none (empty shell) — provision `web`, `worker`, Postgres in Phase 1
+- **Not** the `oracle` Railway project; keep Beyoracle and RWAScreener infra separate
 
 ## 5. Services
 

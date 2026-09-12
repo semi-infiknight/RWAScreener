@@ -6,6 +6,8 @@
 - [ ] Draft data/quote-mints.json (xStocks)
 
 ## Phase 1 — Skeleton
+- [x] Railway project `rwascreener` created + linked (empty; env production)
+- [ ] Provision Railway: Postgres + `web` + `worker`; Helius/DB env
 - [ ] pnpm workspace: web + indexer + db + dbc
 - [ ] Drizzle schema + migrations
 - [ ] Seed load + badge verify script

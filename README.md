@@ -18,4 +18,6 @@ Not a general RWA dashboard. Not a SOL/USDC launch feed.
 
 ## Status
 
-Spec kit committed locally. App scaffold not started.
+Spec kit on `main`. App scaffold not started.
+
+**Host (for now):** Railway project [`rwascreener`](https://railway.com/project/7ede8677-ff5f-44cf-911e-fa8bb4100695) — empty shell; web, worker, and Postgres go here (not `oracle`).
