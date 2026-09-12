@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   formatAge,
   formatCompact,
@@ -23,6 +23,9 @@ type SortKey =
   | "ageHours"
   | "holders";
 
+/** Keep DOM small on large pads; append via IntersectionObserver. */
+const INITIAL_VISIBLE_ROWS = 48;
+const VISIBLE_ROW_CHUNK = 40;
 
 const IPFS_GATEWAYS = [
   "https://cloudflare-ipfs.com/ipfs/",
@@ -80,6 +83,10 @@ function TokenAvatar({
         <img
           src={src}
           alt=""
+          loading="lazy"
+          decoding="async"
+          width={36}
+          height={36}
           onError={() => {
             if (idx + 1 < candidates.length) setIdx((i) => i + 1);
             else setFailed(true);
@@ -169,6 +176,10 @@ export function TokenScreener({
   /** False until a column header is clicked — default = graduated first, then metric. */
   const [userSorted, setUserSorted] = useState(false);
 
+  /** Progressive window: keep DOM small during fast scroll on large pads (e.g. RevShare ~462). */
+  const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_ROWS);
+  const sentinelRef = useRef<HTMLTableRowElement | null>(null);
+
   const showNotLive = !live;
   const showLoadingTable = live && loading && tokens.length === 0;
   const showLiveEmpty = live && !loading && tokens.length === 0;
@@ -201,6 +212,36 @@ export function TokenScreener({
     });
     return list;
   }, [tokens, sort, asc, showNotLive, userSorted]);
+
+  // Reset window when sort / pad list identity changes (not on every enrich patch of same length).
+  const rowsIdentity = `${launchpadId || ""}:${rows.length}:${sort}:${asc}:${userSorted}`;
+  useEffect(() => {
+    setVisibleCount(INITIAL_VISIBLE_ROWS);
+  }, [rowsIdentity]);
+
+  const visibleRows = useMemo(
+    () => rows.slice(0, Math.min(visibleCount, rows.length)),
+    [rows, visibleCount],
+  );
+  const hasMore = visibleCount < rows.length;
+
+  const loadMore = useCallback(() => {
+    setVisibleCount((n) => Math.min(rows.length, n + VISIBLE_ROW_CHUNK));
+  }, [rows.length]);
+
+  useEffect(() => {
+    if (!hasMore) return;
+    const node = sentinelRef.current;
+    if (!node) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) loadMore();
+      },
+      { root: null, rootMargin: "480px 0px", threshold: 0 },
+    );
+    io.observe(node);
+    return () => io.disconnect();
+  }, [hasMore, loadMore, visibleRows.length]);
 
   function toggleSort(key: SortKey) {
     setUserSorted(true);
@@ -329,7 +370,7 @@ export function TokenScreener({
               </tr>
             </thead>
             <tbody>
-              {rows.map((t) => {
+              {visibleRows.map((t) => {
                 const ch = t.change24hPct;
                 const up = ch == null ? true : ch >= 0;
                 return (
@@ -392,6 +433,13 @@ export function TokenScreener({
                   </tr>
                 );
               })}
+              {hasMore ? (
+                <tr ref={sentinelRef} className="vs-row vs-row-sentinel" aria-hidden>
+                  <td colSpan={1 + metricColCount}>
+                    <span className="vs-load-more muted">Loading more…</span>
+                  </td>
+                </tr>
+              ) : null}
             </tbody>
           </table>
         </div>
