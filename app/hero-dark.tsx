@@ -3,11 +3,9 @@
 import { useEffect, useRef } from "react";
 
 /**
- * Dark remake of Base ecosystem header motion language.
- * Motion targets from header study: traveling vertical bar clusters,
- * ~14–16px pitch, soft fringe, mouse-driven deformation, title above.
- * Palette: Meteora orange cores + pastel-black / charcoal fringes.
- * Seamless with page mineral wash — no white stage.
+ * Compact dark remake of Base header motion:
+ * fine vertical hairlines in soft clusters (not chunky "token bars"),
+ * pastel-black field + localized orange crest on pointer wake.
  */
 
 type Cluster = {
@@ -23,64 +21,64 @@ type Cluster = {
   phase: number;
 };
 
-const PITCH = 13;
-const CORE_W = 6.5;
-const R = 1.5;
+const PITCH = 7; // fine spacing
+const CORE_W = 2.4; // hairline cores
+const R = 0.8;
 
 function hash(n: number) {
   const x = Math.sin(n * 127.1 + 311.7) * 43758.5453;
   return x - Math.floor(x);
 }
 
-function env(u: number, seed: number, t: number, phase: number) {
+function envelope(u: number, seed: number, t: number, phase: number) {
   const a = Math.max(0, 1 - Math.abs(u));
   const soft = a * a * (3 - 2 * a);
-  const n1 = Math.sin(u * 7 + seed + t * 1.25 + phase) * 0.14;
-  const n2 = Math.sin(u * 15 + seed * 1.4 - t * 0.85) * 0.07;
-  const core = Math.exp(-(u * u) * 2.35);
-  return Math.max(0, soft * (0.55 + 0.45 * core) + n1 + n2);
+  const n1 = Math.sin(u * 9 + seed + t * 1.1 + phase) * 0.12;
+  const n2 = Math.sin(u * 21 + seed * 1.3 - t * 0.7) * 0.06;
+  const n3 = (hash(u * 40 + seed) - 0.5) * 0.05;
+  const core = Math.exp(-(u * u) * 2.1);
+  return Math.max(0, soft * (0.5 + 0.5 * core) + n1 + n2 + n3);
 }
 
 function makeCluster(w: number, partial?: Partial<Cluster>): Cluster {
   const fromLeft = Math.random() > 0.5;
-  const large = Math.random() > 0.35;
+  const large = Math.random() > 0.4;
   return {
-    x: fromLeft ? -50 - Math.random() * 80 : w + 50 + Math.random() * 80,
-    y: 0.56 + Math.random() * 0.08,
-    vx: (fromLeft ? 1 : -1) * (35 + Math.random() * 40),
+    x: fromLeft ? -40 - Math.random() * 60 : w + 40 + Math.random() * 60,
+    y: 0.62 + Math.random() * 0.1,
+    vx: (fromLeft ? 1 : -1) * (28 + Math.random() * 36),
     age: 0,
-    maxAge: 7 + Math.random() * 5,
+    maxAge: 9 + Math.random() * 6,
     life: 0,
-    n: large ? 12 + Math.floor(Math.random() * 6) : 8 + Math.floor(Math.random() * 5),
-    peak: large ? 55 + Math.random() * 35 : 28 + Math.random() * 32,
+    // denser: 18–32 fine bars
+    n: large ? 22 + Math.floor(Math.random() * 10) : 14 + Math.floor(Math.random() * 8),
+    peak: large ? 42 + Math.random() * 28 : 22 + Math.random() * 22,
     seed: Math.random() * 1000,
     phase: Math.random() * Math.PI * 2,
     ...partial,
   };
 }
 
-/** orange → ember → dusty pastel-black */
-function barColor(u: number, rel: number, a: number, hot = false) {
-  const core = Math.exp(-(u * u) * 3.2);
+function barColor(u: number, rel: number, a: number, hot: boolean) {
+  const core = Math.exp(-(u * u) * 2.8);
   const edge = Math.abs(u);
   let r: number, g: number, b: number;
-  if (hot && core > 0.45) {
-    // localized orange crest (#ff6a00 family)
-    const k = (core - 0.45) / 0.55;
+  if (hot && core > 0.4) {
+    const k = (core - 0.4) / 0.6;
     r = 255;
-    g = Math.round(90 + 70 * k + 30 * rel);
-    b = Math.round(0 + 40 * k * rel);
-  } else if (edge > 0.72 || core < 0.35) {
-    // pastel blacks #17171b / #24242b
-    const g0 = 23 + 18 * (1 - edge) + 12 * rel;
-    r = Math.round(g0 + 2);
+    g = Math.round(100 + 60 * k + 25 * rel);
+    b = Math.round(10 + 35 * k * rel);
+  } else if (edge > 0.7 || core < 0.28) {
+    // pastel black fringe
+    const g0 = 20 + 14 * (1 - edge) + 10 * rel;
+    r = Math.round(g0 + 3);
     g = Math.round(g0);
-    b = Math.round(g0 + 6);
+    b = Math.round(g0 + 8);
   } else {
-    // desaturated near-black ember / violet-ish mid
-    r = Math.round(48 + 40 * (1 - Math.abs(u)));
-    g = Math.round(36 + 22 * (1 - Math.abs(u)) + 8 * rel);
-    b = Math.round(42 + 18 * rel);
+    // soft graphite / near-black violet mid
+    r = Math.round(36 + 28 * (1 - Math.abs(u)));
+    g = Math.round(32 + 18 * (1 - Math.abs(u)) + 6 * rel);
+    b = Math.round(40 + 16 * rel);
   }
   return `rgba(${r},${g},${b},${a})`;
 }
@@ -100,7 +98,7 @@ export function HeroDark() {
     let h = 0;
     let raf = 0;
     let last = performance.now();
-    let spawnAt = 0.8;
+    let spawnAt = 1.2;
     const clusters: Cluster[] = [];
 
     const pointer = {
@@ -116,7 +114,7 @@ export function HeroDark() {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       const rect = wrap.getBoundingClientRect();
       w = Math.max(320, rect.width);
-      h = Math.max(360, Math.min(490, Math.max(420, rect.height)));
+      h = Math.max(140, Math.min(200, rect.height || 168));
       canvas.width = Math.floor(w * dpr);
       canvas.height = Math.floor(h * dpr);
       canvas.style.width = `${w}px`;
@@ -124,54 +122,80 @@ export function HeroDark() {
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       if (clusters.length === 0) {
         clusters.push(
-          makeCluster(w, { x: w * 0.58, n: 14, peak: 78, vx: 48, life: 1, age: 2, maxAge: 14, seed: 12 }),
-          makeCluster(w, { x: w * 0.28, n: 10, peak: 48, vx: -40, life: 0.85, age: 3, maxAge: 12, seed: 44 }),
+          makeCluster(w, {
+            x: w * 0.62,
+            n: 28,
+            peak: 52,
+            vx: 34,
+            life: 1,
+            age: 2,
+            maxAge: 16,
+            seed: 12,
+          }),
+          makeCluster(w, {
+            x: w * 0.28,
+            n: 20,
+            peak: 34,
+            vx: -28,
+            life: 0.9,
+            age: 3,
+            maxAge: 14,
+            seed: 44,
+          }),
+          makeCluster(w, {
+            x: w * 0.85,
+            n: 16,
+            peak: 26,
+            vx: 22,
+            life: 0.55,
+            age: 5,
+            maxAge: 12,
+            seed: 71,
+          }),
         );
       }
     };
 
-    const drawCluster = (c: Cluster, strength: number, t: number, hot = false) => {
+    const drawCluster = (c: Cluster, strength: number, t: number, hot: boolean) => {
       if (strength < 0.04) return;
       const baseline = c.y * h;
       const half = (c.n - 1) / 2 || 1;
-      const fringeExtra = 7;
+      const fringeExtra = 10;
       const total = c.n + fringeExtra * 2;
 
       for (let i = 0; i < total; i++) {
         const coreIndex = i - fringeExtra;
         const u = coreIndex / half;
-        const inCore = Math.abs(u) <= 1.05;
-        const e = env(Math.max(-1.4, Math.min(1.4, u)), c.seed, t, c.phase);
-        if (e < 0.02) continue;
+        const e = envelope(Math.max(-1.45, Math.min(1.45, u)), c.seed, t, c.phase);
+        if (e < 0.015) continue;
 
-        const noise = (hash(coreIndex * 13 + c.seed + Math.floor(t * 8)) - 0.5) * 6;
-        const shimmer = Math.sin(t * 4.1 + coreIndex * 0.75 + c.phase) * 2;
+        const noise = (hash(coreIndex * 17 + c.seed + Math.floor(t * 6)) - 0.5) * 3.5;
+        const shimmer = Math.sin(t * 3.4 + coreIndex * 0.55 + c.phase) * 1.2;
         let height = c.peak * e * strength + noise + shimmer;
-        height = Math.max(4, Math.min(124, height));
+        height = Math.max(3, Math.min(h * 0.72, height));
 
+        // soft vertical tail: draw as gradient alpha already; also taper width
         const x = c.x + coreIndex * PITCH;
-        const isFringe = !inCore || e < 0.22;
+        const isFringe = Math.abs(u) > 1.02 || e < 0.2;
         const barW = isFringe
-          ? 1.2 + hash(coreIndex + c.seed) * 1.8
-          : CORE_W + (hash(coreIndex * 3 + c.seed) - 0.5) * 1.4;
+          ? 0.7 + hash(coreIndex + c.seed) * 1.1
+          : CORE_W + (hash(coreIndex * 3 + c.seed) - 0.5) * 0.8;
 
-        const coreA = 0.55 + 0.32 * e;
-        const fringeA = 0.03 + 0.07 * e;
-        const a = Math.min(0.9, (isFringe ? fringeA : coreA) * strength);
+        const coreA = 0.35 + 0.4 * e;
+        const fringeA = 0.02 + 0.08 * e;
+        const a = Math.min(0.78, (isFringe ? fringeA : coreA) * strength);
 
         const top = baseline - height;
         const grad = ctx.createLinearGradient(x, baseline, x, top);
-        grad.addColorStop(0, barColor(u, 0, a * 0.55, hot));
-        grad.addColorStop(0.45, barColor(u, 0.5, a, hot));
-        grad.addColorStop(1, barColor(u, 1, a * 0.9, hot));
+        grad.addColorStop(0, barColor(u, 0, a * 0.15, hot));
+        grad.addColorStop(0.35, barColor(u, 0.35, a * 0.75, hot));
+        grad.addColorStop(0.75, barColor(u, 0.75, a, hot));
+        grad.addColorStop(1, barColor(u, 1, a * 0.55, hot));
 
-        if (isFringe) {
-          ctx.shadowColor = `rgba(255, 106, 0, ${0.18 * a})`;
-          ctx.shadowBlur = 3.5;
-        } else {
-          ctx.shadowColor = `rgba(255, 140, 50, ${0.12 * a})`;
-          ctx.shadowBlur = 1.5;
-        }
+        ctx.shadowBlur = hot && !isFringe ? 2 : isFringe ? 1.2 : 0;
+        ctx.shadowColor = hot
+          ? `rgba(255, 106, 0, ${0.2 * a})`
+          : `rgba(180, 180, 200, ${0.08 * a})`;
 
         ctx.fillStyle = grad;
         ctx.beginPath();
@@ -191,17 +215,18 @@ export function HeroDark() {
       last = now;
       const t = now / 1000;
 
-      const pk = 1 - Math.exp(-dt * 3.2);
+      const pk = 1 - Math.exp(-dt * 3.4);
       pointer.x += (pointer.tx - pointer.x) * pk;
       pointer.y += (pointer.ty - pointer.y) * pk;
-      pointer.strength += ((pointer.active ? 1 : 0) - pointer.strength) * (1 - Math.exp(-dt * 4));
+      pointer.strength +=
+        ((pointer.active ? 1 : 0) - pointer.strength) * (1 - Math.exp(-dt * 4));
 
       ctx.clearRect(0, 0, w, h);
 
       spawnAt -= dt;
-      if (spawnAt <= 0 && clusters.length < 2) {
+      if (spawnAt <= 0 && clusters.length < 3) {
         clusters.push(makeCluster(w));
-        spawnAt = 1.4 + Math.random() * 2.2;
+        spawnAt = 1.8 + Math.random() * 2.5;
       }
 
       const order = [...clusters.keys()].sort((a, b) => clusters[a].n - clusters[b].n);
@@ -209,50 +234,54 @@ export function HeroDark() {
         const c = clusters[idx];
         c.age += dt;
         c.x += c.vx * dt;
-        c.phase += dt * 0.4;
+        c.phase += dt * 0.35;
 
-        // mouse deformation (Base interactivity language)
-        if (pointer.strength > 0.05 && c.n >= 9) {
-          const targetX = pointer.x * w;
-          c.x += (targetX - c.x) * dt * 1.7 * pointer.strength;
-          c.y += (0.54 + pointer.y * 0.08 - c.y) * dt * 0.55 * pointer.strength;
+        if (pointer.strength > 0.05) {
+          const dist = Math.hypot(c.x - pointer.x * w, (c.y - pointer.y) * h);
+          if (dist < 170 && c.n >= 16) {
+            c.x += (pointer.x * w - c.x) * dt * 1.4 * pointer.strength;
+            c.y += (0.58 + pointer.y * 0.08 - c.y) * dt * 0.5 * pointer.strength;
+          }
         }
 
-        const fadeIn = 0.55;
-        const fadeOut = 0.65;
+        const fadeIn = 0.7;
+        const fadeOut = 0.8;
         if (c.age < fadeIn) c.life = c.age / fadeIn;
-        else if (c.maxAge - c.age < fadeOut) c.life = Math.max(0, (c.maxAge - c.age) / fadeOut);
+        else if (c.maxAge - c.age < fadeOut)
+          c.life = Math.max(0, (c.maxAge - c.age) / fadeOut);
         else c.life = 1;
 
         const near =
-          Math.hypot(c.x - pointer.x * w, (c.y - pointer.y) * h) < 160;
-        drawCluster(c, c.life, t, near && pointer.strength > 0.15);
+          Math.hypot(c.x - pointer.x * w, (c.y - pointer.y) * h) < 150;
+        drawCluster(c, c.life, t, near && pointer.strength > 0.12);
       }
 
       for (let i = clusters.length - 1; i >= 0; i--) {
         const c = clusters[i];
-        const halfW = (c.n * PITCH) / 2 + 48;
-        if (c.age > c.maxAge || c.x < -halfW || c.x > w + halfW) clusters.splice(i, 1);
+        const halfW = (c.n * PITCH) / 2 + 60;
+        if (c.age > c.maxAge || c.x < -halfW || c.x > w + halfW) {
+          clusters.splice(i, 1);
+        }
       }
 
       if (pointer.strength > 0.05) {
         const local = makeCluster(w, {
           x: pointer.x * w,
-          y: 0.55 + pointer.y * 0.06,
+          y: 0.58 + pointer.y * 0.08,
           vx: 0,
-          n: 11,
-          peak: 78 + (1 - pointer.y) * 36,
+          n: 26,
+          peak: 48 + (1 - pointer.y) * 22,
           life: 1,
           age: 1,
           maxAge: 2,
-          seed: 30 + Math.floor(pointer.x * 15),
+          seed: 30 + Math.floor(pointer.x * 20),
           phase: t,
         });
         drawCluster(local, pointer.strength, t, true);
-        local.x -= 30;
+        local.x -= 22;
         local.peak *= 0.55;
-        local.n = 8;
-        drawCluster(local, pointer.strength * 0.35, t + 0.4, true);
+        local.n = 18;
+        drawCluster(local, pointer.strength * 0.4, t + 0.35, true);
       }
 
       raf = requestAnimationFrame(draw);
