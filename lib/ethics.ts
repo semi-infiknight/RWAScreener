@@ -4,7 +4,7 @@ import { cachedPadFeed } from "./pad-cache";
 const ETHICS_ORIGIN = "https://www.ethics.ltd";
 /** Cap detail enrichment so SSR does not open 89 parallel sockets (undici "network error"). */
 const DETAIL_LIMIT = 24;
-const DETAIL_CONCURRENCY = 4;
+const DETAIL_CONCURRENCY = 6;
 const DETAIL_TIMEOUT_MS = 6_000;
 
 type EthicsLaunch = {
@@ -217,7 +217,7 @@ function buildRows(
 }
 
 export type FetchEthicsOptions = {
-  /** When false, skip token-info price/% (fast first paint). Default true. */
+  /** Kept for cache phase (fast|full). Token-info (liq) always runs — board/enrich has no liq. */
   enrichDetails?: boolean;
   /** When false, skip POST /enrich (use board mcaps/volumes only). Default true. */
   enrichBoard?: boolean;
@@ -225,7 +225,9 @@ export type FetchEthicsOptions = {
 
 /**
  * Live Ethics launches. Never throws — returns [] on hard failure.
- * Icons from /api/launches; mcap/vol from board/enrich; price/% optional (top DETAIL_LIMIT).
+ * Icons from /api/launches; mcap/vol from board/enrich (no liquidity there).
+ * Liq/price/% from token-info for top DETAIL_LIMIT by volume — also on the
+ * fast/summary path (overlapped with enrich POST).
  */
 export async function fetchEthicsTokens(
   opts: FetchEthicsOptions = {},
@@ -239,7 +241,6 @@ export async function fetchEthicsTokens(
 async function loadEthicsTokens(
   opts: FetchEthicsOptions,
 ): Promise<TokenRow[]> {
-  const enrichDetails = opts.enrichDetails === true;
   const enrichBoard = opts.enrichBoard !== false;
   try {
     const [all, board] = await Promise.all([
@@ -256,6 +257,17 @@ async function loadEthicsTokens(
       ...new Set(launches.map((l) => l.mint).filter(Boolean)),
     ] as string[];
 
+    // Board + POST /enrich = mcaps/volumes/dbcQuotes only (verified). Liquidity
+    // is token-info only — always fetch top-by-volume so homepage summary has Liq.
+    const detailMints = [...mints]
+      .sort((a, b) => (volumes[b] ?? 0) - (volumes[a] ?? 0))
+      .slice(0, DETAIL_LIMIT);
+    const detailsPromise = mapPool(
+      detailMints,
+      DETAIL_CONCURRENCY,
+      fetchTokenInfo,
+    ).catch(() => [] as Array<TokenInfoEnrich | null>);
+
     if (enrichBoard) {
       try {
         const enriched = await postJson<{
@@ -270,20 +282,11 @@ async function loadEthicsTokens(
     }
 
     const details = new Map<string, TokenInfoEnrich | null>();
-    if (enrichDetails) {
-      const detailMints = [...mints]
-        .sort((a, b) => (volumes[b] ?? 0) - (volumes[a] ?? 0))
-        .slice(0, DETAIL_LIMIT);
-      try {
-        const detailRows = await mapPool(
-          detailMints,
-          DETAIL_CONCURRENCY,
-          fetchTokenInfo,
-        );
-        detailMints.forEach((m, i) => details.set(m, detailRows[i] ?? null));
-      } catch {
-        // identity + board metrics still render
-      }
+    try {
+      const detailRows = await detailsPromise;
+      detailMints.forEach((m, i) => details.set(m, detailRows[i] ?? null));
+    } catch {
+      // identity + board metrics still render
     }
 
     return buildRows(launches, mcaps, volumes, details);

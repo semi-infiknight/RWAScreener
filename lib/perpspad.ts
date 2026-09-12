@@ -238,7 +238,8 @@ async function loadRawTokens(): Promise<{ source: string; tokens: PerpspadToken[
  * Semi filter drops `source:external` / pump.fun fee-router adopts.
  * Status: site `graduated` boolean → graduated|bonding (upstream catalog often
  * all graduated; do not invent bonding from graduationProgress).
- * Columns: price, mcap, age; liquidity from reserveUsdc when present. No volume/holders.
+ * Columns: price, mcap, age; liquidity from reserveUsdc when present.
+ * Catalog has no volume field (keys verified 2026-09-13). Holders stay null.
  * Sort: highest mcap.
  */
 export async function fetchPerpspadTokens(opts?: {

@@ -54,7 +54,7 @@ async function loadPadTokens(padId: string): Promise<TokenRow[]> {
     case "clawpump":
       return fetchClawPumpTokens({ phase: "fast" });
     case "ethics":
-      // Match /api/pads/ethics?phase=fast so Redis key hits (board enrich on).
+      // ethics:fast — board/enrich mcap+vol + token-info liq (top 24). Same Redis key as pad ?phase=fast.
       return fetchEthicsTokens({ enrichBoard: true, enrichDetails: false });
     case "revshare":
       return fetchRevShareTokens({ phase: "fast" });
@@ -74,6 +74,10 @@ async function summarizePad(padId: string): Promise<PadSummaryRow> {
   }
   try {
     const tokens = await loadPadTokens(p.id);
+    // Empty live feed is a flap/fail — never publish coins:0 / 0 / 0.
+    if (!Array.isArray(tokens) || tokens.length === 0) {
+      return { id: p.id, live: true, ok: false, ...FAILED_PAD_AGGREGATE };
+    }
     return {
       id: p.id,
       live: true,

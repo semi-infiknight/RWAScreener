@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 /**
- * ?phase=fast — list only (icons + board mcap/vol)
+ * ?phase=fast — list + board/enrich mcap/vol + token-info liq (top 24)
  * ?mint=… — single-token detail enrich (price / % / liq)
  * ?phase=full — legacy bulk enrich (avoid; prefer sequential ?mint=)
  */

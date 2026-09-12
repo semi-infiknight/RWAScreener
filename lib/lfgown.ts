@@ -251,7 +251,8 @@ export type FetchLfgownOptions = {
  * rangeLowUsd/rangeHighUsd = raised USD / (threshold * quoteUsdPrice) markers.
  * Sorted highest raised-USD first. Icons from launch.uri metadata `image`.
  * Age from activationPoint (Solana slot) vs current slot — null if RPC unavailable.
- * No invented price/vol.
+ * No invented price/vol. Extra /api/{stats,tokens,markets,volume,prices} are 404.
+ * liquidityUsd = raised USD (quoteReserve/1e6 * quoteUsdPrice) — same real field as mcap proxy.
  */
 export async function fetchLfgownTokens(
   opts: FetchLfgownOptions = {},
@@ -344,6 +345,7 @@ export async function enrichLfgownToken(
       status: statusFromLaunch(launch),
       mcapUsd: raisedUsd,
       fdvUsd: raisedUsd,
+      liquidityUsd: raisedUsd,
       rangeLowUsd: raisedUsd,
       rangeHighUsd: targetUsd,
       rangePos: rangePosFromLaunch(launch),
