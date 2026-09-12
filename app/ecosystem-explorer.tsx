@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import type { Project } from "./page";
+import { HeroBars } from "./hero-bars";
 
 const PAGE_SIZE = 15;
 const STATUS_FILTERS = [
@@ -106,11 +107,7 @@ export function EcosystemExplorer({
       </header>
 
       <section className="hero">
-        <div className="hero-art" aria-hidden>
-          {Array.from({ length: 8 }).map((_, i) => (
-            <i key={i} />
-          ))}
-        </div>
+        <HeroBars />
         <h1>Ecosystem</h1>
         <p>
           Explore {projects.length} launchpads and builders around Meteora DBC —
