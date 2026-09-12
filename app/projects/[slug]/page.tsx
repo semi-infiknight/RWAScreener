@@ -136,20 +136,6 @@ export default async function ProjectPage({ params }: Props) {
           </div>
         </article>
 
-        <section className="aarna-row">
-          <span className="aarna-row-label">Runs on</span>
-          <div className="aarna-row-value">
-            <span className="aarna-net">
-              <span className="aarna-net-dot" aria-hidden />
-              Solana
-            </span>
-            <span className="aarna-net accent">
-              <span className="aarna-net-dot accent" aria-hidden />
-              Meteora DBC
-            </span>
-          </div>
-        </section>
-
         <section className="aarna-row aarna-connect">
           <span className="aarna-row-label">Connect</span>
           <div className="aarna-connect-btns">
