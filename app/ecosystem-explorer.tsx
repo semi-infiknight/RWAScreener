@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import type { Project } from "../lib/projects";
-import { HeroBars } from "./hero-bars";
+import { HeroBase } from "./hero-base";
 
 const PAGE_SIZE = 15;
 const STATUS_FILTERS = [
@@ -83,7 +83,7 @@ export function EcosystemExplorer({
   return (
     <div className="page">
       <section className="hero">
-        <HeroBars />
+        <HeroBase />
         <h1>Ecosystem</h1>
         <p>
           DBC launchpads on Solana — what they built, what is live, what we verified.
