@@ -6,14 +6,6 @@ import type { Project } from "../lib/projects";
 import { HeroDark } from "./hero-dark";
 
 const PAGE_SIZE = 15;
-const STATUS_FILTERS = [
-  { id: "all", label: "All" },
-  { id: "live", label: "Live" },
-  { id: "integrating", label: "Integrating" },
-  { id: "in_contact", label: "In contact" },
-  { id: "discovered", label: "Discovered" },
-] as const;
-
 const AVATAR_COLORS = [
   "#ff6a00",
   "#ff8a1a",
@@ -50,17 +42,14 @@ export function EcosystemExplorer({
 }: {
   projects: Project[];
 }) {
-  const [status, setStatus] = useState<string>("all");
   const [query, setQuery] = useState("");
   const [visible, setVisible] = useState(PAGE_SIZE);
-  const [drawerOpen, setDrawerOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
+    if (!q) return projects;
     return projects.filter((p) => {
-      if (status !== "all" && p.status !== status) return false;
-      if (!q) return true;
       const hay = [
         p.displayName,
         p.slug,
@@ -73,7 +62,7 @@ export function EcosystemExplorer({
         .toLowerCase();
       return hay.includes(q);
     });
-  }, [projects, query, status]);
+  }, [projects, query]);
 
   const shown = filtered.slice(0, visible);
 
@@ -89,36 +78,7 @@ export function EcosystemExplorer({
 
       <div className="shell">
         <div className="panel">
-        <div className="controls">
-          <div className="pills" role="tablist" aria-label="Status filters">
-            {STATUS_FILTERS.map((f) => {
-              const hideOnMobile =
-                f.id !== "all" && f.id !== "live" && f.id !== "discovered";
-              return (
-                <button
-                  key={f.id}
-                  type="button"
-                  className={`pill${hideOnMobile ? " desktop-only-pills" : ""}`}
-                  data-active={status === f.id}
-                  onClick={() => {
-                    setStatus(f.id);
-                    setVisible(PAGE_SIZE);
-                  }}
-                >
-                  {f.label}
-                </button>
-              );
-            })}
-          </div>
-
-          <button
-            type="button"
-            className="icon-btn"
-            aria-label="Open filters"
-            onClick={() => setDrawerOpen(true)}
-          >
-            <FilterIcon />
-          </button>
+        <div className="controls controls-search-only">
           <button
             type="button"
             className="icon-btn search-toggle"
@@ -250,64 +210,6 @@ export function EcosystemExplorer({
           </a>
         </div>
       </div>
-
-      <div
-        className="drawer-backdrop"
-        data-open={drawerOpen}
-        onClick={() => setDrawerOpen(false)}
-      />
-      <aside className="drawer" data-open={drawerOpen} aria-hidden={!drawerOpen}>
-        <div className="drawer-head">
-          <h2>Filters</h2>
-          <button
-            type="button"
-            className="ext"
-            aria-label="Close"
-            onClick={() => setDrawerOpen(false)}
-          >
-            ×
-          </button>
-        </div>
-        <div className="drawer-body">
-          <div className="drawer-group">
-            <h3>Status</h3>
-            <div className="pills">
-              {STATUS_FILTERS.map((f) => (
-                <button
-                  key={f.id}
-                  type="button"
-                  className="pill"
-                  data-active={status === f.id}
-                  onClick={() => setStatus(f.id)}
-                >
-                  {f.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-        <div className="drawer-actions">
-          <button
-            type="button"
-            onClick={() => {
-              setStatus("all");
-              setQuery("");
-            }}
-          >
-            Clear
-          </button>
-          <button
-            type="button"
-            className="primary"
-            onClick={() => {
-              setDrawerOpen(false);
-              setVisible(PAGE_SIZE);
-            }}
-          >
-            Apply
-          </button>
-        </div>
-      </aside>
     </div>
   );
 }
@@ -321,15 +223,3 @@ function SearchIcon() {
   );
 }
 
-function FilterIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path
-        d="M4 7h16M7 12h10M10 17h4"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}

@@ -1174,3 +1174,13 @@ td.col-name { display: flex; }
   100% { background-position: -100% 0; }
 }
 .vs-row.skeleton td { padding: 0.85rem 0.65rem; }
+
+
+.controls-search-only {
+  justify-content: flex-end;
+}
+.controls-search-only .search {
+  flex: 1;
+  max-width: 22rem;
+  display: flex;
+}
