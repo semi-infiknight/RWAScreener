@@ -235,7 +235,7 @@ button, input { font: inherit; color: inherit; }
   padding: 0.85rem 1rem;
   cursor: pointer;
   display: grid;
-  grid-template-columns: auto 1fr auto auto;
+  grid-template-columns: auto 1fr auto;
   gap: 0.85rem;
   align-items: center;
 }
@@ -444,7 +444,6 @@ button, input { font: inherit; color: inherit; }
 @media (min-width: 860px) {
   .nav-links, .nav-cta { display: flex; }
   .hamburger { display: none; }
-  .tags { display: flex; }
   .row {
     min-height: 64px;
     padding: 0.7rem 1.1rem;
@@ -459,7 +458,6 @@ button, input { font: inherit; color: inherit; }
   .row {
     grid-template-columns: auto 1fr auto;
   }
-  .tags { display: none; }
   .expand { padding-left: 3.25rem; }
 }
 
@@ -485,6 +483,32 @@ button, input { font: inherit; color: inherit; }
   align-self: center;
   margin-right: 0.65rem;
 }
+
+.go-to-app {
+  align-self: center;
+  margin-right: 0.75rem;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  border-radius: 999px;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: #0a0a0a;
+  background: linear-gradient(145deg, #ff8a1a, #ff6a00);
+  border: 1px solid rgba(255, 106, 0, 0.55);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25);
+}
+.go-to-app:hover {
+  filter: brightness(1.06);
+  color: #0a0a0a;
+}
+
 
 .project-page { padding-top: 2rem; }
 .back-link {

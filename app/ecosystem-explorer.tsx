@@ -30,13 +30,6 @@ function initials(name: string): string {
   return (parts[0][0] + parts[1][0]).toUpperCase();
 }
 
-function dbcTag(p: Project): string {
-  if (p.dbc.integrated === true) return "DBC";
-  if (p.dbc.integrated === false) return "NO DBC YET";
-  if (p.status === "integrating") return "DBC integrating";
-  return "DBC TBD";
-}
-
 export function EcosystemExplorer({
   projects,
 }: {
@@ -102,7 +95,7 @@ export function EcosystemExplorer({
             <div className="empty">No projects match.</div>
           ) : (
             shown.map((p, idx) => {
-              const href = p.website ?? p.x ?? p.docs ?? "#";
+              const appHref = p.website ?? p.x ?? p.docs ?? null;
               return (
                 <div key={p.id} role="listitem" className="row-wrap">
                   <Link
@@ -131,23 +124,22 @@ export function EcosystemExplorer({
                       <div className="name">{p.displayName}</div>
                       <div className="domain">{domainOf(p.website)}</div>
                     </span>
-                    <span className="tags">
-                      <span className="tag">{p.status.replace("_", " ")}</span>
-                      <span className="tag">{dbcTag(p)}</span>
-                    </span>
                     <span className="row-chevron" aria-hidden>
                       →
                     </span>
                   </Link>
-                  {href !== "#" ? (
+                  {appHref ? (
                     <a
-                      className="ext row-ext"
-                      href={href}
+                      className="go-to-app"
+                      href={appHref}
                       target="_blank"
                       rel="noreferrer"
-                      aria-label={`Open ${p.displayName} website`}
+                      aria-label={`Go to ${p.displayName} app`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                      }}
                     >
-                      ↗
+                      GO TO APP
                     </a>
                   ) : null}
                 </div>
