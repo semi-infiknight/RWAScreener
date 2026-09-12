@@ -139,7 +139,7 @@ export function EcosystemExplorer({
                         e.stopPropagation();
                       }}
                     >
-                      GO TO APP
+                      GO TO APP ↗
                     </a>
                   ) : null}
                 </div>
