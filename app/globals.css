@@ -138,12 +138,29 @@ button, input { font: inherit; color: inherit; }
 .hero-title {
   position: relative;
   z-index: 3;
-  margin: 0;
-  font-size: clamp(1.65rem, 3.6vw, 2.15rem);
+  margin: 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.42em;
+  max-width: 100%;
+  font-size: clamp(1.45rem, 3.4vw, 2.15rem);
   letter-spacing: -0.045em;
   font-weight: 300;
   color: #f5f2ed;
   pointer-events: none;
+  text-align: left;
+}
+.hero-title-mark {
+  width: 1.2em;
+  height: 1.2em;
+  flex-shrink: 0;
+  display: block;
+  object-fit: contain;
+}
+.hero-title-text {
+  min-width: 0;
+  line-height: 1.05;
 }
 .hero-title-brand {
   font-weight: 800;
@@ -152,6 +169,12 @@ button, input { font: inherit; color: inherit; }
 .hero-title-light {
   font-weight: 300;
   letter-spacing: -0.045em;
+}
+@media (max-width: 520px) {
+  .hero-title {
+    gap: 0.36em;
+    flex-wrap: nowrap;
+  }
 }
 .hero p {
   position: relative;

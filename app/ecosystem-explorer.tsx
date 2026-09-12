@@ -63,9 +63,19 @@ export function EcosystemExplorer({
       <section className="hero">
         <HeroDark />
         <h1 className="hero-title">
-          <span className="hero-title-light">The </span>
-          <span className="hero-title-brand">Meteora</span>
-          <span className="hero-title-light"> DBC Screener</span>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            className="hero-title-mark"
+            src="/favicon.svg"
+            alt=""
+            width={48}
+            height={48}
+          />
+          <span className="hero-title-text">
+            <span className="hero-title-light">The </span>
+            <span className="hero-title-brand">Meteora</span>
+            <span className="hero-title-light"> DBC Screener</span>
+          </span>
         </h1>
       </section>
 
