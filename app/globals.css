@@ -769,6 +769,11 @@ td.col-name { display: flex; }
 .stack { display: flex; flex-direction: column; gap: 0.1rem; }
 .num { font-variant-numeric: tabular-nums; color: #e4e4e7; }
 .pct { font-size: 0.78rem; font-variant-numeric: tabular-nums; }
+
+.pct.muted,
+.num.muted {
+  color: #71717a;
+}
 .up { color: #4ade80; }
 .down { color: #f87171; }
 .spark { display: block; }

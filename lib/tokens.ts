@@ -2,25 +2,28 @@ import raw from "../data/tokens.json";
 
 export type TokenStatus = "bonding" | "graduated";
 
+/** Nullable metrics: real Bags rows ship identity only until priced. */
 export type TokenRow = {
   id: string;
   launchpadId: string;
   symbol: string;
   name: string;
   status: TokenStatus;
-  priceUsd: number;
-  change24hPct: number;
-  mcapUsd: number;
-  fdvUsd: number;
-  volume24hUsd: number;
-  liquidityUsd: number;
-  holders: number;
-  holdersDelta24h: number;
-  ageHours: number;
-  rangeLowUsd: number;
-  rangeHighUsd: number;
-  rangePos: number;
-  spark24h: number[];
+  /** Solana mint when known (Bags real rows). */
+  mint?: string;
+  priceUsd: number | null;
+  change24hPct: number | null;
+  mcapUsd: number | null;
+  fdvUsd: number | null;
+  volume24hUsd: number | null;
+  liquidityUsd: number | null;
+  holders: number | null;
+  holdersDelta24h: number | null;
+  ageHours: number | null;
+  rangeLowUsd: number | null;
+  rangeHighUsd: number | null;
+  rangePos: number | null;
+  spark24h: number[] | null;
   draft: boolean;
 };
 
@@ -39,7 +42,8 @@ export function tokensForLaunchpad(launchpadId: string): TokenRow[] {
   return data.tokens.filter((t) => t.launchpadId === launchpadId);
 }
 
-export function formatUsd(n: number): string {
+export function formatUsd(n: number | null | undefined): string {
+  if (n == null || Number.isNaN(n)) return "—";
   if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
   if (n >= 1_000) return `$${(n / 1_000).toFixed(1)}K`;
   if (n >= 1) return `$${n.toFixed(2)}`;
@@ -47,17 +51,30 @@ export function formatUsd(n: number): string {
   return `$${n.toFixed(6)}`;
 }
 
-export function formatCompact(n: number): string {
+export function formatCompact(n: number | null | undefined): string {
+  if (n == null || Number.isNaN(n)) return "—";
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
   if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
   return `${n}`;
 }
 
-export function formatAge(hours: number): string {
+export function formatAge(hours: number | null | undefined): string {
+  if (hours == null || Number.isNaN(hours)) return "—";
   if (hours < 24) return `${hours}h`;
   const d = Math.floor(hours / 24);
   if (d < 7) return `${d}d`;
   if (d < 30) return `${Math.floor(d / 7)}w`;
   if (d < 365) return `${Math.floor(d / 30)}mo`;
   return `${Math.floor(d / 365)}y`;
+}
+
+export function formatPct(n: number | null | undefined): string {
+  if (n == null || Number.isNaN(n)) return "—";
+  const sign = n > 0 ? "+" : "";
+  return `${sign}${n.toFixed(2)}%`;
+}
+
+/** Sort helper: missing metrics sink to the bottom regardless of asc/desc intent via callers. */
+export function metricOrNaN(n: number | null | undefined): number {
+  return n == null || Number.isNaN(n) ? Number.NEGATIVE_INFINITY : n;
 }

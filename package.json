@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "refresh:bags": "node scripts/refresh-bags-tokens.mjs"
   },
   "dependencies": {
     "@react-three/fiber": "^9.7.0",

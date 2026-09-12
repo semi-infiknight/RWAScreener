@@ -4,7 +4,9 @@ import { useMemo, useState } from "react";
 import {
   formatAge,
   formatCompact,
+  formatPct,
   formatUsd,
+  metricOrNaN,
   tokensDisclaimer,
   type TokenRow,
 } from "../../lib/tokens";
@@ -35,7 +37,10 @@ function hue(sym: string) {
   return h;
 }
 
-function Sparkline({ values, up }: { values: number[]; up: boolean }) {
+function Sparkline({ values, up }: { values: number[] | null; up: boolean }) {
+  if (!values || values.length < 2) {
+    return <span className="num muted">—</span>;
+  }
   const w = 88;
   const h = 28;
   const min = Math.min(...values);
@@ -63,7 +68,10 @@ function Sparkline({ values, up }: { values: number[]; up: boolean }) {
   );
 }
 
-function RangeBar({ pos }: { pos: number }) {
+function RangeBar({ pos }: { pos: number | null }) {
+  if (pos == null || Number.isNaN(pos)) {
+    return <span className="num muted">—</span>;
+  }
   const p = Math.min(1, Math.max(0, pos));
   return (
     <div className="range" aria-hidden>
@@ -99,26 +107,42 @@ export function TokenScreener({
       if (!query) return true;
       return (
         t.symbol.toLowerCase().includes(query) ||
-        t.name.toLowerCase().includes(query)
+        t.name.toLowerCase().includes(query) ||
+        (t.mint?.toLowerCase().includes(query) ?? false)
       );
     });
 
     if (tab === "gainers") {
-      list = [...list].sort((a, b) => b.change24hPct - a.change24hPct);
-    } else if (tab === "new") {
-      list = [...list].sort((a, b) => a.ageHours - b.ageHours);
-    } else if (tab === "top") {
-      list = [...list].sort((a, b) => b.fdvUsd - a.fdvUsd);
-    } else {
       list = [...list].sort(
-        (a, b) =>
-          b.volume24hUsd * (1 + Math.abs(b.change24hPct) / 100) -
-          a.volume24hUsd * (1 + Math.abs(a.change24hPct) / 100),
+        (a, b) => metricOrNaN(b.change24hPct) - metricOrNaN(a.change24hPct),
       );
+    } else if (tab === "new") {
+      // Missing age → bottom (treat as very old when ascending by ageHours)
+      list = [...list].sort((a, b) => {
+        const ah = a.ageHours == null ? Number.POSITIVE_INFINITY : a.ageHours;
+        const bh = b.ageHours == null ? Number.POSITIVE_INFINITY : b.ageHours;
+        return ah - bh;
+      });
+    } else if (tab === "top") {
+      list = [...list].sort(
+        (a, b) => metricOrNaN(b.fdvUsd) - metricOrNaN(a.fdvUsd),
+      );
+    } else {
+      list = [...list].sort((a, b) => {
+        const score = (t: TokenRow) => {
+          const vol = metricOrNaN(t.volume24hUsd);
+          const ch = t.change24hPct == null ? 0 : Math.abs(t.change24hPct);
+          if (vol === Number.NEGATIVE_INFINITY) return Number.NEGATIVE_INFINITY;
+          return vol * (1 + ch / 100);
+        };
+        return score(b) - score(a);
+      });
     }
 
     list = [...list].sort((a, b) => {
-      const d = (a[sort] as number) - (b[sort] as number);
+      const av = metricOrNaN(a[sort] as number | null);
+      const bv = metricOrNaN(b[sort] as number | null);
+      const d = av - bv;
       return asc ? d : -d;
     });
 
@@ -229,7 +253,8 @@ export function TokenScreener({
             </thead>
             <tbody>
               {rows.map((t) => {
-                const up = t.change24hPct >= 0;
+                const ch = t.change24hPct;
+                const up = ch == null ? true : ch >= 0;
                 const h = hue(t.symbol);
                 return (
                   <tr key={t.id} className="vs-row">
@@ -251,15 +276,23 @@ export function TokenScreener({
                           <span className="token-status" data-status={t.status}>
                             {t.status}
                           </span>
+                          {t.draft ? (
+                            <span className="token-status" data-status="bonding">
+                              draft
+                            </span>
+                          ) : null}
                         </span>
                       </span>
                     </td>
                     <td>
                       <div className="stack">
                         <span className="num">{formatUsd(t.priceUsd)}</span>
-                        <span className={up ? "pct up" : "pct down"}>
-                          {up ? "+" : ""}
-                          {t.change24hPct.toFixed(2)}%
+                        <span
+                          className={
+                            ch == null ? "pct muted" : up ? "pct up" : "pct down"
+                          }
+                        >
+                          {formatPct(ch)}
                         </span>
                       </div>
                     </td>
@@ -276,14 +309,18 @@ export function TokenScreener({
                     <td className="hide-md">
                       <div className="stack">
                         <span className="num">{formatCompact(t.holders)}</span>
-                        <span
-                          className={
-                            t.holdersDelta24h >= 0 ? "pct up" : "pct down"
-                          }
-                        >
-                          {t.holdersDelta24h >= 0 ? "+" : ""}
-                          {t.holdersDelta24h}
-                        </span>
+                        {t.holdersDelta24h == null ? (
+                          <span className="pct muted">—</span>
+                        ) : (
+                          <span
+                            className={
+                              t.holdersDelta24h >= 0 ? "pct up" : "pct down"
+                            }
+                          >
+                            {t.holdersDelta24h >= 0 ? "+" : ""}
+                            {t.holdersDelta24h}
+                          </span>
+                        )}
                       </div>
                     </td>
                     <td className="col-buy">
