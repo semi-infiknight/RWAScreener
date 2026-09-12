@@ -1,4 +1,5 @@
 import type { TokenRow } from "./tokens";
+import { cachedPadFeed } from "./pad-cache";
 
 const CLAW_ORIGIN = "https://clawpump.tech";
 /** Max offset for snapshot pagination. Offset is ignored unless `snapshot` is pinned. */
@@ -118,7 +119,14 @@ async function fetchPage(
  * - Cap: offset ≤ 4000 (~20 pages). Full catalog ~14k is too slow for the request path;
  *   meteora_dbc density is low and clustered early in sort=new under current snapshots.
  */
-export async function fetchClawPumpTokens(): Promise<TokenRow[]> {
+export async function fetchClawPumpTokens(opts?: {
+  phase?: string;
+}): Promise<TokenRow[]> {
+  const phase = opts?.phase === "fast" ? "fast" : "full";
+  return cachedPadFeed("clawpump", phase, () => loadClawPumpTokens());
+}
+
+async function loadClawPumpTokens(): Promise<TokenRow[]> {
   const first = await fetchPage(0);
   const snapshot =
     first.snapshot != null && first.snapshot !== ""

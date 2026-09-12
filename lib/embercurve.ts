@@ -1,4 +1,5 @@
 import type { TokenRow } from "./tokens";
+import { cachedPadFeed } from "./pad-cache";
 
 const EMBER_ORIGIN = "https://embercurve.fun";
 
@@ -54,10 +55,17 @@ function ageHoursFrom(createdAt: number | undefined): number | null {
  * (feed is SSE long-poll; quotes is quote-asset catalog — not launches)
  * Missing fields stay null. No invented metrics.
  */
-export async function fetchEmberCurveTokens(): Promise<TokenRow[]> {
+export async function fetchEmberCurveTokens(opts?: {
+  phase?: string;
+}): Promise<TokenRow[]> {
+  const phase = opts?.phase === "fast" ? "fast" : "full";
+  return cachedPadFeed("embercurve", phase, () => loadEmberCurveTokens());
+}
+
+async function loadEmberCurveTokens(): Promise<TokenRow[]> {
   const res = await fetch(`${EMBER_ORIGIN}/api/solana/markets`, {
     headers: emberHeaders(),
-    next: { revalidate: 60 },
+    cache: "no-store",
   });
   if (!res.ok) {
     throw new Error(`Ember /api/solana/markets → HTTP ${res.status}`);

@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
   const fast = phase === "fast";
   try {
     const { source, tokens, kept, droppedExternal, rawCount } =
-      await fetchPerpspadTokens();
+      await fetchPerpspadTokens({ phase: fast ? "fast" : "full" });
     return NextResponse.json({
       source,
       phase: fast ? "fast" : "full",

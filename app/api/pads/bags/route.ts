@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
   const phase = req.nextUrl.searchParams.get("phase") || "full";
   const fast = phase === "fast";
   try {
-    const tokens = await fetchBagsTokens();
+    const tokens = await fetchBagsTokens({ phase: fast ? "fast" : "full" });
     return NextResponse.json({
       source:
         "https://public-api-v2.bags.fm/api/v1/token-launch/damm-v2/launches?quoteMint=<xStock>",

@@ -1,4 +1,5 @@
 import type { TokenRow } from "./tokens";
+import { cachedPadFeed } from "./pad-cache";
 
 const PERPSPAD_ORIGIN = "https://perpspad.fun";
 
@@ -238,7 +239,20 @@ async function loadRawTokens(): Promise<{ source: string; tokens: PerpspadToken[
  * Columns: price, mcap, age. No volume/liquidity/holders — left null.
  * Sort: highest mcap.
  */
-export async function fetchPerpspadTokens(): Promise<{
+export async function fetchPerpspadTokens(opts?: {
+  phase?: string;
+}): Promise<{
+  source: string;
+  tokens: TokenRow[];
+  kept: number;
+  droppedExternal: number;
+  rawCount: number;
+}> {
+  const phase = opts?.phase === "fast" ? "fast" : "full";
+  return cachedPadFeed("perpspad", phase, () => loadPerpspadTokens());
+}
+
+async function loadPerpspadTokens(): Promise<{
   source: string;
   tokens: TokenRow[];
   kept: number;

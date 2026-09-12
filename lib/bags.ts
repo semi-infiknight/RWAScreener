@@ -1,4 +1,5 @@
 import type { TokenRow } from "./tokens";
+import { cachedPadFeed } from "./pad-cache";
 import quoteMintsFile from "../data/quote-mints.json";
 
 const BAGS_ORIGIN = "https://public-api-v2.bags.fm";
@@ -168,8 +169,18 @@ async function fetchLaunchesForQuote(
  * Non-SOL / xStock Bags launches are DAMM_V2_DIRECT (no DBC curve).
  * Missing USD metrics stay null. No invented numbers.
  * Fail-closed if BAGS_API_KEY is missing — never fetch this feed unauthenticated.
+ * List results cached via lib/pad-cache (pad+phase, short TTL).
  */
-export async function fetchBagsTokens(): Promise<TokenRow[]> {
+export async function fetchBagsTokens(opts?: {
+  phase?: string;
+}): Promise<TokenRow[]> {
+  // Fail-closed before cache — missing key must not be masked by a stale hit.
+  bagsApiKey();
+  const phase = opts?.phase === "fast" ? "fast" : "full";
+  return cachedPadFeed("bags", phase, () => loadBagsTokens());
+}
+
+async function loadBagsTokens(): Promise<TokenRow[]> {
   const apiKey = bagsApiKey();
   const quotes = allowlistedMints();
   const allowed = new Set(quotes);

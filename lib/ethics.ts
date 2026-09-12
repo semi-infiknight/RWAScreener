@@ -1,4 +1,5 @@
 import type { TokenRow } from "./tokens";
+import { cachedPadFeed } from "./pad-cache";
 
 const ETHICS_ORIGIN = "https://www.ethics.ltd";
 /** Cap detail enrichment so SSR does not open 89 parallel sockets (undici "network error"). */
@@ -228,6 +229,15 @@ export type FetchEthicsOptions = {
  */
 export async function fetchEthicsTokens(
   opts: FetchEthicsOptions = {},
+): Promise<TokenRow[]> {
+  const enrichDetails = opts.enrichDetails === true;
+  const enrichBoard = opts.enrichBoard !== false;
+  const phase = enrichDetails ? "full" : "fast";
+  return cachedPadFeed("ethics", phase, () => loadEthicsTokens(opts));
+}
+
+async function loadEthicsTokens(
+  opts: FetchEthicsOptions,
 ): Promise<TokenRow[]> {
   const enrichDetails = opts.enrichDetails === true;
   const enrichBoard = opts.enrichBoard !== false;

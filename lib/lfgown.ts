@@ -1,4 +1,5 @@
 import type { TokenRow } from "./tokens";
+import { cachedPadFeed } from "./pad-cache";
 
 const LFGOWN_ORIGIN = "https://letsfuckingown.fun";
 const LAUNCHES_URL = `${LFGOWN_ORIGIN}/api/launches`;
@@ -253,6 +254,14 @@ export type FetchLfgownOptions = {
  */
 export async function fetchLfgownTokens(
   opts: FetchLfgownOptions = {},
+): Promise<TokenRow[]> {
+  const enrichIcons = opts.enrichIcons === true;
+  const phase = enrichIcons ? "full" : "fast";
+  return cachedPadFeed("lfgown", phase, () => loadLfgownTokens(opts));
+}
+
+async function loadLfgownTokens(
+  opts: FetchLfgownOptions,
 ): Promise<TokenRow[]> {
   const enrichIcons = opts.enrichIcons === true;
   try {

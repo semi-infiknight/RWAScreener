@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
   const phase = req.nextUrl.searchParams.get("phase") || "full";
   const fast = phase === "fast";
   try {
-    const tokens = await fetchClawPumpTokens();
+    const tokens = await fetchClawPumpTokens({ phase: fast ? "fast" : "full" });
     return NextResponse.json({
       source: "https://clawpump.tech/api/tokens?sort=new&limit=200&offset=&snapshot= (filter launchPlatform===meteora_dbc)",
       phase: fast ? "fast" : "full",
