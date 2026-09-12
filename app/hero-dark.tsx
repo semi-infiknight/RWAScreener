@@ -23,8 +23,8 @@ type Cluster = {
   phase: number;
 };
 
-const PITCH = 15;
-const CORE_W = 9;
+const PITCH = 13;
+const CORE_W = 6.5;
 const R = 1.5;
 
 function hash(n: number) {
@@ -47,12 +47,12 @@ function makeCluster(w: number, partial?: Partial<Cluster>): Cluster {
   return {
     x: fromLeft ? -50 - Math.random() * 80 : w + 50 + Math.random() * 80,
     y: 0.56 + Math.random() * 0.08,
-    vx: (fromLeft ? 1 : -1) * (55 + Math.random() * 55),
+    vx: (fromLeft ? 1 : -1) * (35 + Math.random() * 40),
     age: 0,
     maxAge: 7 + Math.random() * 5,
     life: 0,
-    n: large ? 10 + Math.floor(Math.random() * 3) : 6 + Math.floor(Math.random() * 4),
-    peak: large ? 72 + Math.random() * 38 : 36 + Math.random() * 28,
+    n: large ? 12 + Math.floor(Math.random() * 6) : 8 + Math.floor(Math.random() * 5),
+    peak: large ? 55 + Math.random() * 35 : 28 + Math.random() * 32,
     seed: Math.random() * 1000,
     phase: Math.random() * Math.PI * 2,
     ...partial,
@@ -60,27 +60,27 @@ function makeCluster(w: number, partial?: Partial<Cluster>): Cluster {
 }
 
 /** orange → ember → dusty pastel-black */
-function barColor(u: number, rel: number, a: number) {
+function barColor(u: number, rel: number, a: number, hot = false) {
   const core = Math.exp(-(u * u) * 3.2);
   const edge = Math.abs(u);
   let r: number, g: number, b: number;
-  if (core > 0.5) {
-    // hot orange / soft peach pastel
-    const k = (core - 0.5) / 0.5;
-    r = Math.round(255);
-    g = Math.round(120 + 90 * k + 40 * rel);
-    b = Math.round(40 + 70 * k * rel);
-  } else if (edge > 0.75) {
-    // pastel black / graphite fringe
-    const g0 = 28 + 22 * (1 - edge) + 18 * rel;
-    r = Math.round(g0 + 8);
+  if (hot && core > 0.45) {
+    // localized orange crest (#ff6a00 family)
+    const k = (core - 0.45) / 0.55;
+    r = 255;
+    g = Math.round(90 + 70 * k + 30 * rel);
+    b = Math.round(0 + 40 * k * rel);
+  } else if (edge > 0.72 || core < 0.35) {
+    // pastel blacks #17171b / #24242b
+    const g0 = 23 + 18 * (1 - edge) + 12 * rel;
+    r = Math.round(g0 + 2);
     g = Math.round(g0);
-    b = Math.round(g0 + 4);
+    b = Math.round(g0 + 6);
   } else {
-    // ember mid
-    r = Math.round(220 + 25 * (1 - Math.abs(u)));
-    g = Math.round(70 + 50 * (1 - Math.abs(u)) + 20 * rel);
-    b = Math.round(24 + 16 * rel);
+    // desaturated near-black ember / violet-ish mid
+    r = Math.round(48 + 40 * (1 - Math.abs(u)));
+    g = Math.round(36 + 22 * (1 - Math.abs(u)) + 8 * rel);
+    b = Math.round(42 + 18 * rel);
   }
   return `rgba(${r},${g},${b},${a})`;
 }
@@ -116,7 +116,7 @@ export function HeroDark() {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       const rect = wrap.getBoundingClientRect();
       w = Math.max(320, rect.width);
-      h = Math.max(360, Math.min(560, rect.height));
+      h = Math.max(360, Math.min(490, Math.max(420, rect.height)));
       canvas.width = Math.floor(w * dpr);
       canvas.height = Math.floor(h * dpr);
       canvas.style.width = `${w}px`;
@@ -124,14 +124,13 @@ export function HeroDark() {
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       if (clusters.length === 0) {
         clusters.push(
-          makeCluster(w, { x: w * 0.62, n: 11, peak: 96, vx: 72, life: 1, age: 2, maxAge: 12, seed: 12 }),
-          makeCluster(w, { x: w * 0.34, n: 8, peak: 54, vx: -58, life: 0.9, age: 3, maxAge: 10, seed: 44 }),
-          makeCluster(w, { x: w * 0.16, n: 6, peak: 34, vx: 48, life: 0.55, age: 4, maxAge: 8, seed: 77 }),
+          makeCluster(w, { x: w * 0.58, n: 14, peak: 78, vx: 48, life: 1, age: 2, maxAge: 14, seed: 12 }),
+          makeCluster(w, { x: w * 0.28, n: 10, peak: 48, vx: -40, life: 0.85, age: 3, maxAge: 12, seed: 44 }),
         );
       }
     };
 
-    const drawCluster = (c: Cluster, strength: number, t: number) => {
+    const drawCluster = (c: Cluster, strength: number, t: number, hot = false) => {
       if (strength < 0.04) return;
       const baseline = c.y * h;
       const half = (c.n - 1) / 2 || 1;
@@ -157,14 +156,14 @@ export function HeroDark() {
           : CORE_W + (hash(coreIndex * 3 + c.seed) - 0.5) * 1.4;
 
         const coreA = 0.55 + 0.32 * e;
-        const fringeA = 0.04 + 0.1 * e;
+        const fringeA = 0.03 + 0.07 * e;
         const a = Math.min(0.9, (isFringe ? fringeA : coreA) * strength);
 
         const top = baseline - height;
         const grad = ctx.createLinearGradient(x, baseline, x, top);
-        grad.addColorStop(0, barColor(u, 0, a * 0.75));
-        grad.addColorStop(0.45, barColor(u, 0.5, a));
-        grad.addColorStop(1, barColor(u, 1, a * 0.95));
+        grad.addColorStop(0, barColor(u, 0, a * 0.55, hot));
+        grad.addColorStop(0.45, barColor(u, 0.5, a, hot));
+        grad.addColorStop(1, barColor(u, 1, a * 0.9, hot));
 
         if (isFringe) {
           ctx.shadowColor = `rgba(255, 106, 0, ${0.18 * a})`;
@@ -200,7 +199,7 @@ export function HeroDark() {
       ctx.clearRect(0, 0, w, h);
 
       spawnAt -= dt;
-      if (spawnAt <= 0 && clusters.length < 3) {
+      if (spawnAt <= 0 && clusters.length < 2) {
         clusters.push(makeCluster(w));
         spawnAt = 1.4 + Math.random() * 2.2;
       }
@@ -225,7 +224,9 @@ export function HeroDark() {
         else if (c.maxAge - c.age < fadeOut) c.life = Math.max(0, (c.maxAge - c.age) / fadeOut);
         else c.life = 1;
 
-        drawCluster(c, c.life, t);
+        const near =
+          Math.hypot(c.x - pointer.x * w, (c.y - pointer.y) * h) < 160;
+        drawCluster(c, c.life, t, near && pointer.strength > 0.15);
       }
 
       for (let i = clusters.length - 1; i >= 0; i--) {
@@ -247,11 +248,11 @@ export function HeroDark() {
           seed: 30 + Math.floor(pointer.x * 15),
           phase: t,
         });
-        drawCluster(local, pointer.strength, t);
+        drawCluster(local, pointer.strength, t, true);
         local.x -= 30;
         local.peak *= 0.55;
         local.n = 8;
-        drawCluster(local, pointer.strength * 0.35, t + 0.4);
+        drawCluster(local, pointer.strength * 0.35, t + 0.4, true);
       }
 
       raf = requestAnimationFrame(draw);

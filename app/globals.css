@@ -112,7 +112,7 @@ button, input { font: inherit; color: inherit; }
   text-align: center;
   padding: 5.5rem 1.25rem 4.5rem;
   overflow: hidden;
-  min-height: 520px;
+  min-height: 490px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -134,7 +134,7 @@ button, input { font: inherit; color: inherit; }
   inset: 0;
   z-index: 0;
   pointer-events: auto;
-  min-height: 520px;
+  min-height: 490px;
   background: transparent !important;
 }
 .hero-canvas-wrap canvas {
@@ -150,7 +150,7 @@ button, input { font: inherit; color: inherit; }
   font-size: clamp(2.75rem, 7vw, 4.25rem);
   letter-spacing: -0.045em;
   font-weight: 700;
-  color: #fafafa;
+  color: #f5f2ed;
   pointer-events: none;
 }
 .hero p {
