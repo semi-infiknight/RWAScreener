@@ -91,6 +91,7 @@ export function EcosystemExplorer({
       </section>
 
       <div className="shell">
+        <div className="panel">
         <div className="controls">
           <div className="pills" role="tablist" aria-label="Status filters">
             {STATUS_FILTERS.map((f) => {
@@ -231,6 +232,7 @@ export function EcosystemExplorer({
             </button>
           </div>
         ) : null}
+        </div>
 
         <p className="disclaimer">
           {disclaimer} This page lists third-party projects. RWAScreener does
