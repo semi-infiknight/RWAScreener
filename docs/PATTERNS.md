@@ -55,6 +55,75 @@ UI reads Postgres (or Supabase Realtime). No per-page RPC for the main lists.
 ### 10. Label map is data, not code
 `fee_claimer → launchpad_label` in DB/JSON. Unknown claimers show truncated pubkey until labeled.
 
+## Official provider patterns (2026-09-12)
+
+Sources: Helius Data Streaming + LaserStream docs; QuickNode Streams docs/guides; Triton One Dragon's Mouth / Yellowstone gRPC docs (`rpcpool/yellowstone-grpc`).
+
+### Helius
+
+| Product | Official stance | Fit for RWAScreener |
+| --- | --- | --- |
+| **Webhooks** | HTTP POST, parsed events, retries, no historical replay | **MVP Monitor** — low ops, ACK fast, dedupe deliveries |
+| **LaserStream gRPC** | Yellowstone-compatible; auto-reconnect; **~24h `fromSlot` replay**; multi-node; filter hard | **Production Monitor** once volume or missed webhooks hurt |
+| **LaserStream WS** | UI / moderate backends | Not our primary indexer path |
+| **Shreds / preconfirmations** | Sub-ms trading | **Out of scope** (sniper stack, not a directory screener) |
+
+Official guidance we should copy:
+1. Prefer **narrow filters** (`accountInclude` / program / `vote:false` `failed:false`) — JS clients lag on fat streams.
+2. Persist **last processed slot**; resume with `fromSlot` on reconnect (within ~24h window).
+3. Use **confirmed/finalized** for directory truth; `processed` can fork without rollback notices.
+4. Order with **block/transaction index**; treat slot notifications as “flush this slot.”
+5. Webhooks: **dedupe** (retries can double-deliver); no replay → backfill gap separately.
+6. Account/program state changes need LaserStream/Geyser — shreds do **not** carry account updates.
+
+### QuickNode Streams
+
+Official model: **filter at the edge → push to destination** (Webhook, **Postgres**, S3, Kafka).
+
+Patterns to steal:
+1. **Server-side JS/Go filters** — only emit DBC txs that mention our quote mints / program; return `null` when no match (bill for less noise).
+2. **Same Stream for backfill + live** — set block range for history, then continuous; avoids hand-rolled signature walks for MVP history.
+3. Destination = **Postgres** with `ON CONFLICT DO NOTHING` on signature (their Solana backfill guide).
+4. Validate webhook authenticity (security token / custom headers).
+5. Reorg handling is productized — still keep idempotent upserts.
+
+Fit: strong **alternative to DIY backfill** if we want provider-managed filter+Postgres. Still decode DBC with our SDK after delivery.
+
+### Triton One — Dragon's Mouth (Yellowstone gRPC)
+
+Official stance: gRPC/Geyser for **backend** indexers (not browsers). `@triton-one/yellowstone-grpc`.
+
+Patterns to steal:
+1. Subscribe to **transactions** with `account_include` = DBC program (and/or quote mints); `vote:false`, `failed:false`.
+2. Optional **accounts** owner = DBC for pool/config account writes (Checker enrichment).
+3. **`from_slot` + `SubscribeReplayInfo`** for short disconnect recovery (server buffer only — not deep history).
+4. Deduplicate when replaying from last slot.
+5. Commitment: default processed; for DB commits prefer buffering until **confirmed/finalized** slot notification (release buffer on slot status).
+6. Pings to keep streams alive behind proxies.
+7. Compressed account filters if tracking huge mint sets later (cuckoo filter + client-side exact contains).
+8. Deshred stream = latency trading only — **not** for screener SoT (no execution meta / finality).
+
+Fit: interchangeable with Helius LaserStream (wire-compatible Yellowstone). Choose on plan/latency, not architecture.
+
+### Provider-shaped recommendation for us
+
+```
+Phase A (now):  Helius enhanced webhook on DBC program
+                → filter quote_mint ∈ seed in our worker
+                → idempotent Postgres upsert
+                + one-shot RPC/Helius backfill from 0.2.1 cutoff
+
+Phase B:        Same filters on LaserStream gRPC OR Triton Dragon's Mouth
+                → persist slot cursor, fromSlot resume
+                → confirmed/finalized for inserts
+
+Optional alt:   QuickNode Stream with server-side filter
+                → webhook or direct Postgres
+                → still run DBC SDK normalize step
+```
+
+Do **not** build on shreds/preconfirmations for this product.
+
 ## Anti-patterns to avoid
 
 - Indexing all DBC swaps on day one
