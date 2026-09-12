@@ -236,10 +236,10 @@ button, input { font: inherit; color: inherit; }
 .search-mobile[data-open="true"] { display: flex; }
 
 .list {
-  border: 1px solid var(--border);
-  border-radius: 16px;
+  border: 0;
+  border-radius: 0;
   overflow: hidden;
-  background: var(--panel);
+  background: transparent;
 }
 .row {
   width: 100%;
@@ -593,11 +593,11 @@ button, input { font: inherit; color: inherit; }
 .panel {
   border-radius: 16px;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  border: 0;
   background: rgba(12, 12, 14, 0.55);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
+  box-shadow: none;
 }
 .controls {
   margin: 0;
