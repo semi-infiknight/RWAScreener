@@ -45,8 +45,8 @@ function initials(name: string): string {
   return (parts[0][0] + parts[1][0]).toUpperCase();
 }
 
-function statusLiveLabel(status: string): string {
-  if (status === "live") return "Now live";
+function statusLabel(status: string): string {
+  if (status === "live") return "Live";
   if (status === "integrating") return "Integrating";
   if (status === "in_contact") return "In contact";
   return "Discovered";
@@ -60,175 +60,132 @@ export default async function ProjectPage({ params }: Props) {
   const idx = projects.findIndex((x) => x.id === p.id);
   const color = AVATAR_COLORS[Math.max(0, idx) % AVATAR_COLORS.length];
   const live = isScreenerLive(p);
+  const about = [p.summary, p.notes].filter(Boolean).join(" ");
 
   return (
     <div className="page">
-      <main className="shell profile-page">
-        <div className="profile-topbar">
-          <nav className="crumbs" aria-label="Breadcrumb">
-            <Link href="/">Home</Link>
-            <span aria-hidden>›</span>
-            <Link href="/">Ecosystem</Link>
-            <span aria-hidden>›</span>
-            <span>{p.displayName}</span>
-          </nav>
-          <Link href="/" className="profile-close">
-            Close
-          </Link>
-        </div>
+      <main className="shell aarna-page">
+        <nav className="aarna-crumbs" aria-label="Breadcrumb">
+          <Link href="/">Home</Link>
+          <span aria-hidden>›</span>
+          <span>{p.displayName}</span>
+        </nav>
 
-        <div className="profile-layout">
-          <aside className="profile-visual" aria-hidden>
-            <div
-              className="profile-visual-art"
+        <article className="aarna-hero">
+          <div
+            className="aarna-banner"
+            style={{
+              background: `radial-gradient(ellipse 80% 120% at 50% -10%, ${color}55 0%, transparent 55%), linear-gradient(180deg, #16120e 0%, #0e0e0e 100%)`,
+            }}
+            aria-hidden
+          />
+          <div className="aarna-hero-top">
+            <span
+              className="aarna-logo"
               style={{
-                background: `radial-gradient(circle at 50% 42%, ${color} 0%, transparent 42%), linear-gradient(160deg, #1a120c 0%, #0a0a0c 55%, #121014 100%)`,
+                background: `linear-gradient(145deg, ${color}, #1a120c)`,
+                boxShadow: `0 0 0 1px ${color}88, 0 12px 40px rgba(0,0,0,0.45)`,
               }}
             >
-              <span className="profile-visual-mark" style={{ background: color }}>
-                {initials(p.displayName)}
+              {initials(p.displayName)}
+            </span>
+            {p.website ? (
+              <a
+                className="aarna-visit"
+                href={p.website}
+                target="_blank"
+                rel="noreferrer"
+              >
+                Visit Website ↗
+              </a>
+            ) : (
+              <span className="aarna-visit muted">
+                {live ? "Visit Website" : "Not live yet"}
               </span>
-              <span className="profile-live-pill" data-status={p.status}>
-                ● {statusLiveLabel(p.status)}
-                {p.dbc.integrated === true
-                  ? " on DBC"
-                  : p.status === "integrating"
-                    ? " · DBC"
-                    : ""}
-              </span>
-            </div>
-          </aside>
-
-          <div className="profile-body">
-            <header className="profile-header">
-              <span className="avatar profile-logo" style={{ background: color }}>
-                {initials(p.displayName)}
-              </span>
-              <div className="profile-heading">
-                <h1>{p.displayName}</h1>
-                <p className="profile-tagline">{p.summary}</p>
-              </div>
-              {p.website ? (
-                <a
-                  className="profile-visit"
-                  href={p.website}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Visit website ↗
-                </a>
-              ) : null}
-            </header>
-
-            <section className="profile-block">
-              <h2>About</h2>
-              <p>{p.summary}</p>
-              {p.notes ? <p className="profile-notes">{p.notes}</p> : null}
-            </section>
-
-            <section className="profile-block">
-              <h2>Categories</h2>
-              <div className="profile-cats">
-                <span className="profile-cat">Launchpad</span>
-                <span className="profile-cat">{dbcLabel(p)}</span>
-                <span className="profile-cat">{p.status.replace("_", " ")}</span>
-                {p.ecosystem ? (
-                  <span className="profile-cat">{p.ecosystem.name} ecosystem</span>
-                ) : null}
-              </div>
-            </section>
-
-            {p.built.length > 0 ? (
-              <section className="profile-block">
-                <h2>Features</h2>
-                <ul className="profile-features">
-                  {p.built.map((b) => (
-                    <li key={b}>{b}</li>
-                  ))}
-                </ul>
-              </section>
-            ) : null}
-
-            <section className="profile-card">
-              <span className="profile-card-label">Runs on</span>
-              <div className="profile-card-value">
-                <span className="profile-chip">Solana</span>
-                <span className="profile-chip accent">Meteora DBC</span>
-              </div>
-            </section>
-
-            <section className="profile-card">
-              <span className="profile-card-label">Connect</span>
-              <div className="profile-connect">
-                {p.website ? (
-                  <a href={p.website} target="_blank" rel="noreferrer">
-                    Website ↗
-                  </a>
-                ) : null}
-                {p.x ? (
-                  <a href={p.x} target="_blank" rel="noreferrer">
-                    X / Twitter ↗
-                  </a>
-                ) : null}
-                {p.docs ? (
-                  <a href={p.docs} target="_blank" rel="noreferrer">
-                    Docs ↗
-                  </a>
-                ) : null}
-                {p.ecosystem?.website ? (
-                  <a href={p.ecosystem.website} target="_blank" rel="noreferrer">
-                    {p.ecosystem.name} ↗
-                  </a>
-                ) : null}
-              </div>
-            </section>
-
-            <div className="profile-meta-grid">
-              <section className="profile-card">
-                <h3>Status</h3>
-                <p>
-                  <span className="muted">DBC</span>
-                  <br />
-                  {p.dbc.evidence}
-                </p>
-              </section>
-              <section className="profile-card">
-                <h3>Verified</h3>
-                <p>
-                  {p.verified.length ? p.verified.join(" · ") : "—"}
-                  <br />
-                  <span className="muted">contact: {p.contact}</span>
-                </p>
-              </section>
-            </div>
-
-            <div className="profile-actions">
-              {p.website ? (
-                <a
-                  className="profile-cta primary"
-                  href={p.website}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Launch app ↗
-                </a>
-              ) : (
-                <span className="profile-cta primary disabled">
-                  {live ? "Launch app" : "Not live yet"}
-                </span>
-              )}
-              {p.x ? (
-                <a
-                  className="profile-cta secondary"
-                  href={p.x}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Follow ↗
-                </a>
-              ) : null}
-            </div>
+            )}
           </div>
+
+          <div className="aarna-hero-body">
+            <h1>{p.displayName}</h1>
+            <div className="aarna-tags">
+              <span className="aarna-tag">Launchpad</span>
+              <span className="aarna-tag">{dbcLabel(p)}</span>
+              <span className="aarna-tag">{statusLabel(p.status)}</span>
+              {p.ecosystem ? (
+                <span className="aarna-tag">{p.ecosystem.name}</span>
+              ) : null}
+            </div>
+            <p className="aarna-desc">{about}</p>
+            {p.built.length > 0 ? (
+              <ul className="aarna-built">
+                {p.built.map((b) => (
+                  <li key={b}>{b}</li>
+                ))}
+              </ul>
+            ) : null}
+          </div>
+        </article>
+
+        <section className="aarna-row">
+          <span className="aarna-row-label">Runs on</span>
+          <div className="aarna-row-value">
+            <span className="aarna-net">
+              <span className="aarna-net-dot" aria-hidden />
+              Solana
+            </span>
+            <span className="aarna-net accent">
+              <span className="aarna-net-dot accent" aria-hidden />
+              Meteora DBC
+            </span>
+          </div>
+        </section>
+
+        <section className="aarna-row aarna-connect">
+          <span className="aarna-row-label">Connect</span>
+          <div className="aarna-connect-btns">
+            {p.x ? (
+              <a href={p.x} target="_blank" rel="noreferrer">
+                See Twitter/X ↗
+              </a>
+            ) : null}
+            {p.docs ? (
+              <a href={p.docs} target="_blank" rel="noreferrer">
+                Read Docs ↗
+              </a>
+            ) : null}
+            {p.website ? (
+              <a href={p.website} target="_blank" rel="noreferrer">
+                Open App ↗
+              </a>
+            ) : null}
+            {p.ecosystem?.website ? (
+              <a href={p.ecosystem.website} target="_blank" rel="noreferrer">
+                {p.ecosystem.name} ↗
+              </a>
+            ) : null}
+            {!p.x && !p.docs && !p.website && !p.ecosystem?.website ? (
+              <span className="aarna-connect-empty">No public links yet</span>
+            ) : null}
+          </div>
+        </section>
+
+        <div className="aarna-meta">
+          <section className="aarna-meta-card">
+            <h2>Status</h2>
+            <p className="aarna-meta-k">DBC</p>
+            <p className="aarna-meta-v">{p.dbc.evidence}</p>
+          </section>
+          <section className="aarna-meta-card">
+            <h2>Verified</h2>
+            <p className="aarna-meta-k">Sources</p>
+            <p className="aarna-meta-v">
+              {p.verified.length ? p.verified.join(" · ") : "—"}
+            </p>
+            <p className="aarna-meta-k" style={{ marginTop: "0.75rem" }}>
+              Contact
+            </p>
+            <p className="aarna-meta-v">{p.contact}</p>
+          </section>
         </div>
 
         <TokenScreener
