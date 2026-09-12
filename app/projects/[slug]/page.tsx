@@ -10,6 +10,8 @@ import {
   projects,
   updatedAt,
 } from "../../../lib/projects";
+import { tokensForLaunchpad } from "../../../lib/tokens";
+import { TokenScreener } from "../../components/token-screener";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -49,8 +51,6 @@ export default async function ProjectPage({ params }: Props) {
 
   const idx = projects.findIndex((x) => x.id === p.id);
   const color = AVATAR_COLORS[Math.max(0, idx) % AVATAR_COLORS.length];
-  const others = projects.filter((x) => x.id !== p.id).slice(0, 5);
-
   return (
     <div className="page">
       <main className="shell project-page">
@@ -142,23 +142,10 @@ export default async function ProjectPage({ params }: Props) {
           </div>
         </section>
 
-        {others.length > 0 ? (
-          <section className="project-section">
-            <h2>Other launchpads</h2>
-            <div className="other-list">
-              {others.map((o) => (
-                <Link
-                  key={o.id}
-                  href={`/projects/${o.slug}`}
-                  className="other-row"
-                >
-                  <span>{o.displayName}</span>
-                  <span className="domain">{o.status.replace("_", " ")}</span>
-                </Link>
-              ))}
-            </div>
-          </section>
-        ) : null}
+        <TokenScreener
+          launchpadName={p.displayName}
+          tokens={tokensForLaunchpad(p.id)}
+        />
 
         <p className="disclaimer">
           {disclaimer} Updated {updatedAt}.
