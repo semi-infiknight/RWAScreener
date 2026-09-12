@@ -110,7 +110,7 @@ export default async function ProjectPage({ params }: Props) {
                   target="_blank"
                   rel="noreferrer"
                 >
-                  Go to App
+                  Go to App ↗
                 </a>
               ) : null}
               {(p.x || p.docs || p.github || p.devX || p.devGithub) ? (
