@@ -9,6 +9,13 @@ export const revalidate = 0;
  * Honors ?phase= for LivePadScreener.
  */
 export async function GET(req: NextRequest) {
+  const mint = req.nextUrl.searchParams.get("mint")?.trim();
+  if (mint) {
+    return NextResponse.json(
+      { error: "ClawPump has no per-mint enrich", mint, token: null },
+      { status: 404 },
+    );
+  }
   const phase = req.nextUrl.searchParams.get("phase") || "full";
   const fast = phase === "fast";
   try {

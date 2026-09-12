@@ -251,7 +251,19 @@ export function TokenScreener({
           </table>
         </div>
       ) : showLiveEmpty ? (
-        feedPending ? null : null
+        <div className="vs-empty-state">
+          <div className="vs-empty-badge">{feedPending ? "Pending" : "No rows"}</div>
+          <h3>
+            {feedPending
+              ? `${launchpadName} feed not wired yet`
+              : `No tokens from ${launchpadName}`}
+          </h3>
+          <p>
+            {feedPending
+              ? "This pad still returns an empty pending stub — no invented rows."
+              : "The live pad API returned zero tokens."}
+          </p>
+        </div>
       ) : (
         <div className="vs-table-wrap">
           <table className="vs-table" data-slim={slimTable ? "true" : undefined}>

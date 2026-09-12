@@ -57,7 +57,9 @@ export function LivePadScreener({
         setTokens(fastTokens);
         setLoading(false);
 
-        if (fastBody.pending || fastTokens.length === 0) return;
+        // Only Ethics-style feeds opt into sequential ?mint= enrich.
+        // Pads without it (Bags/Ember/ClawPump/…) must not storm the list endpoint.
+        if (fastBody.pending || fastTokens.length === 0 || !fastBody.sequential) return;
 
         const queue = fastTokens.filter((t) => t.mint);
         for (let i = 0; i < queue.length; i++) {
