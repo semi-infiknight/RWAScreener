@@ -2,10 +2,13 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import type { PadAggregate } from "../lib/pad-aggregates";
+import {
+  EMPTY_PAD_AGGREGATE,
+  type PadAggregate,
+} from "../lib/pad-aggregates";
 import type { Project } from "../lib/projects";
 import { isScreenerLive } from "../lib/projects";
-import { formatUsd, metricOrNaN } from "../lib/tokens";
+import { formatUsd } from "../lib/tokens";
 import { HeroDark } from "./hero-dark";
 
 const PAGE_SIZE = 15;
@@ -73,72 +76,90 @@ export function EcosystemExplorer({
   const [query, setQuery] = useState("");
   const [visible, setVisible] = useState(PAGE_SIZE);
   const [metrics, setMetrics] = useState<PadMetricsMap>({});
-  const [metricsLoading, setMetricsLoading] = useState(true);
   const [sort, setSort] = useState<SortKey>("sortOrder");
   const [asc, setAsc] = useState(true);
   /** False until a column header is clicked — default = curated sortOrder. */
   const [userSorted, setUserSorted] = useState(false);
 
+  // Progressive pad-by-pad metrics: paint names immediately, fill cells as each
+  // /api/pads/summary?pad=id returns (never block first paint on monolithic summary).
   useEffect(() => {
     let cancelled = false;
     const ac = new AbortController();
-    async function load() {
-      setMetricsLoading(true);
-      try {
-        const res = await fetch("/api/pads/summary", { signal: ac.signal });
-        const body = await res.json().catch(() => ({}));
+
+    const livePads = [...projects]
+      .filter((p) => isScreenerLive(p))
+      .sort((a, b) => curatedOrder(a) - curatedOrder(b));
+
+    async function loadOne(id: string): Promise<PadAggregate> {
+      const res = await fetch(
+        `/api/pads/summary?pad=${encodeURIComponent(id)}`,
+        { signal: ac.signal },
+      );
+      const body = await res.json().catch(() => ({}));
+      const row = body?.pad;
+      if (!res.ok || !row || typeof row !== "object") {
+        return { ...EMPTY_PAD_AGGREGATE };
+      }
+      return {
+        coins: row.coins ?? 0,
+        bonding: row.bonding ?? 0,
+        graduated: row.graduated ?? 0,
+        mcapUsd: row.mcapUsd ?? null,
+        volume24hUsd: row.volume24hUsd ?? null,
+        liquidityUsd: row.liquidityUsd ?? null,
+      };
+    }
+
+    async function loadSequential() {
+      for (const p of livePads) {
         if (cancelled) return;
-        const pads: Array<PadAggregate & { id: string }> = Array.isArray(
-          body.pads,
-        )
-          ? body.pads
-          : [];
-        const map: PadMetricsMap = {};
-        for (const row of pads) {
-          map[row.id] = {
-            coins: row.coins ?? 0,
-            bonding: row.bonding ?? 0,
-            graduated: row.graduated ?? 0,
-            mcapUsd: row.mcapUsd ?? null,
-            volume24hUsd: row.volume24hUsd ?? null,
-            liquidityUsd: row.liquidityUsd ?? null,
-          };
+        try {
+          const agg = await loadOne(p.id);
+          if (cancelled) return;
+          setMetrics((prev) => ({ ...prev, [p.id]: agg }));
+        } catch (err) {
+          if (
+            cancelled ||
+            (err instanceof DOMException && err.name === "AbortError")
+          ) {
+            return;
+          }
+          // Stop showing … for this pad even on failure.
+          setMetrics((prev) => ({ ...prev, [p.id]: { ...EMPTY_PAD_AGGREGATE } }));
         }
-        setMetrics(map);
-      } catch (err) {
-        if (cancelled || (err instanceof DOMException && err.name === "AbortError")) {
-          return;
-        }
-        setMetrics({});
-      } finally {
-        if (!cancelled) setMetricsLoading(false);
       }
     }
-    void load();
+
+    void loadSequential();
     return () => {
       cancelled = true;
       ac.abort();
     };
-  }, []);
+  }, [projects]);
+
+  const metricsPending = useMemo(() => {
+    return projects.some((p) => isScreenerLive(p) && metrics[p.id] === undefined);
+  }, [projects, metrics]);
 
   const showVol = useMemo(() => {
-    if (metricsLoading) return true; // keep column while loading
+    if (metricsPending) return true; // keep column while still filling
     let n = 0;
     for (const m of Object.values(metrics)) {
       if (m?.volume24hUsd != null && m.volume24hUsd !== 0) n += 1;
     }
     return n >= 1;
-  }, [metrics, metricsLoading]);
+  }, [metrics, metricsPending]);
 
   const showLiq = useMemo(() => {
-    if (metricsLoading) return true;
+    if (metricsPending) return true;
     let n = 0;
     for (const m of Object.values(metrics)) {
       if (m?.liquidityUsd != null && m.liquidityUsd !== 0) n += 1;
     }
     // Hide when almost no pads report liq (after enrich).
     return n >= 2;
-  }, [metrics, metricsLoading]);
+  }, [metrics, metricsPending]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -323,95 +344,86 @@ export function EcosystemExplorer({
                   </tr>
                 </thead>
                 <tbody>
-                  {metricsLoading
-                    ? Array.from({ length: Math.min(8, Math.max(shown.length, 6)) }).map(
-                        (_, i) => (
-                          <tr key={`skel-${i}`} className="vs-row skeleton pad-row">
-                            <td className="col-name" colSpan={8}>
-                              <span className="skel-bar" />
-                            </td>
-                          </tr>
-                        ),
-                      )
-                    : shown.map((p, idx) => {
-                        const live = isScreenerLive(p);
-                        const m = metrics[p.id];
-                        const appHref = p.website ?? p.x ?? p.docs ?? null;
-                        return (
-                          <tr key={p.id} className="vs-row pad-row">
-                            <td className="col-name">
-                              <Link
-                                href={`/projects/${p.slug}`}
-                                className="pad-name-link"
-                              >
-                                <span
-                                  className="avatar"
-                                  style={
-                                    "icon" in p && p.icon
-                                      ? undefined
-                                      : {
-                                          background:
-                                            AVATAR_COLORS[
-                                              idx % AVATAR_COLORS.length
-                                            ],
-                                        }
-                                  }
-                                >
-                                  {"icon" in p && p.icon ? (
-                                    // eslint-disable-next-line @next/next/no-img-element
-                                    <img src={p.icon} alt="" />
-                                  ) : (
-                                    initials(p.displayName)
-                                  )}
-                                </span>
-                                <span className="identity">
-                                  <div className="name">{p.displayName}</div>
-                                  <div className="domain">
-                                    {domainOf(p.website)}
-                                  </div>
-                                </span>
-                              </Link>
-                            </td>
-                            <td className="num">
-                              {fmtCount(m?.coins, false, live)}
-                            </td>
-                            <td className="num hide-sm">
-                              {fmtCount(m?.bonding, false, live)}
-                            </td>
-                            <td className="num hide-sm">
-                              {fmtCount(m?.graduated, false, live)}
-                            </td>
-                            <td className="num">
-                              {fmtUsdCell(m?.mcapUsd, false, live)}
-                            </td>
-                            {showVol ? (
-                              <td className="num hide-md">
-                                {fmtUsdCell(m?.volume24hUsd, false, live)}
-                              </td>
-                            ) : null}
-                            {showLiq ? (
-                              <td className="num hide-lg">
-                                {fmtUsdCell(m?.liquidityUsd, false, live)}
-                              </td>
-                            ) : null}
-                            <td className="col-action">
-                              {appHref ? (
-                                <a
-                                  className="go-to-app go-to-app-table"
-                                  href={appHref}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                  aria-label={`Go to ${p.displayName} app`}
-                                >
-                                  GO TO APP ↗
-                                </a>
+                  {shown.map((p, idx) => {
+                    const live = isScreenerLive(p);
+                    const m = metrics[p.id];
+                    const rowLoading = live && m === undefined;
+                    const appHref = p.website ?? p.x ?? p.docs ?? null;
+                    return (
+                      <tr key={p.id} className="vs-row pad-row">
+                        <td className="col-name">
+                          <Link
+                            href={`/projects/${p.slug}`}
+                            className="pad-name-link"
+                          >
+                            <span
+                              className="avatar"
+                              style={
+                                "icon" in p && p.icon
+                                  ? undefined
+                                  : {
+                                      background:
+                                        AVATAR_COLORS[
+                                          idx % AVATAR_COLORS.length
+                                        ],
+                                    }
+                              }
+                            >
+                              {"icon" in p && p.icon ? (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img src={p.icon} alt="" />
                               ) : (
-                                <span className="muted">—</span>
+                                initials(p.displayName)
                               )}
-                            </td>
-                          </tr>
-                        );
-                      })}
+                            </span>
+                            <span className="identity">
+                              <div className="name">{p.displayName}</div>
+                              <div className="domain">
+                                {domainOf(p.website)}
+                              </div>
+                            </span>
+                          </Link>
+                        </td>
+                        <td className="num">
+                          {fmtCount(m?.coins, rowLoading, live)}
+                        </td>
+                        <td className="num hide-sm">
+                          {fmtCount(m?.bonding, rowLoading, live)}
+                        </td>
+                        <td className="num hide-sm">
+                          {fmtCount(m?.graduated, rowLoading, live)}
+                        </td>
+                        <td className="num">
+                          {fmtUsdCell(m?.mcapUsd, rowLoading, live)}
+                        </td>
+                        {showVol ? (
+                          <td className="num hide-md">
+                            {fmtUsdCell(m?.volume24hUsd, rowLoading, live)}
+                          </td>
+                        ) : null}
+                        {showLiq ? (
+                          <td className="num hide-lg">
+                            {fmtUsdCell(m?.liquidityUsd, rowLoading, live)}
+                          </td>
+                        ) : null}
+                        <td className="col-action">
+                          {appHref ? (
+                            <a
+                              className="go-to-app go-to-app-table"
+                              href={appHref}
+                              target="_blank"
+                              rel="noreferrer"
+                              aria-label={`Go to ${p.displayName} app`}
+                            >
+                              GO TO APP ↗
+                            </a>
+                          ) : (
+                            <span className="muted">—</span>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             )}

@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { fetchBagsTokens } from "../../../../lib/bags";
 import { fetchClawPumpTokens } from "../../../../lib/clawpump";
 import { fetchEmberCurveTokens } from "../../../../lib/embercurve";
@@ -10,7 +10,7 @@ import {
   type PadAggregate,
 } from "../../../../lib/pad-aggregates";
 import { fetchPerpspadTokens } from "../../../../lib/perpspad";
-import { isScreenerLive, projects } from "../../../../lib/projects";
+import { getProject, isScreenerLive, projects } from "../../../../lib/projects";
 import { fetchRevShareTokens } from "../../../../lib/revshare";
 import type { TokenRow } from "../../../../lib/tokens";
 
@@ -26,6 +26,8 @@ export type PadSummaryRow = PadAggregate & {
 /**
  * Homepage launchpad rollups — parallel fast feeds via existing fetchers + Redis
  * cachedPadFeed. Non-live pads return empty aggregates (UI shows —).
+ *
+ * ?pad=<id> — single-pad rollup for progressive homepage fill (one at a time).
  */
 async function loadPadTokens(padId: string): Promise<TokenRow[]> {
   switch (padId) {
@@ -51,25 +53,40 @@ async function loadPadTokens(padId: string): Promise<TokenRow[]> {
   }
 }
 
-export async function GET() {
+async function summarizePad(padId: string): Promise<PadSummaryRow> {
+  const p = getProject(padId);
+  if (!p) {
+    return { id: padId, live: false, ok: false, ...EMPTY_PAD_AGGREGATE };
+  }
+  const live = isScreenerLive(p);
+  if (!live) {
+    return { id: p.id, live: false, ok: true, ...EMPTY_PAD_AGGREGATE };
+  }
+  try {
+    const tokens = await loadPadTokens(p.id);
+    return {
+      id: p.id,
+      live: true,
+      ok: true,
+      ...aggregatePadMetrics(tokens),
+    };
+  } catch {
+    return { id: p.id, live: true, ok: false, ...EMPTY_PAD_AGGREGATE };
+  }
+}
+
+export async function GET(req: NextRequest) {
+  const padId = req.nextUrl.searchParams.get("pad")?.trim();
+  if (padId) {
+    const row = await summarizePad(padId);
+    return NextResponse.json({
+      phase: "fast",
+      pad: row,
+    });
+  }
+
   const rows: PadSummaryRow[] = await Promise.all(
-    projects.map(async (p) => {
-      const live = isScreenerLive(p);
-      if (!live) {
-        return { id: p.id, live: false, ok: true, ...EMPTY_PAD_AGGREGATE };
-      }
-      try {
-        const tokens = await loadPadTokens(p.id);
-        return {
-          id: p.id,
-          live: true,
-          ok: true,
-          ...aggregatePadMetrics(tokens),
-        };
-      } catch {
-        return { id: p.id, live: true, ok: false, ...EMPTY_PAD_AGGREGATE };
-      }
-    }),
+    projects.map((p) => summarizePad(p.id)),
   );
 
   return NextResponse.json({
