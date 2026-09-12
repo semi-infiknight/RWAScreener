@@ -3,60 +3,61 @@
 import { useEffect, useRef } from "react";
 
 /**
- * High-detail waveform bar field (Base-inspired structure, original code).
- * Dense rounded pills, hot core, layered clusters, continuous height noise.
- * Meteora dark/orange palette.
+ * Hero bar field tuned from Base ecosystem observations (own implementation).
+ * Spec targets: 8–12 core bars / cluster, ~14–16px pitch, 1–2px corners,
+ * smooth drift, fringe fade, height noise ±1–4px. Palette: Meteora orange.
  */
 
 type Cluster = {
-  x: number;
-  y: number;
-  vx: number;
+  xPx: number;
+  y: number; // baseline as fraction of height
+  vx: number; // px/s
   age: number;
   maxAge: number;
   life: number;
   n: number;
   peak: number;
-  spread: number;
   seed: number;
   phase: number;
 };
+
+const PITCH = 15; // ~14–16px
+const CORE_W = 9; // ~8–10px
+const RADIUS = 1.5;
 
 function hash(n: number) {
   const x = Math.sin(n * 127.1 + 311.7) * 43758.5453;
   return x - Math.floor(x);
 }
 
-function makeCluster(partial?: Partial<Cluster>): Cluster {
+function makeCluster(w: number, partial?: Partial<Cluster>): Cluster {
   const fromLeft = Math.random() > 0.5;
-  const sizeRoll = Math.random();
-  const large = sizeRoll > 0.55;
+  const large = Math.random() > 0.4;
+  const n = large ? 10 + Math.floor(Math.random() * 3) : 6 + Math.floor(Math.random() * 4); // 6–12 core
   return {
-    x: fromLeft ? -0.08 + Math.random() * 0.12 : 0.88 + Math.random() * 0.14,
-    y: 0.56 + Math.random() * 0.08,
-    vx: (fromLeft ? 1 : -1) * (0.03 + Math.random() * 0.035),
+    xPx: fromLeft ? -40 - Math.random() * 60 : w + 40 + Math.random() * 60,
+    y: 0.58 + Math.random() * 0.06,
+    vx: (fromLeft ? 1 : -1) * (55 + Math.random() * 55), // 55–110 px/s
     age: 0,
-    maxAge: 8 + Math.random() * 6,
+    maxAge: 7 + Math.random() * 5,
     life: 0,
-    n: large ? 55 + Math.floor(Math.random() * 30) : 16 + Math.floor(Math.random() * 22),
-    peak: large ? 100 + Math.random() * 55 : 35 + Math.random() * 40,
-    spread: large ? 170 + Math.random() * 110 : 55 + Math.random() * 70,
+    n,
+    peak: large ? 70 + Math.random() * 40 : 40 + Math.random() * 30, // ~28–110
     seed: Math.random() * 1000,
     phase: Math.random() * Math.PI * 2,
     ...partial,
   };
 }
 
-/** Jagged mountain envelope across u ∈ [-1,1] */
 function envelope(u: number, seed: number, t: number, phase: number) {
+  // u in [-1,1] across cluster
   const a = Math.max(0, 1 - Math.abs(u));
   const soft = a * a * (3 - 2 * a);
-  const n1 = Math.sin(u * 8.5 + seed + t * 1.4 + phase) * 0.2;
-  const n2 = Math.sin(u * 19 + seed * 1.3 - t * 1.1) * 0.11;
-  const n3 = Math.sin(u * 31 + phase * 2 + t * 0.6) * 0.06;
-  const n4 = (hash(Math.floor(u * 48 + seed * 3)) - 0.5) * 0.14;
-  const core = Math.exp(-(u * u) * 2.8);
-  return Math.max(0, (soft * (0.5 + 0.5 * core) + n1 + n2 + n3 + n4) * soft);
+  const n1 = Math.sin(u * 7 + seed + t * 1.3 + phase) * 0.16;
+  const n2 = Math.sin(u * 15 + seed * 1.4 - t * 0.9) * 0.08;
+  const n3 = (hash(Math.floor(u * 24 + seed)) - 0.5) * 0.1;
+  const core = Math.exp(-(u * u) * 2.4);
+  return Math.max(0, soft * (0.55 + 0.45 * core) + n1 + n2 + n3);
 }
 
 export function HeroBars() {
@@ -74,46 +75,9 @@ export function HeroBars() {
     let h = 0;
     let raf = 0;
     let last = performance.now();
-    let spawnAt = 0.9;
+    let spawnAt = 1.0;
 
-    const clusters: Cluster[] = [
-      makeCluster({
-        x: 0.64,
-        y: 0.6,
-        vx: 0.026,
-        n: 72,
-        peak: 130,
-        spread: 230,
-        life: 1,
-        age: 2,
-        maxAge: 16,
-        seed: 11,
-      }),
-      makeCluster({
-        x: 0.34,
-        y: 0.62,
-        vx: -0.018,
-        n: 28,
-        peak: 58,
-        spread: 100,
-        life: 0.9,
-        age: 3,
-        maxAge: 11,
-        seed: 37,
-      }),
-      makeCluster({
-        x: 0.16,
-        y: 0.64,
-        vx: 0.014,
-        n: 14,
-        peak: 30,
-        spread: 52,
-        life: 0.6,
-        age: 4.5,
-        maxAge: 9,
-        seed: 71,
-      }),
-    ];
+    const clusters: Cluster[] = [];
 
     const pointer = {
       tx: 0.5,
@@ -128,112 +92,124 @@ export function HeroBars() {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       const rect = wrap.getBoundingClientRect();
       w = Math.max(320, rect.width);
-      h = Math.max(320, rect.height);
+      h = Math.max(300, Math.min(490, rect.height));
       canvas.width = Math.floor(w * dpr);
       canvas.height = Math.floor(h * dpr);
       canvas.style.width = `${w}px`;
       canvas.style.height = `${h}px`;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      if (clusters.length === 0) {
+        clusters.push(
+          makeCluster(w, {
+            xPx: w * 0.62,
+            n: 11,
+            peak: 95,
+            vx: 70,
+            life: 1,
+            age: 2,
+            maxAge: 12,
+            seed: 12,
+          }),
+          makeCluster(w, {
+            xPx: w * 0.32,
+            n: 8,
+            peak: 52,
+            vx: -60,
+            life: 0.85,
+            age: 3,
+            maxAge: 10,
+            seed: 44,
+          }),
+          makeCluster(w, {
+            xPx: w * 0.14,
+            n: 6,
+            peak: 32,
+            vx: 50,
+            life: 0.5,
+            age: 4,
+            maxAge: 8,
+            seed: 77,
+          }),
+        );
+      }
     };
 
     const colorFor = (u: number, relH: number, a: number) => {
-      const core = Math.exp(-(u * u) * 3.8);
+      const core = Math.exp(-(u * u) * 3.5);
       const edge = Math.abs(u);
       let r: number, g: number, b: number;
-      if (core > 0.5) {
-        const k = (core - 0.5) / 0.5;
-        // hot core → near white
+      if (core > 0.55) {
+        const k = (core - 0.55) / 0.45;
         r = 255;
-        g = Math.round(185 + 60 * k + 20 * relH);
-        b = Math.round(90 + 110 * k * (0.4 + 0.6 * relH));
-      } else if (edge > 0.75) {
-        // thin gold edge accents
+        g = Math.round(190 + 50 * k + 15 * relH);
+        b = Math.round(100 + 90 * k * relH);
+      } else if (edge > 0.78) {
         r = 255;
-        g = Math.round(175 + 55 * relH);
-        b = Math.round(45 + 30 * relH);
+        g = Math.round(170 + 50 * relH);
+        b = Math.round(40 + 25 * relH);
       } else {
         r = 255;
-        g = Math.round(85 + 75 * (1 - Math.abs(u)) + 35 * relH);
-        b = Math.round(8 + 22 * relH);
+        g = Math.round(95 + 70 * (1 - Math.abs(u)) + 30 * relH);
+        b = Math.round(10 + 20 * relH);
       }
       return `rgba(${r},${g},${b},${a})`;
     };
 
-    const drawPill = (
-      x: number,
-      baseline: number,
-      height: number,
-      barW: number,
-      fill: CanvasGradient | string,
-    ) => {
-      const top = baseline - height;
-      const left = x - barW / 2;
-      const r = Math.min(barW / 2, height / 2, 4);
-      ctx.fillStyle = fill;
-      ctx.beginPath();
-      if (typeof ctx.roundRect === "function") {
-        ctx.roundRect(left, top, barW, height, r);
-      } else {
-        ctx.rect(left, top, barW, height);
-      }
-      ctx.fill();
-    };
-
     const drawCluster = (c: Cluster, strength: number, t: number) => {
-      if (strength < 0.03) return;
-      const cx = c.x * w;
+      if (strength < 0.04) return;
       const baseline = c.y * h;
       const half = (c.n - 1) / 2 || 1;
+      const fringeExtra = 6; // pale fringe bars on each side
+      const total = c.n + fringeExtra * 2;
 
-      // soft ambient glow behind dense clusters (tight, not cloudy)
-      if (c.n > 40 && strength > 0.4) {
-        const g = ctx.createRadialGradient(
-          cx,
-          baseline - c.peak * 0.35,
-          8,
-          cx,
-          baseline - c.peak * 0.35,
-          c.spread * 0.55,
-        );
-        g.addColorStop(0, `rgba(255, 120, 20, ${0.12 * strength})`);
-        g.addColorStop(1, "rgba(255, 120, 20, 0)");
-        ctx.fillStyle = g;
-        ctx.fillRect(
-          cx - c.spread * 0.6,
-          baseline - c.peak * 1.2,
-          c.spread * 1.2,
-          c.peak * 1.4,
-        );
-      }
+      for (let i = 0; i < total; i++) {
+        const coreIndex = i - fringeExtra;
+        const u = coreIndex / half; // beyond ±1 for fringe
+        const inCore = Math.abs(u) <= 1.05;
+        const env = envelope(Math.max(-1.35, Math.min(1.35, u)), c.seed, t, c.phase);
+        if (env < 0.02) continue;
 
-      for (let i = 0; i < c.n; i++) {
-        const u = (i - half) / half;
-        let env = envelope(u, c.seed, t, c.phase);
-        // continuous per-bar height shimmer
-        env *= 0.9 + 0.1 * Math.sin(t * 5.5 + i * 0.73 + c.seed);
-        if (env < 0.035) continue;
+        // ±1–4px height noise
+        const noise = (hash(coreIndex * 13 + c.seed + Math.floor(t * 8)) - 0.5) * 6;
+        const shimmer = Math.sin(t * 4.2 + coreIndex * 0.8 + c.phase) * 2;
+        let height = c.peak * env * strength + noise + shimmer;
+        height = Math.max(4, Math.min(120, height));
 
-        const height = c.peak * env * strength;
-        if (height < 2.2) continue;
+        const x = c.xPx + coreIndex * PITCH;
+        const isFringe = !inCore || env < 0.22;
+        const barW = isFringe
+          ? 1.2 + hash(coreIndex + c.seed) * 1.8
+          : CORE_W + (hash(coreIndex * 3 + c.seed) - 0.5) * 1.5;
 
-        const jitter = (hash(i * 17 + c.seed) - 0.5) * 1.8;
-        const x = cx + u * (c.spread * 0.5) + jitter;
-        const core = Math.exp(-(u * u) * 3.2);
-        const barW = 1.8 + core * 4.6 + hash(i * 3 + c.seed) * 1.6;
-        const a = Math.min(0.98, 0.28 + env * strength * 0.8);
+        const coreA = 0.65 + 0.25 * env;
+        const fringeA = 0.03 + 0.09 * env;
+        const a = Math.min(0.92, (isFringe ? fringeA : coreA) * strength);
 
-        const grad = ctx.createLinearGradient(x, baseline, x, baseline - height);
-        grad.addColorStop(0, colorFor(u, 0, a * 0.75));
-        grad.addColorStop(0.45, colorFor(u, 0.4, a));
-        grad.addColorStop(1, colorFor(u, 1, a * 0.92));
+        const top = baseline - height;
+        const grad = ctx.createLinearGradient(x, baseline, x, top);
+        grad.addColorStop(0, colorFor(u, 0, a * 0.8));
+        grad.addColorStop(0.5, colorFor(u, 0.45, a));
+        grad.addColorStop(1, colorFor(u, 1, a * 0.9));
 
-        // faint after-image stem
-        ctx.globalAlpha = a * 0.12;
-        ctx.fillStyle = "rgb(255, 110, 20)";
-        ctx.fillRect(x - barW * 0.35, baseline, barW * 0.7, Math.min(18, height * 0.2));
-        ctx.globalAlpha = 1;
+        // fringe glow only (~2–5px)
+        if (isFringe) {
+          ctx.shadowColor = `rgba(255, 120, 30, ${0.2 * a})`;
+          ctx.shadowBlur = 3;
+        } else {
+          ctx.shadowBlur = 0;
+        }
 
-        drawPill(x, baseline, height, barW, grad);
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        const left = x - barW / 2;
+        if (typeof ctx.roundRect === "function") {
+          ctx.roundRect(left, top, barW, height, RADIUS);
+        } else {
+          ctx.rect(left, top, barW, height);
+        }
+        ctx.fill();
+        ctx.shadowBlur = 0;
       }
     };
 
@@ -253,8 +229,8 @@ export function HeroBars() {
 
       spawnAt -= dt;
       if (spawnAt <= 0 && clusters.length < 3) {
-        clusters.push(makeCluster());
-        spawnAt = 1.4 + Math.random() * 2.4;
+        clusters.push(makeCluster(w));
+        spawnAt = 1.5 + Math.random() * 2.2;
       }
 
       const order = [...clusters.keys()].sort(
@@ -264,17 +240,21 @@ export function HeroBars() {
       for (const idx of order) {
         const c = clusters[idx];
         c.age += dt;
-        c.x += c.vx * dt;
-        c.phase += dt * 0.35;
+        c.xPx += c.vx * dt;
+        c.phase += dt * 0.4;
 
-        if (pointer.strength > 0.05 && c.n >= 50) {
-          c.x += (pointer.x - c.x) * dt * 0.5 * pointer.strength;
-          c.y += (0.56 + pointer.y * 0.1 - c.y) * dt * 0.35 * pointer.strength;
+        if (pointer.strength > 0.05 && c.n >= 10) {
+          const targetX = pointer.x * w;
+          c.xPx += (targetX - c.xPx) * dt * 1.6 * pointer.strength;
+          c.y += (0.55 + pointer.y * 0.08 - c.y) * dt * 0.5 * pointer.strength;
         }
 
+        // fade in/out ~400–800ms ≈ 0.1–0.15 of life for short clusters
+        const fadeIn = 0.55;
+        const fadeOut = 0.65;
         const u = c.age / c.maxAge;
-        if (u < 0.1) c.life = u / 0.1;
-        else if (u > 0.8) c.life = Math.max(0, (1 - u) / 0.2);
+        if (c.age < fadeIn) c.life = c.age / fadeIn;
+        else if (c.maxAge - c.age < fadeOut) c.life = Math.max(0, (c.maxAge - c.age) / fadeOut);
         else c.life = 1;
 
         drawCluster(c, c.life, t);
@@ -282,29 +262,30 @@ export function HeroBars() {
 
       for (let i = clusters.length - 1; i >= 0; i--) {
         const c = clusters[i];
-        if (c.age > c.maxAge || c.x < -0.4 || c.x > 1.4) clusters.splice(i, 1);
+        const halfW = (c.n * PITCH) / 2 + 40;
+        if (c.age > c.maxAge || c.xPx < -halfW || c.xPx > w + halfW) {
+          clusters.splice(i, 1);
+        }
       }
 
-      if (pointer.strength > 0.04) {
-        const local = makeCluster({
-          x: pointer.x,
-          y: 0.55 + pointer.y * 0.08,
+      if (pointer.strength > 0.05) {
+        const local = makeCluster(w, {
+          xPx: pointer.x * w,
+          y: 0.56 + pointer.y * 0.06,
           vx: 0,
-          n: 58,
-          peak: 95 + (1 - pointer.y) * 45,
-          spread: 190,
+          n: 11,
+          peak: 75 + (1 - pointer.y) * 35,
           life: 1,
           age: 1,
           maxAge: 2,
-          seed: 20 + Math.floor(pointer.x * 20),
+          seed: 30 + Math.floor(pointer.x * 15),
           phase: t,
         });
         drawCluster(local, pointer.strength, t);
-        // faint lag trail
-        local.x -= 0.035;
+        local.xPx -= 28;
         local.peak *= 0.55;
-        local.n = 36;
-        drawCluster(local, pointer.strength * 0.35, t + 0.5);
+        local.n = 8;
+        drawCluster(local, pointer.strength * 0.35, t + 0.4);
       }
 
       raf = requestAnimationFrame(draw);
