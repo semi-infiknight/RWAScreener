@@ -44,7 +44,6 @@ export function EcosystemExplorer({
 }) {
   const [query, setQuery] = useState("");
   const [visible, setVisible] = useState(PAGE_SIZE);
-  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -78,44 +77,7 @@ export function EcosystemExplorer({
 
       <div className="shell">
         <div className="panel">
-        <div className="controls controls-search-only">
-          <button
-            type="button"
-            className="icon-btn search-toggle"
-            aria-label="Search"
-            onClick={() => setMobileSearchOpen((v) => !v)}
-          >
-            <SearchIcon />
-          </button>
-
-          <label className="search">
-            <SearchIcon />
-            <input
-              value={query}
-              onChange={(e) => {
-                setQuery(e.target.value);
-                setVisible(PAGE_SIZE);
-              }}
-              placeholder="Search"
-              aria-label="Search projects"
-            />
-            {query ? (
-              <button
-                type="button"
-                className="ext"
-                aria-label="Clear search"
-                onClick={() => setQuery("")}
-              >
-                ×
-              </button>
-            ) : null}
-          </label>
-        </div>
-
-        <label
-          className="search search-mobile"
-          data-open={mobileSearchOpen}
-        >
+        <label className="search search-list">
           <SearchIcon />
           <input
             value={query}
@@ -126,6 +88,16 @@ export function EcosystemExplorer({
             placeholder="Search"
             aria-label="Search projects"
           />
+          {query ? (
+            <button
+              type="button"
+              className="ext"
+              aria-label="Clear search"
+              onClick={() => setQuery("")}
+            >
+              ×
+            </button>
+          ) : null}
         </label>
 
         <div className="list" role="list">
