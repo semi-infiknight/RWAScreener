@@ -62,21 +62,24 @@ export function EcosystemExplorer({
     <div className="page">
       <section className="hero">
         <HeroDark />
-        <h1 className="hero-title">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            className="hero-title-mark"
-            src="/favicon.svg"
-            alt=""
-            width={48}
-            height={48}
-          />
-          <span className="hero-title-text">
-            <span className="hero-title-light">The </span>
-            <span className="hero-title-brand">Meteora</span>
-            <span className="hero-title-light"> DBC Screener</span>
-          </span>
-        </h1>
+        <div className="hero-lockup">
+          <h1 className="hero-title">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              className="hero-title-mark"
+              src="/favicon.svg"
+              alt=""
+              width={48}
+              height={48}
+            />
+            <span className="hero-title-text">
+              <span className="hero-title-light">The </span>
+              <span className="hero-title-brand">Meteora</span>
+              <span className="hero-title-light"> DBC Screener</span>
+            </span>
+          </h1>
+          <p className="hero-sub">limited to stock quote mint pairs</p>
+        </div>
       </section>
 
       <div className="shell">
