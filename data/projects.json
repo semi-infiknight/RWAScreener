@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-09-12T16:13:55Z",
+  "updatedAt": "2026-09-12T16:17:26Z",
   "disclaimer": "",
   "statuses": [
     "live",
@@ -16,11 +16,13 @@
       "website": "https://embercurve.fun/",
       "x": "https://x.com/embercurve",
       "docs": null,
-      "summary": "Launch a Solana token on Meteora, paired with SOL, USDC or one of 163+ tokenized stocks. 5dvXTZ5qwgafnHtwu3Ls3QrWx1U4LQsFeCuJgkk4QEC6",
+      "summary": "Launch a coin on Solana paired with SOL, USDC, or 150+ tokenized stocks. Every Ember coin is a Meteora bonding curve: 80% of each trade's tax goes where you decide — holders, burns, a SuperLotto, or your team — every 15 minutes, on-chain.",
       "built": [
-        "Bonding-curve launches paired with SOL / USDC / tokenized stocks / selected memes",
-        "On-chain trade-tax routing (holders, burns, lottery, team)",
-        "Graduation into Meteora liquidity after the curve"
+        "Pair with SOL, USDC, or 150+ tokenized stocks (xStocks, Ondo, PreStocks, Backpack…)",
+        "Fee modules: 1–3% trade tax; 80% creator side / 20% platform; keeper pays ~every 15 min",
+        "Route the creator side to holders, burns, SuperLotto, or team — paid in the pair token",
+        "Opens at a set market cap; graduates to Meteora DAMM v2 with permanently locked LP",
+        "Pair-with-anything launches — fees in NVDAx if you pair with NVDAx, WIF if you pair with WIF"
       ],
       "status": "live",
       "verified": [
@@ -60,11 +62,13 @@
       "website": "https://letsfuckingown.fun/",
       "x": "https://x.com/LFOWNDOTFUN",
       "docs": null,
-      "summary": "Memecoin launchpad paired with MetaDAO ownership coins.",
+      "summary": "Memecoins paired with ownership coins. LFOwn is a memecoin launchpad where the pair asset is a MetaDAO ownership coin — not SOL, not a tokenized stock — so the other side of every pool has a redeemable treasury behind it.",
       "built": [
-        "Memecoin launches paired against MetaDAO ownership coins (quoteMint ends in meta)",
-        "Bonding / on-curve: LFOwn curve vs MetaDAO ownership-coin quote",
-        "Graduation: isMigrated \u2192 Meteora DAMM v2 pool"
+        "Launch ownership memes paired against MetaDAO ownership-coin quotes",
+        "Redeemable-treasury pair asset instead of a volatile ticker alone",
+        "Futarchy-aware launch stance (ownership-coin mint / lock mechanics)",
+        "Coins + Launch + Leaderboard discovery UX",
+        "Spark-powered fee routing with a share to the LFOwn DAO"
       ],
       "status": "live",
       "verified": [
@@ -103,11 +107,13 @@
       "website": "https://star.fun",
       "x": "https://x.com/getstonkoptions",
       "docs": "https://star-fun.gitbook.io/star",
-      "summary": "The Internet's Benefits Department.",
+      "summary": "Programmable ownership for internet startups. Star is a fundraising launchpad for builders: launch an on-chain token sale where backers fund your project in less than a week — fast fundraising for next-gen founders. The Internet's Benefits Department.",
       "built": [
-        "Part of the star.fun ecosystem (startup fundraising / launch stack)",
-        "DBC-oriented launchpad product under StonkOptions (@getstonkoptions)",
-        "Public token screener will populate here once launches go live"
+        "On-chain token sales instead of pitching VCs (≤7 day raises)",
+        "Dynamic Price or Fixed Price raise models with configurable targets",
+        "Choose vesting; 12.5% of raised USDC locked into post-sale AMM liquidity",
+        "Launch now or schedule into discovery; social or wallet signup",
+        "Keep 100% company equity while bootstrapping community ownership"
       ],
       "status": "integrating",
       "verified": [
@@ -118,7 +124,7 @@
       "contact": "unknown",
       "dbc": {
         "integrated": null,
-        "evidence": "Integrating Meteora DBC \u2014 not live for launches yet; star.fun ecosystem context confirmed by owner.",
+        "evidence": "Integrating Meteora DBC — not live for launches yet; star.fun ecosystem context confirmed by owner.",
         "configKeys": [],
         "feeClaimers": []
       },
@@ -160,11 +166,13 @@
       "website": "https://bags.fm",
       "x": "https://x.com/BagsApp",
       "docs": "https://docs.bags.fm",
-      "summary": "Launch, Trade, Earn, and Discover the Next Big Thing.",
+      "summary": "Launch a coin and earn royalties from every trade. Bags is a creator-funding launchpad on Solana and Robinhood Chain — launch, trade, claim fees, and share royalties with fee claimers via the app, API, SDK, or CLI.",
       "built": [
-        "DBC token launches",
-        "DAMM v2 post-migration pools",
-        "Bags Fee Share V1/V2 + launch API/SDK"
+        "Token Launch v2 with Bags Fee Share (explicit BPS, up to 100 claimers)",
+        "Meteora DBC launches plus DAMM v2 pools — including non-SOL quotes (xStocks / badged mints)",
+        "Partner keys, launch intent URLs, and claim flows for creators & partners",
+        "Bags CLI + TypeScript SDK for programmatic launches and trades",
+        "Robinhood Chain launches, trading, and index (dividend) tokens"
       ],
       "status": "live",
       "verified": [
@@ -207,12 +215,13 @@
       "website": "https://perpspad.fun",
       "x": "https://x.com/perpspadfun",
       "docs": "https://perpspad.fun/paper",
-      "summary": "Launch coins on @Solana, backed by perps, stocks and RWA Join the community - http://t.me/perpspad CA - PerPsCe2SJ7Q25CN4R5TTX4fmBdmknE2hQmqCt96fHL",
+      "summary": "Coins with a heartbeat. Launch a Solana coin tied to a perp — each coin runs a leveraged perp treasury that auto buys and burns supply on every up tick. Optional tokenized-stock pairing via Meteora DLMM.",
       "built": [
-        "DBC SOL-quoted bonding curve launches",
-        "DAMM v2 graduation with locked LP",
-        "Per-coin treasury \u2192 Imperial/Phoenix leveraged perps",
-        "Optional xStock / tokenized-stock DLMM pairing"
+        "Meteora DBC quoted in SOL → migrates to DAMM v2 with permanently locked LP",
+        "Per-coin sub-wallet treasury owns a leveraged Phoenix perp via Imperial",
+        "Trading fees feed backing, creator share, and buyback/burn",
+        "Optional xStock / tokenized-stock single-sided DLMM pairing",
+        "50+ underlyings across crypto, stocks, and commodities"
       ],
       "status": "live",
       "verified": [
@@ -223,7 +232,7 @@
       "contact": "unknown",
       "dbc": {
         "integrated": true,
-        "evidence": "Whitepaper \u00a72: trading against Meteora DBC quoted in SOL; migrates to DAMM v2",
+        "evidence": "Whitepaper §2: trading against Meteora DBC quoted in SOL; migrates to DAMM v2",
         "configKeys": [],
         "feeClaimers": []
       },
@@ -255,11 +264,13 @@
       "website": "https://clawpump.tech",
       "x": "https://x.com/clawpumptech",
       "docs": "https://clawpump.tech/docs",
-      "summary": "ClawPump is the capital market for agents on @solana & @robinhoodcrypto chain. Backed by @pumpfun, @colosseum, & @incubator",
+      "summary": "The Home of Agentic Finance — the financial operating system for AI agents. Give agents wallets, market access, token launches, and ways to earn through one connected runtime.",
       "built": [
-        "Agent wallets + MCP/CLI launch tooling",
-        "Public launch paths: pump.fun, Metaplex Genesis, Pons",
-        "DeFi tooling that can touch Meteora pools (not DBC launchpad docs)"
+        "Deploy agents with wallets; connect via Claude, ChatGPT, Cursor, CLI, or MCP",
+        "132-tool MCP connector plus OAuth / curl / SDK launch flows",
+        "Launch on Solana or Robinhood Chain from the terminal (npx clawpump launch)",
+        "Public launch paths include pump.fun, Metaplex Genesis, Pons, and Uniswap",
+        "Eligible Solana launches earn up to 75% of collected creator fees"
       ],
       "status": "discovered",
       "verified": [
@@ -302,11 +313,13 @@
       "website": "https://ethics.ltd",
       "x": "https://x.com/ethicslaunch",
       "docs": null,
-      "summary": "Launch token with any pair on any chain (Solana, Robinhood, Base, BNB, HyperEVM, Arbitrum) $ETHICS",
+      "summary": "Real markets. Locked liquidity. Earn fees. Launch tokens backed by real markets — pair with SOL, stables, and RWAs, with liquidity locked and fees you can earn or airdrop to holders.",
       "built": [
-        "Market-backed launches (SOL / stables / RWAs)",
-        "Locked liquidity + fee earn or airdrop to holders",
-        "v2 Instant DAMMv2 launch UX on ethics.ltd"
+        "Instant DAMM v2 and DBC bonding-curve launches on Solana",
+        "Quote pairs: SOL, USDC, USDT, HYPE, WBTC, WETH, TAO, ZEC (+ RWA Spot CLMM)",
+        "1.5% trading fee — you keep 70%, Ethics 30%; LP locks at graduation",
+        "EVM creates across BNB, Base, Robinhood, HyperEVM, and Arbitrum",
+        "Public /api/token-list registry for Solana + EVM discovery"
       ],
       "status": "live",
       "verified": [
@@ -345,11 +358,13 @@
       "website": "https://revshare.dev/",
       "x": "https://x.com/revshare_app",
       "docs": "https://app.revshare.ltd/docs",
-      "summary": "Create tokens that automatically earn creator fees from 1\u201310% of all volume and share them with your holders. Available on all chains.",
+      "summary": "Launch tokens with rewards. Create highly configurable tokens with built-in fee rewards, auto-buys, liquidity controls, contests, and community incentives from day one — across Solana, Ethereum, and more.",
       "built": [
-        "Solana Meteora DBC bonding-curve launches (among other chains/AMMs)",
-        "Live token catalog via app.revshare.ltd /api/all-tokens",
-        "Revenue / fee sharing launch UX"
+        "Multi-chain launchpad with creator fees and holder rewards at launch",
+        "Custom quote-token Solana launches (not only SOL or stables)",
+        "Arc and Robinhood Chain launch flows alongside Solana / EVM",
+        "Token-2022 automated fee collection with proportional holder distribution",
+        "Perps trading platform plus a crash-style gaming layer in the ecosystem"
       ],
       "status": "live",
       "verified": [
