@@ -82,30 +82,6 @@ export function EcosystemExplorer({
 
   return (
     <div className="page">
-      <header className="topnav">
-        <Link href="/" className="brand">
-          <span className="mark" aria-hidden />
-          RWAScreener
-        </Link>
-        <nav className="nav-links" aria-label="Primary">
-          <Link href="/">Launchpads</Link>
-          <span>Quotes</span>
-          <span>Docs</span>
-        </nav>
-        <a className="nav-cta" href="https://github.com/semi-infiknight/RWAScreener">
-          Repo →
-        </a>
-        <button
-          type="button"
-          className="hamburger"
-          aria-label="Menu"
-          onClick={() => setDrawerOpen(true)}
-        >
-          <span />
-          <span />
-        </button>
-      </header>
-
       <section className="hero">
         <HeroBars />
         <h1>Ecosystem</h1>

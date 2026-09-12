@@ -469,7 +469,7 @@ button, input { font: inherit; color: inherit; }
   margin-right: 0.65rem;
 }
 
-.project-page { padding-top: 1.5rem; }
+.project-page { padding-top: 2rem; }
 .back-link {
   display: inline-block;
   color: var(--muted);
