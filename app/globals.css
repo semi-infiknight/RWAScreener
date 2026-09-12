@@ -1158,3 +1158,19 @@ td.col-name { display: flex; }
 .live-pad-status.error {
   color: #f87171;
 }
+
+
+.vs-table-loading .skel-bar {
+  display: block;
+  height: 14px;
+  width: 70%;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #1a1a1c, #26262a, #1a1a1c);
+  background-size: 200% 100%;
+  animation: skel 1.2s ease-in-out infinite;
+}
+@keyframes skel {
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+.vs-row.skeleton td { padding: 0.85rem 0.65rem; }

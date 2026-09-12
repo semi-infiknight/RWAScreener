@@ -195,11 +195,19 @@ function buildRows(
   return rows;
 }
 
+export type FetchEthicsOptions = {
+  /** When false, skip token-info price/% (fast first paint). Default true. */
+  enrichDetails?: boolean;
+};
+
 /**
  * Live Ethics launches. Never throws — returns [] on hard failure.
- * Icons from /api/launches; mcap/vol from board/enrich; price/% for top DETAIL_LIMIT only.
+ * Icons from /api/launches; mcap/vol from board/enrich; price/% optional (top DETAIL_LIMIT).
  */
-export async function fetchEthicsTokens(): Promise<TokenRow[]> {
+export async function fetchEthicsTokens(
+  opts: FetchEthicsOptions = {},
+): Promise<TokenRow[]> {
+  const enrichDetails = opts.enrichDetails !== false;
   try {
     const [all, board] = await Promise.all([
       getJson<{ launches?: EthicsLaunch[] }>("/api/launches"),
@@ -226,21 +234,21 @@ export async function fetchEthicsTokens(): Promise<TokenRow[]> {
       // board metrics alone still usable
     }
 
-    // Rank candidates for detail enrichment by known volume.
-    const detailMints = [...mints]
-      .sort((a, b) => (volumes[b] ?? 0) - (volumes[a] ?? 0))
-      .slice(0, DETAIL_LIMIT);
-
     const details = new Map<string, TokenInfoEnrich | null>();
-    try {
-      const detailRows = await mapPool(
-        detailMints,
-        DETAIL_CONCURRENCY,
-        fetchTokenInfo,
-      );
-      detailMints.forEach((m, i) => details.set(m, detailRows[i] ?? null));
-    } catch {
-      // identity + board metrics still render
+    if (enrichDetails) {
+      const detailMints = [...mints]
+        .sort((a, b) => (volumes[b] ?? 0) - (volumes[a] ?? 0))
+        .slice(0, DETAIL_LIMIT);
+      try {
+        const detailRows = await mapPool(
+          detailMints,
+          DETAIL_CONCURRENCY,
+          fetchTokenInfo,
+        );
+        detailMints.forEach((m, i) => details.set(m, detailRows[i] ?? null));
+      } catch {
+        // identity + board metrics still render
+      }
     }
 
     return buildRows(launches, mcaps, volumes, details);

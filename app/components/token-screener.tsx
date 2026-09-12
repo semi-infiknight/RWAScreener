@@ -86,11 +86,14 @@ export function TokenScreener({
   launchpadName,
   tokens,
   live = true,
+  loading = false,
   ecosystemName,
 }: {
   launchpadName: string;
   tokens: TokenRow[];
   live?: boolean;
+  /** Live feed still fetching — never show "Not live yet". */
+  loading?: boolean;
   ecosystemName?: string;
 }) {
   const [tab, setTab] = useState<TabId>("trending");
@@ -98,10 +101,14 @@ export function TokenScreener({
   const [sort, setSort] = useState<SortKey>("volume24hUsd");
   const [asc, setAsc] = useState(false);
 
-  const showEmpty = !live || tokens.length === 0;
+  /** Only StonkOptions (screenerLive=false) gets the not-live empty state. */
+  const showNotLive = !live;
+  const showLoadingTable = live && loading && tokens.length === 0;
+  const showLiveEmpty = live && !loading && tokens.length === 0;
+  const showEmpty = showNotLive;
 
   const rows = useMemo(() => {
-    if (showEmpty) return [];
+    if (showNotLive || tokens.length === 0) return [];
     const query = q.trim().toLowerCase();
     let list = tokens.filter((t) => {
       if (!query) return true;
@@ -171,7 +178,7 @@ export function TokenScreener({
               className="vs-tab"
               data-active={tab === t.id}
               aria-selected={tab === t.id}
-              disabled={showEmpty}
+              disabled={showNotLive}
               onClick={() => setTab(t.id)}
             >
               {t.label}
@@ -188,13 +195,13 @@ export function TokenScreener({
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="Search"
-              disabled={showEmpty}
+              disabled={showNotLive}
             />
           </label>
         </div>
       </div>
 
-      {showEmpty ? (
+      {showNotLive ? (
         <div className="vs-empty-state">
           <div className="vs-empty-badge">Not live yet</div>
           <h3>{launchpadName} launches coming soon</h3>
@@ -204,15 +211,45 @@ export function TokenScreener({
                 Part of the <strong>{ecosystemName}</strong> ecosystem.{" "}
               </>
             ) : null}
-            DBC integration is in progress — this screener will fill with
-            launches once StonkOptions goes live. No placeholder tokens by
-            design.
+            Token launches are not live yet — this screener stays empty until
+            they are. No placeholder tokens by design.
           </p>
           <div className="vs-empty-tags">
             <span className="tag">integrating</span>
             <span className="tag">DBC integrating</span>
             {ecosystemName ? <span className="tag">{ecosystemName}</span> : null}
           </div>
+        </div>
+      ) : showLoadingTable ? (
+        <div className="vs-table-wrap">
+          <table className="vs-table vs-table-loading">
+            <thead>
+              <tr>
+                <th className="col-name">Name</th>
+                <th>Price / %Δ</th>
+                <th className="hide-md">FDV</th>
+                <th>Vol</th>
+              </tr>
+            </thead>
+            <tbody>
+              {Array.from({ length: 6 }).map((_, i) => (
+                <tr key={i} className="vs-row skeleton">
+                  <td className="col-name" colSpan={4}>
+                    <span className="skel-bar" />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : showLiveEmpty ? (
+        <div className="vs-empty-state">
+          <div className="vs-empty-badge">Live</div>
+          <h3>No launches returned</h3>
+          <p>
+            The live feed for {launchpadName} is up, but it returned no rows
+            right now. Try refreshing.
+          </p>
         </div>
       ) : (
         <div className="vs-table-wrap">
