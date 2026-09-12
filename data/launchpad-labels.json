@@ -1,0 +1,8 @@
+{
+  "fee_claimer_labels": {},
+  "notes": [
+    "Empty map on purpose. Do not invent Bags / Perpspad / other launchpad fee_claimer pubkeys.",
+    "Bags docs (docs.bags.fm/principles/program-ids) publish program IDs only — Fee Share V1/V2 are programs, not DBC PoolConfig fee_claimers.",
+    "Label a claimer only after it is observed on-chain as fee_claimer on a stock-quote DBC PoolConfig (quote_mint ∈ data/quote-mints.json, created_at ≥ DBC_021_CUTOFF_ISO)."
+  ]
+}

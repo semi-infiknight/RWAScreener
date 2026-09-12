@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "refresh:bags": "node scripts/refresh-bags-tokens.mjs"
+    "refresh:bags": "node scripts/refresh-bags-tokens.mjs",
+    "backfill:dbc": "node scripts/dbc-backfill.mjs"
   },
   "dependencies": {
     "@react-three/fiber": "^9.7.0",

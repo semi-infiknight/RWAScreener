@@ -5,17 +5,19 @@
 - [x] Static ecosystem seed (`data/projects.json`) + Next.js dashboard
 - [ ] Owner fill: contact levels, LFGOWN identity, missing X handles
 - [ ] Confirm 0.2.1 exact deploy slot
-- [ ] Draft data/quote-mints.json (xStocks)
+- [x] Draft data/quote-mints.json (xStocks) — 61 Backed seed
 
 ## Phase 1 — Skeleton
 - [x] Railway project `rwascreener` created + linked (empty; env production)
 - [ ] Provision Railway: Postgres + `web` + `worker`; Helius/DB env
 - [ ] pnpm workspace: web + indexer + db + dbc
+- [x] SQL schema stub (`packages/db/migrations/001_init.sql`)
 - [ ] Drizzle schema + migrations
 - [ ] Seed load + badge verify script
 - [ ] Empty UI: Launchpads / Launches / Quotes
 
 ## Phase 2 — Backfill
+- [x] Backfill stub (`packages/dbc` + `apps/indexer`; fail closed without Helius)
 - [ ] Cutoff cursor
 - [ ] Parse DBC initialize txs; filter quote allowlist
 - [ ] Upsert configs + pools

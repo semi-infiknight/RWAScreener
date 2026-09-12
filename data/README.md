@@ -40,3 +40,18 @@ node scripts/refresh-bags-tokens.mjs
 ```
 
 Program IDs (docs.bags.fm/principles/program-ids): DBC `dbcij3LWUppWqq96dh6gJWwBifmcGfLSB5D4DuSMaqN`, DAMM v2 `cpamdpZCGKUy5JxQXB4dcpGPiikHawvSWAd6mEn1sGG`, Fee Share V2 `FEE2tBhCKAt7shrod19QttSVREUYPiyMzoku1mL1gqVK`.
+
+
+## Quote mints (`quote-mints.json`) — screener SoT step 1
+
+Source of truth for the **quote screener** is **quote → pool → config**, not the Bags feed.
+
+- 61 Backed xStocks. Mints from mint authority `S7vYFFWH6BjJyEsdrPQpqpYTqLTrPRK6KW3VwsJuRaS`; names from `xstocks-metadata.backed.fi`.
+- Fields: `mint`, `symbol`, `name`, `badge_verified_at` (null until Checker), `meta`.
+- Do not invent mint addresses. Do not expand this list from Bags / other pad APIs.
+- `tokens.json` Bags rows stay as **temporary UI fill** for the ecosystem dashboard. StonkOptions (`stardotfun`) stays empty while `screenerLive: false`.
+
+## Launchpad labels (`launchpad-labels.json`)
+
+`fee_claimer → label` map. Empty until a real DBC PoolConfig fee_claimer is observed on-chain for a stock-quote pool. Do not invent Bags / Perpspad pubkeys.
+
