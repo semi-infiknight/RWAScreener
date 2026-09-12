@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 /**
- * LFOwn live pad — not Meteora DBC.
+ * LFOwn live pad — DBC verified.
  * Bonding/on-curve vs MetaDAO quote; graduated = DAMM v2 (isMigrated).
  * ?phase=fast — identity + status + raised-USD (fdv) + progress (rangePos) + age (no uri icons)
  * ?mint=… — single-token icon enrich from launch.uri metadata

@@ -187,7 +187,7 @@ function rangePosFromLaunch(l: LfgownLaunch): number | null {
 
 /**
  * Status matches LFOwn site:
- * - bonding / on-curve: still on LFOwn curve vs MetaDAO ownership-coin quote (not Meteora DBC)
+ * - bonding / on-curve: still on LFOwn curve vs MetaDAO ownership-coin quote
  * - graduated: isMigrated → Meteora DAMM v2
  */
 function statusFromLaunch(l: LfgownLaunch): TokenRow["status"] {
@@ -243,7 +243,7 @@ export type FetchLfgownOptions = {
 /**
  * Live LFOwn launches from letsfuckingown.fun.
  * Source: GET https://letsfuckingown.fun/api/launches (keep all rows; do not filter isMigrated).
- * Bonding = on-curve vs MetaDAO ownership-coin quote — not Meteora DBC.
+ * Pad DBC verified; bonding rows = on-curve vs MetaDAO ownership-coin quote (no DBC-on-curve field in API).
  * Graduated (isMigrated) = Meteora DAMM v2.
  * mcapUsd/fdvUsd = raised USD proxy (quoteReserve/1e6 * quoteUsdPrice), not token mcap.
  * rangePos = bonding progress 0–1 (isMigrated→1 else min(1, quoteRaised/threshold)).

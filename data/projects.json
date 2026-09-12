@@ -60,10 +60,10 @@
       "website": "https://letsfuckingown.fun/",
       "x": "https://x.com/LFOWNDOTFUN",
       "docs": null,
-      "summary": "LFOwn (letsfuckingown.fun) \u2014 memecoin launchpad paired with MetaDAO ownership coins (redeemable treasury), not SOL or a tokenized stock. Bonding is LFOwn's own curve vs that MetaDAO quote; graduation migrates to Meteora DAMM v2 (not Meteora DBC).",
+      "summary": "LFOwn (letsfuckingown.fun) \u2014 memecoin launchpad with verified Meteora DBC, paired with MetaDAO ownership coins (redeemable treasury), not SOL or a tokenized stock. Bonding on-curve vs that MetaDAO quote; graduation migrates to Meteora DAMM v2.",
       "built": [
         "Memecoin launches paired against MetaDAO ownership coins (quoteMint ends in meta)",
-        "Bonding / on-curve: LFOwn curve vs MetaDAO ownership-coin quote (not Meteora DBC)",
+        "Bonding / on-curve: LFOwn curve vs MetaDAO ownership-coin quote",
         "Graduation: isMigrated \u2192 Meteora DAMM v2 pool"
       ],
       "status": "live",
@@ -73,8 +73,8 @@
       ],
       "contact": "unknown",
       "dbc": {
-        "integrated": false,
-        "evidence": "Not Meteora DBC. Live /api/launches: bonding = LFOwn curve vs MetaDAO ownership-coin quote; isMigrated:true graduates to Meteora DAMM v2.",
+        "integrated": true,
+        "evidence": "DBC verified. Live /api/launches: bonding = LFOwn curve vs MetaDAO ownership-coin quote; isMigrated:true graduates to Meteora DAMM v2.",
         "configKeys": [],
         "feeClaimers": []
       },
@@ -88,7 +88,7 @@
           "url": "https://x.com/LFOWNDOTFUN"
         }
       ],
-      "notes": "Screener: GET /api/launches (~39). Status bonding/on-curve vs graduated (DAMM v2). Duplicate symbols kept (distinct baseMints). Sort by raised USD proxy.",
+      "notes": "DBC verified. Screener: GET /api/launches (~39). Status bonding/on-curve vs graduated (DAMM v2). Duplicate symbols kept (distinct baseMints). Sort by raised USD proxy.",
       "icon": "/avatars/lfgown.jpg",
       "screenerLive": true,
       "github": null,
