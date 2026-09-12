@@ -69,10 +69,7 @@ export function EcosystemExplorer({
     <div className="page">
       <section className="hero">
         <HeroDark />
-        <h1>Ecosystem</h1>
-        <p>
-          DBC launchpads on Solana — what they built, what is live, what we verified.
-        </p>
+        <h1>meteora DBC screener</h1>
       </section>
 
       <div className="shell">
