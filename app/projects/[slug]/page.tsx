@@ -62,19 +62,23 @@ export default async function ProjectPage({ params }: Props) {
   // Live pads: SSR-seed last-good Redis padfeed (shared), then client refreshes.
   let tokens: TokenRow[] = tokensForLaunchpad(p.id);
   if (live) {
-    const peeked = await peekPadFeed<TokenRow[] | { tokens?: TokenRow[] }>(
-      p.id,
-      "fast",
-    );
-    if (Array.isArray(peeked) && peeked.length > 0) {
-      tokens = peeked;
-    } else if (
-      peeked &&
-      typeof peeked === "object" &&
-      Array.isArray((peeked as { tokens?: TokenRow[] }).tokens) &&
-      ((peeked as { tokens: TokenRow[] }).tokens.length > 0)
-    ) {
-      tokens = (peeked as { tokens: TokenRow[] }).tokens;
+    try {
+      const peeked = await peekPadFeed<TokenRow[] | { tokens?: TokenRow[] }>(
+        p.id,
+        "fast",
+      );
+      if (Array.isArray(peeked) && peeked.length > 0) {
+        tokens = peeked;
+      } else if (
+        peeked &&
+        typeof peeked === "object" &&
+        Array.isArray((peeked as { tokens?: TokenRow[] }).tokens) &&
+        (peeked as { tokens: TokenRow[] }).tokens.length > 0
+      ) {
+        tokens = (peeked as { tokens: TokenRow[] }).tokens;
+      }
+    } catch {
+      // Build / Redis flap — client will fetch live.
     }
   }
 

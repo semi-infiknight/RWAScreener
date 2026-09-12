@@ -13,6 +13,11 @@
 import { createClient, type RedisClientType } from "redis";
 
 export const PAD_CACHE_TTL_DEFAULT_SECONDS = 30;
+
+/** Next production build must not block on Redis (SSG pad pages). */
+function isNextBuild(): boolean {
+  return process.env.NEXT_PHASE === "phase-production-build";
+}
 export const PAD_CACHE_HARD_TTL_DEFAULT_SECONDS = 600;
 
 type Envelope<T> = { savedAt: number; value: T };
@@ -60,6 +65,7 @@ export function padSummaryCacheKey(padId: string): string {
 }
 
 async function getRedis(): Promise<RedisClientType | null> {
+  if (isNextBuild()) return null;
   const url = redisUrl();
   if (!url) return null;
   if (redisClient?.isOpen) return redisClient;
@@ -67,12 +73,28 @@ async function getRedis(): Promise<RedisClientType | null> {
 
   redisConnectPromise = (async () => {
     try {
-      const client = createClient({ url });
+      const client = createClient({
+        url,
+        socket: {
+          connectTimeout: 1500,
+          reconnectStrategy: false,
+        },
+      });
       client.on("error", () => {});
-      await client.connect();
+      await Promise.race([
+        client.connect(),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error("redis connect timeout")), 2000),
+        ),
+      ]);
       redisClient = client as RedisClientType;
       return redisClient;
     } catch {
+      try {
+        // abandon half-open client
+      } catch {
+        /* ignore */
+      }
       redisClient = null;
       return null;
     } finally {
