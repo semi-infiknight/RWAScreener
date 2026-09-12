@@ -42,8 +42,8 @@ async function loadPadTokens(padId: string): Promise<TokenRow[]> {
     case "clawpump":
       return fetchClawPumpTokens({ phase: "fast" });
     case "ethics":
-      // Match /api/pads/ethics?phase=fast so Redis key hits.
-      return fetchEthicsTokens({ enrichBoard: false, enrichDetails: false });
+      // Match /api/pads/ethics?phase=fast so Redis key hits (board enrich on).
+      return fetchEthicsTokens({ enrichBoard: true, enrichDetails: false });
     case "revshare":
       return fetchRevShareTokens({ phase: "fast" });
     default:

@@ -34,7 +34,8 @@ export async function GET(req: NextRequest) {
   const full = phase === "full";
   try {
     const tokens = await fetchEthicsTokens({
-      enrichBoard: full,
+      // Board enrich is one POST — safe for homepage + fast pad paint.
+      enrichBoard: true,
       enrichDetails: full,
     });
     return NextResponse.json({

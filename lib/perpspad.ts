@@ -21,6 +21,8 @@ type PerpspadToken = {
   priceUsd?: number | null;
   changePct?: number | null;
   marketCap?: number | null;
+  /** USDC reserve in pool — honest liquidity proxy from catalog. */
+  reserveUsdc?: number | null;
   graduated?: boolean;
   graduationProgress?: number | null;
   createdAt?: string | null;
@@ -236,7 +238,7 @@ async function loadRawTokens(): Promise<{ source: string; tokens: PerpspadToken[
  * Semi filter drops `source:external` / pump.fun fee-router adopts.
  * Status: site `graduated` boolean → graduated|bonding (upstream catalog often
  * all graduated; do not invent bonding from graduationProgress).
- * Columns: price, mcap, age. No volume/liquidity/holders — left null.
+ * Columns: price, mcap, age; liquidity from reserveUsdc when present. No volume/holders.
  * Sort: highest mcap.
  */
 export async function fetchPerpspadTokens(opts?: {
@@ -288,7 +290,7 @@ async function loadPerpspadTokens(): Promise<{
       mcapUsd: mcap,
       fdvUsd: mcap,
       volume24hUsd: null,
-      liquidityUsd: null,
+      liquidityUsd: numOrNull(t.reserveUsdc),
       holders: null,
       holdersDelta24h: null,
       ageHours: ageHoursFrom(t.createdAt ?? null),

@@ -41,6 +41,39 @@ type RevShareListResponse = {
   };
 };
 
+/** Dexscreener-style pair from /api/projects (graduated / listed). */
+type RevShareProject = {
+  chainId?: string;
+  marketCap?: number | null;
+  fdv?: number | null;
+  priceUsd?: string | number | null;
+  volume?: { h24?: number | null } | null;
+  liquidity?: { usd?: number | null } | null;
+  priceChange?: { h24?: number | null } | null;
+  baseToken?: { address?: string; name?: string; symbol?: string } | null;
+};
+
+type RevShareTrending = {
+  chain?: string;
+  mint_address?: string;
+  marketCap?: number | null;
+  volume_h24?: number | null;
+  liquidity?: number | null;
+  priceUsd?: number | null;
+  priceChange?: number | null;
+  token_name?: string | null;
+  token_image?: string | null;
+};
+
+type MintMetrics = {
+  mcapUsd: number | null;
+  fdvUsd: number | null;
+  volume24hUsd: number | null;
+  liquidityUsd: number | null;
+  priceUsd: number | null;
+  change24hPct: number | null;
+};
+
 function revshareHeaders(): HeadersInit {
   return {
     Accept: "application/json",
@@ -58,6 +91,13 @@ function numOrNull(v: unknown): number | null {
   }
   if (typeof v !== "number" || !Number.isFinite(v)) return null;
   return v;
+}
+
+/** Treat placeholder zeros as missing — all-tokens often ships marketCap:0. */
+function positiveOrNull(v: unknown): number | null {
+  const n = numOrNull(v);
+  if (n == null || n === 0) return null;
+  return n;
 }
 
 function absoluteIcon(image: string | undefined | null): string | null {
@@ -107,16 +147,21 @@ export function isMeteoraDbcConfig(cfg: unknown): boolean {
 
 function isGraduated(t: RevShareToken): boolean {
   if (t.migrated === true || t.migrated === 1) return true;
-  // Some rows use status flags; treat explicit migrated only as SoT when present.
   return false;
 }
 
-function mapToken(t: RevShareToken): TokenRow | null {
+function mapToken(
+  t: RevShareToken,
+  enrich: MintMetrics | undefined,
+): TokenRow | null {
   const mint = typeof t.mintAddress === "string" ? t.mintAddress.trim() : "";
   if (!mint) return null;
   // Solana mints are base58, not 0x…
   if (mint.startsWith("0x") || mint.startsWith("0X")) return null;
-  const mcap = numOrNull(t.marketCap);
+  // Prefer projects/trending (real numbers); all-tokens marketCap is often 0.
+  const listMcap = positiveOrNull(t.marketCap);
+  const mcap = enrich?.mcapUsd ?? listMcap;
+  const fdv = enrich?.fdvUsd ?? mcap;
   return {
     id: `revshare-${mint}`,
     launchpadId: "revshare",
@@ -128,12 +173,12 @@ function mapToken(t: RevShareToken): TokenRow | null {
     mint,
     icon: absoluteIcon(t.tokenLogo),
     status: isGraduated(t) ? "graduated" : "bonding",
-    priceUsd: null,
-    change24hPct: null,
+    priceUsd: enrich?.priceUsd ?? null,
+    change24hPct: enrich?.change24hPct ?? null,
     mcapUsd: mcap,
-    fdvUsd: mcap,
-    volume24hUsd: null,
-    liquidityUsd: null,
+    fdvUsd: fdv,
+    volume24hUsd: enrich?.volume24hUsd ?? null,
+    liquidityUsd: enrich?.liquidityUsd ?? null,
     holders: null,
     holdersDelta24h: null,
     ageHours: ageHoursFromDate(t.dateCreated),
@@ -166,13 +211,112 @@ async function fetchPage(cursor?: number | string | null): Promise<RevShareListR
 }
 
 /**
+ * Batch market metrics from public RevShare endpoints that actually price tokens.
+ * /api/all-tokens leaves marketCap at 0 for bonding rows; projects + trending fill gaps.
+ */
+async function fetchMintMetrics(): Promise<Map<string, MintMetrics>> {
+  const out = new Map<string, MintMetrics>();
+
+  const merge = (mint: string, patch: Partial<MintMetrics>) => {
+    const cur = out.get(mint) ?? {
+      mcapUsd: null,
+      fdvUsd: null,
+      volume24hUsd: null,
+      liquidityUsd: null,
+      priceUsd: null,
+      change24hPct: null,
+    };
+    out.set(mint, {
+      mcapUsd: patch.mcapUsd ?? cur.mcapUsd,
+      fdvUsd: patch.fdvUsd ?? cur.fdvUsd,
+      volume24hUsd: patch.volume24hUsd ?? cur.volume24hUsd,
+      liquidityUsd: patch.liquidityUsd ?? cur.liquidityUsd,
+      priceUsd: patch.priceUsd ?? cur.priceUsd,
+      change24hPct: patch.change24hPct ?? cur.change24hPct,
+    });
+  };
+
+  const [projectsRes, trendingRes] = await Promise.allSettled([
+    fetch(`${REVSHARE_ORIGIN}/api/projects`, {
+      headers: revshareHeaders(),
+      cache: "no-store",
+      signal: AbortSignal.timeout(20_000),
+    }),
+    fetch(`${REVSHARE_ORIGIN}/api/trending-tokens`, {
+      headers: revshareHeaders(),
+      cache: "no-store",
+      signal: AbortSignal.timeout(15_000),
+    }),
+  ]);
+
+  if (projectsRes.status === "fulfilled" && projectsRes.value.ok) {
+    try {
+      const body = (await projectsRes.value.json()) as {
+        projects?: RevShareProject[];
+      };
+      for (const p of Array.isArray(body.projects) ? body.projects : []) {
+        if (p.chainId && p.chainId !== "solana") continue;
+        const mint =
+          typeof p.baseToken?.address === "string"
+            ? p.baseToken.address.trim()
+            : "";
+        if (!mint) continue;
+        const mcap = positiveOrNull(p.marketCap) ?? positiveOrNull(p.fdv);
+        merge(mint, {
+          mcapUsd: mcap,
+          fdvUsd: positiveOrNull(p.fdv) ?? mcap,
+          volume24hUsd: positiveOrNull(p.volume?.h24),
+          liquidityUsd: positiveOrNull(p.liquidity?.usd),
+          priceUsd: positiveOrNull(p.priceUsd),
+          change24hPct: numOrNull(p.priceChange?.h24),
+        });
+      }
+    } catch {
+      // keep empty — list rows still usable
+    }
+  }
+
+  if (trendingRes.status === "fulfilled" && trendingRes.value.ok) {
+    try {
+      const body = (await trendingRes.value.json()) as {
+        trending_tokens?: RevShareTrending[];
+      };
+      for (const t of Array.isArray(body.trending_tokens)
+        ? body.trending_tokens
+        : []) {
+        if (t.chain && t.chain !== "solana") continue;
+        const mint =
+          typeof t.mint_address === "string" ? t.mint_address.trim() : "";
+        if (!mint) continue;
+        // Trending often has fresher volume/liq — prefer non-null trending fields.
+        const cur = out.get(mint);
+        merge(mint, {
+          mcapUsd: positiveOrNull(t.marketCap) ?? cur?.mcapUsd ?? null,
+          fdvUsd: positiveOrNull(t.marketCap) ?? cur?.fdvUsd ?? null,
+          volume24hUsd:
+            positiveOrNull(t.volume_h24) ?? cur?.volume24hUsd ?? null,
+          liquidityUsd:
+            positiveOrNull(t.liquidity) ?? cur?.liquidityUsd ?? null,
+          priceUsd: positiveOrNull(t.priceUsd) ?? cur?.priceUsd ?? null,
+          change24hPct: numOrNull(t.priceChange) ?? cur?.change24hPct ?? null,
+        });
+      }
+    } catch {
+      // projects alone still useful
+    }
+  }
+
+  return out;
+}
+
+/**
  * Live RevShare Solana Meteora DBC launches.
  *
  * Source: GET https://app.revshare.ltd/api/all-tokens?limit=100&order=newest&chain_id=0
  *         (+ cursor pagination via pagination.next_cursor / has_more)
+ * Metrics: merge /api/projects + /api/trending-tokens (all-tokens marketCap is often 0).
  * Filter: bonding_config is base58 pubkey (Meteora DBC config); drop PUMPFUN /
- *         raydium-launchlab / *_V3/_V4 / null. JS chunk references
- *         `Meteora DBC pool found` via getPoolByBaseMint for these configs.
+ *         raydium-launchlab / *_V3/_V4 / null.
  * Cap: MAX_PAGES (10) for request-path latency.
  */
 export async function fetchRevShareTokens(opts?: {
@@ -184,17 +328,25 @@ export async function fetchRevShareTokens(opts?: {
 
 async function loadRevShareTokens(): Promise<TokenRow[]> {
   try {
+    const [metrics, firstPage] = await Promise.all([
+      fetchMintMetrics().catch(() => new Map<string, MintMetrics>()),
+      fetchPage(undefined),
+    ]);
+
     const rows: TokenRow[] = [];
     const seen = new Set<string>();
     let cursor: number | string | null | undefined = undefined;
     let pages = 0;
+    let body: RevShareListResponse = firstPage;
 
     while (pages < MAX_PAGES) {
-      const body = await fetchPage(cursor);
+      if (pages > 0) body = await fetchPage(cursor);
       const tokens = Array.isArray(body.tokens) ? body.tokens : [];
       for (const raw of tokens) {
         if (!isMeteoraDbcConfig(raw?.bonding_config)) continue;
-        const row = mapToken(raw);
+        const mint =
+          typeof raw?.mintAddress === "string" ? raw.mintAddress.trim() : "";
+        const row = mapToken(raw, mint ? metrics.get(mint) : undefined);
         if (!row || !row.mint || seen.has(row.mint)) continue;
         seen.add(row.mint);
         rows.push(row);

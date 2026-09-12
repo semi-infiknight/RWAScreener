@@ -167,7 +167,7 @@ async function fetchLaunchesForQuote(
  * Live Bags xStock-quoted launches.
  * Source: GET /token-launch/damm-v2/launches?quoteMint=<allowlisted mint>
  * Non-SOL / xStock Bags launches are DAMM_V2_DIRECT (no DBC curve).
- * Missing USD metrics stay null. No invented numbers.
+ * Launches payload has no mcap/vol/liq fields (verified) — metrics stay null. No invented numbers.
  * Fail-closed if BAGS_API_KEY is missing — never fetch this feed unauthenticated.
  * List results cached via lib/pad-cache (pad+phase, short TTL).
  */

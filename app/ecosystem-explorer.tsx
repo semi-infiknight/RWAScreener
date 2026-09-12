@@ -121,6 +121,25 @@ export function EcosystemExplorer({
     };
   }, []);
 
+  const showVol = useMemo(() => {
+    if (metricsLoading) return true; // keep column while loading
+    let n = 0;
+    for (const m of Object.values(metrics)) {
+      if (m?.volume24hUsd != null && m.volume24hUsd !== 0) n += 1;
+    }
+    return n >= 1;
+  }, [metrics, metricsLoading]);
+
+  const showLiq = useMemo(() => {
+    if (metricsLoading) return true;
+    let n = 0;
+    for (const m of Object.values(metrics)) {
+      if (m?.liquidityUsd != null && m.liquidityUsd !== 0) n += 1;
+    }
+    // Hide when almost no pads report liq (after enrich).
+    return n >= 2;
+  }, [metrics, metricsLoading]);
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return projects;
@@ -278,24 +297,28 @@ export function EcosystemExplorer({
                         Mcap{mark("mcapUsd")}
                       </button>
                     </th>
-                    <th className="hide-md">
-                      <button
-                        type="button"
-                        className="sort-btn"
-                        onClick={() => toggleSort("volume24hUsd")}
-                      >
-                        Vol 24h{mark("volume24hUsd")}
-                      </button>
-                    </th>
-                    <th className="hide-lg">
-                      <button
-                        type="button"
-                        className="sort-btn"
-                        onClick={() => toggleSort("liquidityUsd")}
-                      >
-                        Liq{mark("liquidityUsd")}
-                      </button>
-                    </th>
+                    {showVol ? (
+                      <th className="hide-md">
+                        <button
+                          type="button"
+                          className="sort-btn"
+                          onClick={() => toggleSort("volume24hUsd")}
+                        >
+                          Vol 24h{mark("volume24hUsd")}
+                        </button>
+                      </th>
+                    ) : null}
+                    {showLiq ? (
+                      <th className="hide-lg">
+                        <button
+                          type="button"
+                          className="sort-btn"
+                          onClick={() => toggleSort("liquidityUsd")}
+                        >
+                          Liq{mark("liquidityUsd")}
+                        </button>
+                      </th>
+                    ) : null}
                     <th className="col-action">App</th>
                   </tr>
                 </thead>
@@ -361,12 +384,16 @@ export function EcosystemExplorer({
                             <td className="num">
                               {fmtUsdCell(m?.mcapUsd, false, live)}
                             </td>
-                            <td className="num hide-md">
-                              {fmtUsdCell(m?.volume24hUsd, false, live)}
-                            </td>
-                            <td className="num hide-lg">
-                              {fmtUsdCell(m?.liquidityUsd, false, live)}
-                            </td>
+                            {showVol ? (
+                              <td className="num hide-md">
+                                {fmtUsdCell(m?.volume24hUsd, false, live)}
+                              </td>
+                            ) : null}
+                            {showLiq ? (
+                              <td className="num hide-lg">
+                                {fmtUsdCell(m?.liquidityUsd, false, live)}
+                              </td>
+                            ) : null}
                             <td className="col-action">
                               {appHref ? (
                                 <a

@@ -6,7 +6,7 @@ export const revalidate = 0;
 
 /**
  * RevShare public all-tokens — Solana Meteora DBC only (client filter).
- * fast and full are the same rows (no enrich step).
+ * Metrics merged from /api/projects + /api/trending-tokens (all-tokens mcap often 0).
  * Honors ?phase= for LivePadScreener.
  */
 export async function GET(req: NextRequest) {
@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
     const tokens = await fetchRevShareTokens({ phase: fast ? "fast" : "full" });
     return NextResponse.json({
       source:
-        "https://app.revshare.ltd/api/all-tokens?limit=100&order=newest&chain_id=0 (+cursor; filter bonding_config base58 Meteora DBC)",
+        "https://app.revshare.ltd/api/all-tokens (+ /api/projects + /api/trending-tokens; Meteora DBC filter)",
       phase: fast ? "fast" : "full",
       count: tokens.length,
       tokens,

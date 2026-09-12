@@ -15,7 +15,10 @@ function sumFinite(values: Array<number | null | undefined>): number | null {
     (n): n is number => typeof n === "number" && Number.isFinite(n),
   );
   if (nums.length === 0) return null;
-  return nums.reduce((a, b) => a + b, 0);
+  const sum = nums.reduce((a, b) => a + b, 0);
+  // All placeholder zeros (e.g. RevShare all-tokens marketCap:0) → show — not $0.000000.
+  if (sum === 0 && nums.every((n) => n === 0)) return null;
+  return sum;
 }
 
 /** Aggregate only from real TokenRow fields — never invent metrics. */
