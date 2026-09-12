@@ -3,26 +3,49 @@
 import { useEffect, useRef } from "react";
 
 /**
- * Interactive hero bars inspired by Base ecosystem canvas.
- * Original implementation: traveling wave packets + pointer Gaussian lift.
+ * Base-inspired hero: sparse pastel vertical-bar clusters on canvas.
+ * Clusters drift/re-form and can read as fleeting wing-like arcs.
+ * Original implementation (no Base assets).
  */
 
-type Packet = {
-  /** center x as fraction of width */
-  x: number;
-  /** center y as fraction of height */
-  y: number;
-  /** horizontal speed (width-fractions / sec) */
+type Cluster = {
+  x: number; // normalized 0..1
+  y: number; // normalized baseline
   vx: number;
-  /** peak height px */
+  age: number;
+  maxAge: number;
+  life: number;
   peak: number;
-  /** half-width in bar indices */
+  bars: number;
   sigma: number;
-  /** opacity */
-  alpha: number;
-  /** phase for idle pulse */
-  phase: number;
+  /** per-bar vertical jitter seeds */
+  offsets: number[];
+  heights: number[];
+  hues: number[];
+  /** morph phase for wing/hump shapes */
+  morph: number;
 };
+
+function makeCluster(seed?: Partial<Cluster>): Cluster {
+  const bars = 12 + Math.floor(Math.random() * 8); // 12–19
+  const fromLeft = Math.random() > 0.45;
+  return {
+    x: fromLeft ? -0.05 + Math.random() * 0.15 : 0.85 + Math.random() * 0.2,
+    y: 0.36 + Math.random() * 0.16,
+    vx: (fromLeft ? 1 : -1) * (0.035 + Math.random() * 0.04),
+    age: 0,
+    maxAge: 6.5 + Math.random() * 5,
+    life: 0,
+    peak: 55 + Math.random() * 50,
+    bars,
+    sigma: 3.4 + Math.random() * 2.2,
+    offsets: Array.from({ length: bars }, () => (Math.random() - 0.5) * 18),
+    heights: Array.from({ length: bars }, () => 0.55 + Math.random() * 0.55),
+    hues: Array.from({ length: bars }, (_, i) => i % 3),
+    morph: Math.random() * Math.PI * 2,
+    ...seed,
+  };
+}
 
 export function HeroBars() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -35,27 +58,67 @@ export function HeroBars() {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    const BAR_W = 9;
-    const GAP = 7;
+    const BAR_W = 8.5;
+    const GAP = 5.5;
     const STEP = BAR_W + GAP;
 
-    const pointer = { x: 0, y: 0, active: false, tx: 0, ty: 0 };
-    let raf = 0;
-    let last = performance.now();
     let w = 0;
     let h = 0;
+    let raf = 0;
+    let last = performance.now();
+    let spawnAt = 0.8;
 
-    const packets: Packet[] = [
-      { x: 0.55, y: 0.42, vx: 0.045, peak: 110, sigma: 5.5, alpha: 0.9, phase: 0 },
-      { x: 0.22, y: 0.38, vx: 0.028, peak: 58, sigma: 4.2, alpha: 0.35, phase: 1.7 },
-      { x: 0.78, y: 0.48, vx: -0.022, peak: 48, sigma: 3.8, alpha: 0.28, phase: 3.1 },
+    const clusters: Cluster[] = [
+      makeCluster({
+        x: 0.58,
+        y: 0.38,
+        vx: 0.028,
+        peak: 95,
+        bars: 16,
+        life: 1,
+        age: 1.2,
+        maxAge: 11,
+      }),
+      makeCluster({
+        x: 0.3,
+        y: 0.48,
+        vx: -0.02,
+        peak: 42,
+        bars: 11,
+        life: 0.6,
+        age: 3,
+        maxAge: 8,
+      }),
     ];
+
+    // lagged pointer attractor
+    const pointer = {
+      x: 0.5,
+      y: 0.4,
+      tx: 0.5,
+      ty: 0.4,
+      active: false,
+      strength: 0,
+    };
+
+    const colors = {
+      base: [
+        [138, 148, 255],
+        [160, 150, 245],
+        [175, 165, 250],
+      ],
+      tip: [
+        [210, 235, 165],
+        [255, 228, 185],
+        [255, 200, 215],
+      ],
+    };
 
     const resize = () => {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       const rect = wrap.getBoundingClientRect();
       w = Math.max(320, rect.width);
-      h = Math.max(260, rect.height);
+      h = Math.max(300, rect.height);
       canvas.width = Math.floor(w * dpr);
       canvas.height = Math.floor(h * dpr);
       canvas.style.width = `${w}px`;
@@ -63,60 +126,70 @@ export function HeroBars() {
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
 
-    const smoothPointer = (dt: number) => {
-      const k = 1 - Math.exp(-dt * 10);
-      pointer.tx += (pointer.x - pointer.tx) * k;
-      pointer.ty += (pointer.y - pointer.ty) * k;
+    const shapeAt = (c: Cluster, i: number, t: number) => {
+      const half = (c.bars - 1) / 2;
+      const di = i - half;
+      // Gaussian hump
+      let env = Math.exp(-(di * di) / (2 * c.sigma * c.sigma));
+      // transient wing/arc morph: lift outer lobes
+      const wing =
+        0.55 +
+        0.45 *
+          Math.abs(Math.sin((di / (half || 1)) * Math.PI)) *
+          (0.6 + 0.4 * Math.sin(t * 1.4 + c.morph));
+      // occasional valley in center for “two wing” read
+      const split =
+        1 -
+        0.22 *
+          Math.exp(-(di * di) / 2.2) *
+          (0.5 + 0.5 * Math.sin(t * 0.9 + c.morph * 0.5));
+      env *= wing * split * c.heights[i];
+      return env;
     };
 
-    const barColor = (relH: number, accent: number) => {
-      // relH 0 bottom → 1 top tip; accent shifts pastel tip hue
-      const bottom = { r: 140, g: 150, b: 255 };
-      const mid = { r: 180, g: 170, b: 245 };
-      const tips = [
-        { r: 210, g: 235, b: 170 }, // pale lime
-        { r: 255, g: 230, b: 190 }, // pale yellow
-        { r: 255, g: 200, b: 220 }, // pale pink
-      ];
-      const tip = tips[accent % tips.length];
-      const t = Math.min(1, Math.max(0, relH));
-      let r: number, g: number, b: number;
-      if (t < 0.55) {
-        const u = t / 0.55;
-        r = bottom.r + (mid.r - bottom.r) * u;
-        g = bottom.g + (mid.g - bottom.g) * u;
-        b = bottom.b + (mid.b - bottom.b) * u;
-      } else {
-        const u = (t - 0.55) / 0.45;
-        r = mid.r + (tip.r - mid.r) * u;
-        g = mid.g + (tip.g - mid.g) * u;
-        b = mid.b + (tip.b - mid.b) * u;
-      }
-      return `rgb(${r | 0},${g | 0},${b | 0})`;
-    };
+    const drawCluster = (c: Cluster, strength: number, t: number) => {
+      if (strength < 0.03) return;
+      const cx = c.x * w;
+      const baseline = c.y * h;
+      const half = (c.bars - 1) / 2;
 
-    const drawBar = (
-      x: number,
-      baseline: number,
-      height: number,
-      alpha: number,
-      accent: number,
-    ) => {
-      if (height < 1.5 || alpha < 0.02) return;
-      const top = baseline - height;
-      const grad = ctx.createLinearGradient(x, baseline, x, top);
-      grad.addColorStop(0, barColor(0, accent));
-      grad.addColorStop(0.5, barColor(0.45, accent));
-      grad.addColorStop(1, barColor(1, accent));
-      ctx.globalAlpha = alpha;
-      ctx.fillStyle = grad;
-      const left = x - BAR_W / 2;
-      if (typeof ctx.roundRect === "function") {
+      for (let i = 0; i < c.bars; i++) {
+        const di = i - half;
+        const env = shapeAt(c, i, t);
+        const height = c.peak * env * strength;
+        if (height < 1.5) continue;
+
+        const x = cx + di * STEP;
+        const yOff = c.offsets[i] * (0.6 + 0.4 * Math.sin(t + i));
+        const bottom = baseline + yOff;
+        const top = bottom - height;
+
+        const tip = colors.tip[c.hues[i] % 3];
+        const base = colors.base[c.hues[i] % 3];
+        const a = Math.min(0.92, (0.2 + env) * strength);
+
+        const grad = ctx.createLinearGradient(x, bottom, x, top);
+        grad.addColorStop(0, `rgba(${base[0]},${base[1]},${base[2]},${a * 0.95})`);
+        grad.addColorStop(
+          0.55,
+          `rgba(${base[0]},${base[1]},${base[2]},${a * 0.75})`,
+        );
+        grad.addColorStop(1, `rgba(${tip[0]},${tip[1]},${tip[2]},${a * 0.7})`);
+
+        // faint afterimage under the bar
+        ctx.globalAlpha = a * 0.18;
+        ctx.fillStyle = `rgb(${base[0]},${base[1]},${base[2]})`;
+        ctx.fillRect(x - BAR_W / 2, bottom, BAR_W, Math.min(28, height * 0.35));
+
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = grad;
         ctx.beginPath();
-        ctx.roundRect(left, top, BAR_W, height, [3, 3, 2, 2]);
+        if (typeof ctx.roundRect === "function") {
+          ctx.roundRect(x - BAR_W / 2, top, BAR_W, height, [2.5, 2.5, 1.5, 1.5]);
+        } else {
+          ctx.rect(x - BAR_W / 2, top, BAR_W, height);
+        }
         ctx.fill();
-      } else {
-        ctx.fillRect(left, top, BAR_W, height);
       }
     };
 
@@ -125,78 +198,69 @@ export function HeroBars() {
       last = now;
       const t = now / 1000;
 
-      smoothPointer(dt);
+      // laggy pointer
+      const pk = 1 - Math.exp(-dt * 3.5);
+      pointer.x += (pointer.tx - pointer.x) * pk;
+      pointer.y += (pointer.ty - pointer.y) * pk;
+      const want = pointer.active ? 1 : 0;
+      pointer.strength += (want - pointer.strength) * (1 - Math.exp(-dt * 4));
+
       ctx.clearRect(0, 0, w, h);
 
-      // advance traveling packets
-      for (const p of packets) {
-        p.x += p.vx * dt;
-        if (p.x > 1.25) p.x = -0.2;
-        if (p.x < -0.25) p.x = 1.2;
+      spawnAt -= dt;
+      if (spawnAt <= 0 && clusters.length < 3) {
+        clusters.push(makeCluster());
+        spawnAt = 1.8 + Math.random() * 2.5;
       }
 
-      const cols = Math.ceil(w / STEP) + 2;
-      const heights = new Float32Array(cols);
-      const alphas = new Float32Array(cols);
-      const accents = new Int8Array(cols);
+      for (let i = clusters.length - 1; i >= 0; i--) {
+        const c = clusters[i];
+        c.age += dt;
+        c.x += c.vx * dt;
+        c.morph += dt * 0.7;
+        // gentle bob
+        c.y += Math.sin(t * 1.1 + c.morph) * 0.0008;
 
-      for (let i = 0; i < cols; i++) {
-        const x = i * STEP + BAR_W / 2;
-        let hSum = 0;
-        let aSum = 0;
-
-        for (const p of packets) {
-          const cx = p.x * w;
-          const cy = p.y * h;
-          const di = (x - cx) / STEP;
-          const env = Math.exp(-(di * di) / (2 * p.sigma * p.sigma));
-          const pulse =
-            0.85 + 0.15 * Math.sin(t * 1.6 + p.phase + di * 0.35);
-          const amp = p.peak * env * pulse;
-          hSum += amp;
-          aSum += p.alpha * env;
+        // gently attract strongest cluster toward pointer region
+        if (pointer.strength > 0.05 && i === 0) {
+          c.x += (pointer.x - c.x) * dt * 0.55 * pointer.strength;
+          c.y += (pointer.y - c.y) * dt * 0.45 * pointer.strength;
+          c.peak += (100 - c.peak) * dt * 0.8 * pointer.strength;
         }
 
-        // pointer Gaussian lift — follows cursor, taller when pointer higher
-        if (pointer.active) {
-          const dx = (x - pointer.tx) / (STEP * 4.2);
-          const dyNorm = 1 - Math.min(1, Math.max(0, pointer.ty / h));
-          const vert = 0.55 + dyNorm * 0.9;
-          const g = Math.exp(-(dx * dx));
-          hSum += 130 * g * vert;
-          aSum += 0.95 * g;
-        }
+        const u = c.age / c.maxAge;
+        if (u < 0.12) c.life = u / 0.12;
+        else if (u > 0.72) c.life = Math.max(0, (1 - u) / 0.28);
+        else c.life = 1;
 
-        // faint global idle shimmer so empty areas aren't dead
-        hSum +=
-          6 *
-          (0.5 +
-            0.5 *
-              Math.sin(t * 0.9 + i * 0.22) *
-              Math.sin(t * 0.35 + i * 0.05));
+        const pulse = 0.92 + 0.08 * Math.sin(t * 2.1 + c.morph);
+        drawCluster(c, c.life * pulse, t);
 
-        heights[i] = hSum;
-        alphas[i] = Math.min(0.95, aSum);
-        accents[i] = i % 3;
+        if (c.age > c.maxAge || c.x < -0.3 || c.x > 1.3) clusters.splice(i, 1);
       }
 
-      // soft trail: draw a faded offset pass first
-      for (let i = 0; i < cols; i++) {
-        const x = i * STEP + BAR_W / 2;
-        const baseline = h * 0.58;
-        drawBar(
-          x + 10,
-          baseline + 8,
-          heights[i] * 0.55,
-          alphas[i] * 0.22,
-          accents[i],
-        );
-      }
-
-      for (let i = 0; i < cols; i++) {
-        const x = i * STEP + BAR_W / 2;
-        const baseline = h * 0.58;
-        drawBar(x, baseline, heights[i], alphas[i], accents[i]);
+      // pointer-local ephemeral cluster (builds near cursor with lag)
+      if (pointer.strength > 0.04) {
+        const local = makeCluster({
+          x: pointer.x,
+          y: pointer.y,
+          vx: 0,
+          peak: 70 + (1 - pointer.y) * 45,
+          bars: 14,
+          sigma: 4.2,
+          life: 1,
+          age: 1,
+          maxAge: 2,
+          offsets: Array.from({ length: 14 }, () => (Math.random() - 0.5) * 10),
+          heights: Array.from({ length: 14 }, () => 0.7 + Math.random() * 0.4),
+          hues: Array.from({ length: 14 }, (_, i) => i % 3),
+          morph: t * 2,
+        });
+        drawCluster(local, pointer.strength * 0.95, t);
+        // faint lagged ghost
+        local.x -= 0.04;
+        local.peak *= 0.55;
+        drawCluster(local, pointer.strength * 0.28, t + 1);
       }
 
       ctx.globalAlpha = 1;
@@ -205,8 +269,8 @@ export function HeroBars() {
 
     const onMove = (e: PointerEvent) => {
       const rect = canvas.getBoundingClientRect();
-      pointer.x = e.clientX - rect.left;
-      pointer.y = e.clientY - rect.top;
+      pointer.tx = (e.clientX - rect.left) / Math.max(1, rect.width);
+      pointer.ty = (e.clientY - rect.top) / Math.max(1, rect.height);
       pointer.active = true;
     };
     const onLeave = () => {
