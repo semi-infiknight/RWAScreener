@@ -9,7 +9,12 @@ type EmberMarket = {
   symbol?: string;
   image?: string;
   pool?: string;
+  dammPool?: string;
   graduated?: boolean;
+  /** Ember-flagged junk / spoofed pricing — skip from screener. */
+  suspect?: boolean;
+  progress?: number;
+  quoteReserve?: number;
   priceUsd?: number;
   change24h?: number;
   marketCapUsd?: number;
@@ -52,7 +57,8 @@ function ageHoursFrom(createdAt: number | undefined): number | null {
 /**
  * Live Ember Curve markets as shown on embercurve.fun/cooking.
  * Source: GET https://embercurve.fun/api/solana/markets
- * (feed is SSE long-poll; quotes is quote-asset catalog — not launches)
+ * Status SoT: `graduated` boolean (dammPool set iff graduated).
+ * Skip `suspect: true` — Ember flags empty/spoofed pools (e.g. AR/CLANKER ~$75M FDV).
  * Missing fields stay null. No invented metrics.
  */
 export async function fetchEmberCurveTokens(opts?: {
@@ -78,6 +84,8 @@ async function loadEmberCurveTokens(): Promise<TokenRow[]> {
   const seen = new Set<string>();
   for (const m of markets) {
     if (!m?.mint || seen.has(m.mint)) continue;
+    // Ember marks spoofed / empty-curve rows (fake mega mcap, progress≈0).
+    if (m.suspect === true) continue;
     seen.add(m.mint);
     const mcap = numOrNull(m.marketCapUsd);
     rows.push({
@@ -87,6 +95,7 @@ async function loadEmberCurveTokens(): Promise<TokenRow[]> {
       name: String(m.name || "").trim() || m.symbol || m.mint.slice(0, 8),
       mint: m.mint,
       icon: absoluteIcon(m.image),
+      // SoT: Ember `graduated` (true ⇒ dammPool set). Do not infer from mcap.
       status: m.graduated ? "graduated" : "bonding",
       priceUsd: numOrNull(m.priceUsd),
       change24hPct: numOrNull(m.change24h),
