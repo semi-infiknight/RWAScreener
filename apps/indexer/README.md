@@ -1,5 +1,11 @@
-# indexer stub
+# apps/indexer
 
-`node apps/indexer/index.mjs` (or `npm run backfill:dbc`) calls `backfillOnce()`.
+Worker entry stub. Runs `backfillOnce()` (Helius DBC initialize-tx walk).
 
-Without `HELIUS_API_KEY` the stub exits 0 with `pools: []` (fail closed).
+```bash
+node apps/indexer/index.mjs
+# or
+npm run backfill:dbc
+```
+
+Requires `HELIUS_API_KEY` in `.env` / `.env.local`. Fail closed when missing.

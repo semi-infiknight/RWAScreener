@@ -75,14 +75,15 @@
         "Locked liquidity + fee earn or airdrop to holders",
         "v2 Instant DAMMv2 launch UX on ethics.ltd"
       ],
-      "status": "integrating",
+      "status": "live",
       "verified": [
-        "public_site"
+        "public_site",
+        "api_launches"
       ],
       "contact": "unknown",
       "dbc": {
-        "integrated": null,
-        "evidence": "Homepage emphasizes DAMMv2; DBC path not clearly documented publicly yet",
+        "integrated": true,
+        "evidence": "Live launches via ethics.ltd /api/launches (dbc + dammv2 + clmm paths); board/enrich supply mcap/volume. fee_claimer map still pending on-chain indexer.",
         "configKeys": [],
         "feeClaimers": []
       },
@@ -97,7 +98,8 @@
         }
       ],
       "notes": "Confirm whether DBC is live vs DAMM-only.",
-      "icon": "/avatars/ethics.jpg"
+      "icon": "/avatars/ethics.jpg",
+      "screenerLive": true
     },
     {
       "id": "bags",
@@ -139,7 +141,8 @@
           "url": "https://x.com/BagsApp"
         }
       ],
-      "icon": "/avatars/bags.jpg"
+      "icon": "/avatars/bags.jpg",
+      "screenerLive": true
     },
     {
       "id": "perpspad",
@@ -182,7 +185,8 @@
           "url": "https://x.com/perpspadfun"
         }
       ],
-      "icon": "/avatars/perpspad.jpg"
+      "icon": "/avatars/perpspad.jpg",
+      "screenerLive": false
     },
     {
       "id": "clawpump",
@@ -224,7 +228,8 @@
         }
       ],
       "notes": "Confirm if DBC integration is planned / in progress / different product.",
-      "icon": "/avatars/clawpump.jpg"
+      "icon": "/avatars/clawpump.jpg",
+      "screenerLive": false
     },
     {
       "id": "lfgown",
@@ -261,7 +266,8 @@
         }
       ],
       "notes": "Confirm whether launches use DBC configs or another Meteora primitive.",
-      "icon": "/avatars/lfgown.jpg"
+      "icon": "/avatars/lfgown.jpg",
+      "screenerLive": false
     },
     {
       "id": "embercurve",

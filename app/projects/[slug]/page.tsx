@@ -12,6 +12,7 @@ import {
   updatedAt,
 } from "../../../lib/projects";
 import { tokensForLaunchpad } from "../../../lib/tokens";
+import { fetchEthicsTokens } from "../../../lib/ethics";
 import { TokenScreener } from "../../components/token-screener";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -61,6 +62,10 @@ export default async function ProjectPage({ params }: Props) {
   const color = AVATAR_COLORS[Math.max(0, idx) % AVATAR_COLORS.length];
   const live = isScreenerLive(p);
   const about = [p.summary, p.notes].filter(Boolean).join(" ");
+  const tokens =
+    p.id === "ethics"
+      ? await fetchEthicsTokens().catch(() => [])
+      : tokensForLaunchpad(p.id);
 
   return (
     <div className="page">
@@ -203,7 +208,7 @@ export default async function ProjectPage({ params }: Props) {
 
         <TokenScreener
           launchpadName={p.displayName}
-          tokens={tokensForLaunchpad(p.id)}
+          tokens={tokens}
           live={live}
           ecosystemName={p.ecosystem?.name}
         />

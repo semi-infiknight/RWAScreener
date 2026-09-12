@@ -10,7 +10,9 @@
     "backfill:dbc": "node scripts/dbc-backfill.mjs"
   },
   "dependencies": {
+    "@meteora-ag/dynamic-bonding-curve-sdk": "^1.5.12",
     "@react-three/fiber": "^9.7.0",
+    "bs58": "^6.0.0",
     "framer-motion": "^13.2.0",
     "next": "^15.5.2",
     "react": "^19.1.1",
