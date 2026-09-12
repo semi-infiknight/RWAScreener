@@ -186,12 +186,21 @@ export function EcosystemExplorer({
                   >
                     <span
                       className="avatar"
-                      style={{
-                        background:
-                          AVATAR_COLORS[idx % AVATAR_COLORS.length],
-                      }}
+                      style={
+                        "icon" in p && p.icon
+                          ? undefined
+                          : {
+                              background:
+                                AVATAR_COLORS[idx % AVATAR_COLORS.length],
+                            }
+                      }
                     >
-                      {initials(p.displayName)}
+                      {"icon" in p && p.icon ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={p.icon} alt="" />
+                      ) : (
+                        initials(p.displayName)
+                      )}
                     </span>
                     <span className="identity">
                       <div className="name">{p.displayName}</div>

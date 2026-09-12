@@ -82,12 +82,25 @@ export default async function ProjectPage({ params }: Props) {
           <div className="aarna-hero-top">
             <span
               className="aarna-logo"
-              style={{
-                background: `linear-gradient(145deg, ${color}, #1a120c)`,
-                boxShadow: `0 0 0 1px ${color}88, 0 12px 40px rgba(0,0,0,0.45)`,
-              }}
+              style={
+                "icon" in p && p.icon
+                  ? {
+                      boxShadow: `0 0 0 1px ${color}88, 0 12px 40px rgba(0,0,0,0.45)`,
+                      overflow: "hidden",
+                      padding: 0,
+                    }
+                  : {
+                      background: `linear-gradient(145deg, ${color}, #1a120c)`,
+                      boxShadow: `0 0 0 1px ${color}88, 0 12px 40px rgba(0,0,0,0.45)`,
+                    }
+              }
             >
-              {initials(p.displayName)}
+              {"icon" in p && p.icon ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={p.icon} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              ) : (
+                initials(p.displayName)
+              )}
             </span>
             {p.website ? (
               <a

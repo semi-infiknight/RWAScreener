@@ -59,14 +59,15 @@
         "website": "https://star.fun",
         "x": "https://x.com/stardotfun"
       },
-      "screenerLive": false
+      "screenerLive": false,
+      "icon": "/avatars/stardotfun.jpg"
     },
     {
       "id": "ethics",
       "displayName": "Ethics",
       "slug": "ethics",
       "website": "https://ethics.ltd",
-      "x": null,
+      "x": "https://x.com/ethicslaunch",
       "docs": null,
       "summary": "Ethics Launch \u2014 market-backed token launches with locked liquidity; pairs with SOL, stables, and RWAs; site markets Instant DAMMv2 launches.",
       "built": [
@@ -89,16 +90,21 @@
         {
           "label": "Site",
           "url": "https://ethics.ltd"
+        },
+        {
+          "label": "X",
+          "url": "https://x.com/ethicslaunch"
         }
       ],
-      "notes": "Need X handle + whether DBC is live vs DAMM-only."
+      "notes": "Confirm whether DBC is live vs DAMM-only.",
+      "icon": "/avatars/ethics.jpg"
     },
     {
       "id": "bags",
       "displayName": "Bags",
       "slug": "bags",
       "website": "https://bags.fm",
-      "x": null,
+      "x": "https://x.com/BagsApp",
       "docs": "https://docs.bags.fm",
       "summary": "Token launchpad with documented Meteora DBC creation/curve flow and DAMM v2 migration; Fee Share V1/V2 + public SDK/API.",
       "built": [
@@ -127,16 +133,20 @@
         {
           "label": "Launch guide",
           "url": "https://docs.bags.fm/how-to-guides/launch-token"
+        },
+        {
+          "label": "X",
+          "url": "https://x.com/BagsApp"
         }
       ],
-      "notes": "Need official X handle for the dashboard."
+      "icon": "/avatars/bags.jpg"
     },
     {
       "id": "perpspad",
       "displayName": "Perpspad",
       "slug": "perpspad",
       "website": "https://perpspad.fun",
-      "x": null,
+      "x": "https://x.com/perpspadfun",
       "docs": "https://perpspad.fun/paper",
       "summary": "Launchpad where coins trade on Meteora DBC (SOL quote), migrate to DAMM v2, and route fees into per-coin sub-wallets that back Phoenix perps; also stock-paired DLMM mode.",
       "built": [
@@ -166,16 +176,20 @@
         {
           "label": "Site",
           "url": "https://perpspad.fun"
+        },
+        {
+          "label": "X",
+          "url": "https://x.com/perpspadfun"
         }
       ],
-      "notes": "Need official X handle."
+      "icon": "/avatars/perpspad.jpg"
     },
     {
       "id": "clawpump",
       "displayName": "ClawPump",
       "slug": "clawpump",
       "website": "https://clawpump.tech",
-      "x": null,
+      "x": "https://x.com/clawpumptech",
       "docs": "https://clawpump.tech/docs",
       "summary": "Agentic finance runtime for launching/trading via agents. Public docs emphasize pump.fun / Metaplex Genesis / Pons; DBC as a launch path not documented yet.",
       "built": [
@@ -203,16 +217,21 @@
         {
           "label": "Docs",
           "url": "https://clawpump.tech/docs"
+        },
+        {
+          "label": "X",
+          "url": "https://x.com/clawpumptech"
         }
       ],
-      "notes": "Confirm if DBC integration is planned / in progress / different product."
+      "notes": "Confirm if DBC integration is planned / in progress / different product.",
+      "icon": "/avatars/clawpump.jpg"
     },
     {
       "id": "lfgown",
       "displayName": "LFOwn",
       "slug": "lfgown",
       "website": "https://letsfuckingown.fun/",
-      "x": null,
+      "x": "https://x.com/LFOWNDOTFUN",
       "docs": null,
       "summary": "LFOwn (letsfuckingown.fun) \u2014 memecoin launchpad where the pair asset is a MetaDAO ownership coin (redeemable treasury), not SOL or a tokenized stock.",
       "built": [
@@ -235,9 +254,14 @@
         {
           "label": "Site",
           "url": "https://letsfuckingown.fun/"
+        },
+        {
+          "label": "X",
+          "url": "https://x.com/LFOWNDOTFUN"
         }
       ],
-      "notes": "Need official X handle + whether launches use DBC configs or another Meteora primitive."
+      "notes": "Confirm whether launches use DBC configs or another Meteora primitive.",
+      "icon": "/avatars/lfgown.jpg"
     }
   ]
 }
