@@ -402,7 +402,7 @@ export function EcosystemExplorer({
                         className="sort-btn"
                         onClick={() => toggleSort("mcapUsd")}
                       >
-                        Mcap{mark("mcapUsd")}
+                        Total mcap{mark("mcapUsd")}
                       </button>
                     </th>
                     {showVol ? (
