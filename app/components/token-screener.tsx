@@ -27,6 +27,7 @@ type SortKey =
 const INITIAL_VISIBLE_ROWS = 48;
 const VISIBLE_ROW_CHUNK = 40;
 
+/** Public IPFS gateways are flaky; prefer durable pad CDNs when present. */
 const IPFS_GATEWAYS = [
   "https://cloudflare-ipfs.com/ipfs/",
   "https://gateway.pinata.cloud/ipfs/",
@@ -41,14 +42,37 @@ function ipfsCid(url: string): string | null {
   return m?.[1] ?? null;
 }
 
+/** Hosts that should not be rewritten through rotating IPFS gateways. */
+function isDurableIconHost(url: string): boolean {
+  try {
+    const host = new URL(url).hostname.toLowerCase();
+    if (host === "images.revshare.dev" || host.endsWith(".revshare.dev")) return true;
+    if (host.endsWith(".cloudfront.net")) return true;
+    if (host.endsWith(".amazonaws.com")) return true;
+    if (host.endsWith(".supabase.co")) return true;
+    // Local / same-origin avatars
+    if (!host || host === "localhost") return true;
+    return false;
+  } catch {
+    return url.startsWith("/");
+  }
+}
+
 function iconCandidates(icon: string | null | undefined): string[] {
   if (!icon) return [];
+  // Prefer the original URL first so the browser can hit a stable cache key.
+  // Only fan out to IPFS gateways when the source is ipfs:// or an /ipfs/ path
+  // and not already a durable CDN host.
+  if (isDurableIconHost(icon) || icon.startsWith("/")) return [icon];
   const cid = ipfsCid(icon);
   if (!cid) return [icon];
   const out: string[] = [];
-  for (const g of IPFS_GATEWAYS) out.push(`${g}${cid}`);
-  if (!out.includes(icon)) out.push(icon);
-  return [...new Set(out)];
+  if (icon.startsWith("https://") || icon.startsWith("http://")) out.push(icon);
+  for (const g of IPFS_GATEWAYS) {
+    const u = `${g}${cid}`;
+    if (!out.includes(u)) out.push(u);
+  }
+  return out;
 }
 
 function TokenAvatar({

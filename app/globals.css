@@ -1428,3 +1428,76 @@ td.col-name { display: flex; }
     font-size: 1rem;
   }
 }
+
+/* Homepage launchpad metrics table */
+.pad-table-wrap {
+  overflow-x: auto;
+  border-radius: 12px;
+  background: rgba(10, 10, 12, 0.55);
+  margin: 0.35rem 0.5rem 0.75rem;
+}
+.pad-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 720px;
+}
+.pad-table th {
+  text-align: left;
+  padding: 0.65rem 0.7rem;
+  color: #71717a;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-weight: 600;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  white-space: nowrap;
+}
+.pad-table td {
+  padding: 0.7rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.045);
+  vertical-align: middle;
+}
+.pad-table .pad-row:hover td {
+  background: rgba(255, 106, 0, 0.04);
+}
+.pad-name-link {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  min-width: 0;
+  text-decoration: none;
+  color: inherit;
+}
+.pad-name-link:hover .name {
+  color: #ffb347;
+}
+.pad-table .col-name {
+  min-width: 12rem;
+}
+.pad-table .col-action {
+  text-align: right;
+  white-space: nowrap;
+  width: 1%;
+}
+.go-to-app-table {
+  margin-right: 0;
+  padding: 0.38rem 0.65rem;
+  font-size: 0.72rem;
+}
+.pad-table .avatar {
+  width: 36px;
+  height: 36px;
+  font-size: 0.68rem;
+}
+@media (max-width: 640px) {
+  .pad-table {
+    min-width: 520px;
+  }
+  .pad-table-wrap {
+    margin-inline: 0.35rem;
+  }
+  .go-to-app-table {
+    padding: 0.32rem 0.45rem;
+    font-size: 0.65rem;
+  }
+}

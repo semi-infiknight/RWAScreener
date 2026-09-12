@@ -1,9 +1,10 @@
 "use client";
 
 import {
-  formatUsd,
-  type TokenRow,
-} from "../../lib/tokens";
+  aggregatePadMetrics,
+  type PadAggregate,
+} from "../../lib/pad-aggregates";
+import { formatUsd, type TokenRow } from "../../lib/tokens";
 
 export type PadMetric = {
   key: string;
@@ -11,56 +12,45 @@ export type PadMetric = {
   value: string;
 };
 
+export type { PadAggregate };
+
 /** Aggregate only from real TokenRow fields — skip a metric if the feed has no data. */
 export function computePadMetrics(tokens: TokenRow[]): PadMetric[] {
   if (tokens.length === 0) return [];
 
+  const agg = aggregatePadMetrics(tokens);
   const out: PadMetric[] = [
     {
       key: "coins",
       label: "Coins",
-      value: tokens.length.toLocaleString(),
+      value: agg.coins.toLocaleString(),
+    },
+    {
+      key: "status-split",
+      label: "Bonding / Graduated",
+      value: `${agg.bonding.toLocaleString()} / ${agg.graduated.toLocaleString()}`,
     },
   ];
 
-  const bonding = tokens.filter((t) => t.status === "bonding").length;
-  const graduated = tokens.filter((t) => t.status === "graduated").length;
-  out.push({
-    key: "status-split",
-    label: "Bonding / Graduated",
-    value: `${bonding.toLocaleString()} / ${graduated.toLocaleString()}`,
-  });
-
-  const mcaps = tokens
-    .map((t) => t.mcapUsd)
-    .filter((n): n is number => typeof n === "number" && Number.isFinite(n));
-  if (mcaps.length > 0) {
+  if (agg.mcapUsd != null) {
     out.push({
       key: "mcap",
       label: "Total mcap",
-      value: formatUsd(mcaps.reduce((a, b) => a + b, 0)),
+      value: formatUsd(agg.mcapUsd),
     });
   }
-
-  const vols = tokens
-    .map((t) => t.volume24hUsd)
-    .filter((n): n is number => typeof n === "number" && Number.isFinite(n));
-  if (vols.length > 0) {
+  if (agg.volume24hUsd != null) {
     out.push({
       key: "vol",
       label: "24h volume",
-      value: formatUsd(vols.reduce((a, b) => a + b, 0)),
+      value: formatUsd(agg.volume24hUsd),
     });
   }
-
-  const liqs = tokens
-    .map((t) => t.liquidityUsd)
-    .filter((n): n is number => typeof n === "number" && Number.isFinite(n));
-  if (liqs.length > 0) {
+  if (agg.liquidityUsd != null) {
     out.push({
       key: "liq",
       label: "Liquidity",
-      value: formatUsd(liqs.reduce((a, b) => a + b, 0)),
+      value: formatUsd(agg.liquidityUsd),
     });
   }
 
