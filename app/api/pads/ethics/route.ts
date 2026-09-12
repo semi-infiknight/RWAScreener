@@ -5,17 +5,20 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 /**
- * ?phase=fast — launches + board/enrich only (icons, mcap, vol)
- * ?phase=full (default) — also token-info price/% for top volume mints
+ * ?phase=fast — launches + board only (icons, partial mcap/vol) — first paint
+ * ?phase=full (default) — + enrich + token-info price/%
  */
 export async function GET(req: NextRequest) {
   const phase = req.nextUrl.searchParams.get("phase") || "full";
-  const enrichDetails = phase !== "fast";
+  const fast = phase === "fast";
   try {
-    const tokens = await fetchEthicsTokens({ enrichDetails });
+    const tokens = await fetchEthicsTokens({
+      enrichBoard: !fast,
+      enrichDetails: !fast,
+    });
     return NextResponse.json({
       source: "https://www.ethics.ltd/api/launches (+ board/enrich)",
-      phase: enrichDetails ? "full" : "fast",
+      phase: fast ? "fast" : "full",
       count: tokens.length,
       tokens,
     });

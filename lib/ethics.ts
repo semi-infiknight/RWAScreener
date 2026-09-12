@@ -198,6 +198,8 @@ function buildRows(
 export type FetchEthicsOptions = {
   /** When false, skip token-info price/% (fast first paint). Default true. */
   enrichDetails?: boolean;
+  /** When false, skip POST /enrich (use board mcaps/volumes only). Default true. */
+  enrichBoard?: boolean;
 };
 
 /**
@@ -208,6 +210,7 @@ export async function fetchEthicsTokens(
   opts: FetchEthicsOptions = {},
 ): Promise<TokenRow[]> {
   const enrichDetails = opts.enrichDetails !== false;
+  const enrichBoard = opts.enrichBoard !== false;
   try {
     const [all, board] = await Promise.all([
       getJson<{ launches?: EthicsLaunch[] }>("/api/launches"),
@@ -223,15 +226,17 @@ export async function fetchEthicsTokens(
       ...new Set(launches.map((l) => l.mint).filter(Boolean)),
     ] as string[];
 
-    try {
-      const enriched = await postJson<{
-        mcaps?: Record<string, number>;
-        volumes?: Record<string, number>;
-      }>("/api/launches/enrich", { mints });
-      Object.assign(mcaps, enriched.mcaps ?? {});
-      Object.assign(volumes, enriched.volumes ?? {});
-    } catch {
-      // board metrics alone still usable
+    if (enrichBoard) {
+      try {
+        const enriched = await postJson<{
+          mcaps?: Record<string, number>;
+          volumes?: Record<string, number>;
+        }>("/api/launches/enrich", { mints });
+        Object.assign(mcaps, enriched.mcaps ?? {});
+        Object.assign(volumes, enriched.volumes ?? {});
+      } catch {
+        // board metrics alone still usable
+      }
     }
 
     const details = new Map<string, TokenInfoEnrich | null>();
