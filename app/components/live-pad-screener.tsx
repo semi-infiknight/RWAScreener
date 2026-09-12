@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import type { TokenRow } from "../../lib/tokens";
+import { PadMetrics } from "./pad-metrics";
 import { TokenScreener } from "./token-screener";
 
 function padApi(launchpadId: string): string {
@@ -95,6 +96,7 @@ export function LivePadScreener({
 
   return (
     <div className="live-pad-screener">
+      {!pending ? <PadMetrics tokens={tokens} loading={loading} /> : null}
       <TokenScreener
         launchpadId={launchpadId}
         launchpadName={launchpadName}

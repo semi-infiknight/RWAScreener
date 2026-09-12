@@ -4,7 +4,6 @@ import type { Metadata } from "next";
 import {
   allSlugs,
   dbcLabel,
-  domainOf,
   getProject,
   isScreenerLive,
   projects,
@@ -171,25 +170,6 @@ export default async function ProjectPage({ params }: Props) {
             <span className="aarna-link-empty">No public links yet</span>
           ) : null}
         </section>
-
-        <div className="aarna-meta">
-          <section className="aarna-meta-card">
-            <h2>Status</h2>
-            <p className="aarna-meta-k">DBC</p>
-            <p className="aarna-meta-v">{p.dbc.evidence}</p>
-          </section>
-          <section className="aarna-meta-card">
-            <h2>Verified</h2>
-            <p className="aarna-meta-k">Sources</p>
-            <p className="aarna-meta-v">
-              {p.verified.length ? p.verified.join(" · ") : "—"}
-            </p>
-            <p className="aarna-meta-k" style={{ marginTop: "0.75rem" }}>
-              Contact
-            </p>
-            <p className="aarna-meta-v">{p.contact}</p>
-          </section>
-        </div>
 
         <LivePadScreener
           launchpadId={p.id}
