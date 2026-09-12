@@ -832,3 +832,51 @@ td.col-name { display: flex; }
   .hide-sm { display: none; }
   .vs-table { min-width: 520px; }
 }
+
+.vs-empty-state {
+  border-radius: 14px;
+  padding: 2.75rem 1.5rem;
+  text-align: center;
+  background:
+    radial-gradient(520px 180px at 50% 0%, rgba(255, 106, 0, 0.12), transparent 70%),
+    rgba(10, 10, 12, 0.55);
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+}
+.vs-empty-badge {
+  display: inline-flex;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #0a0a0a;
+  background: #ffb347;
+  margin-bottom: 0.9rem;
+}
+.vs-empty-state h3 {
+  margin: 0 0 0.55rem;
+  font-size: 1.25rem;
+  letter-spacing: -0.02em;
+  color: #f5f2ed;
+}
+.vs-empty-state p {
+  margin: 0 auto;
+  max-width: 36rem;
+  color: #a1a1aa;
+  line-height: 1.45;
+  font-size: 0.95rem;
+}
+.vs-empty-state strong { color: #e4e4e7; font-weight: 650; }
+.vs-empty-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  justify-content: center;
+  margin-top: 1.1rem;
+}
+.vs-tab:disabled,
+.vs-search input:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}

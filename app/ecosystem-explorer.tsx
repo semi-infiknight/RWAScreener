@@ -41,6 +41,7 @@ function initials(name: string): string {
 function dbcTag(p: Project): string {
   if (p.dbc.integrated === true) return "DBC";
   if (p.dbc.integrated === false) return "NO DBC YET";
+  if (p.status === "integrating") return "DBC integrating";
   return "DBC TBD";
 }
 

@@ -26,5 +26,13 @@ export function domainOf(website: string | null): string {
 export function dbcLabel(p: Project): string {
   if (p.dbc.integrated === true) return "DBC integrated";
   if (p.dbc.integrated === false) return "DBC not verified";
-  return "DBC unknown";
+  if (p.status === "integrating") return "DBC integrating";
+  return "DBC TBD";
+}
+
+export function isScreenerLive(p: Project): boolean {
+  if ("screenerLive" in p && typeof (p as { screenerLive?: boolean }).screenerLive === "boolean") {
+    return Boolean((p as { screenerLive?: boolean }).screenerLive);
+  }
+  return true;
 }

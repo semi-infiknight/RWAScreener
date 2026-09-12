@@ -77,16 +77,23 @@ function RangeBar({ pos }: { pos: number }) {
 export function TokenScreener({
   launchpadName,
   tokens,
+  live = true,
+  ecosystemName,
 }: {
   launchpadName: string;
   tokens: TokenRow[];
+  live?: boolean;
+  ecosystemName?: string;
 }) {
   const [tab, setTab] = useState<TabId>("trending");
   const [q, setQ] = useState("");
   const [sort, setSort] = useState<SortKey>("volume24hUsd");
   const [asc, setAsc] = useState(false);
 
+  const showEmpty = !live || tokens.length === 0;
+
   const rows = useMemo(() => {
+    if (showEmpty) return [];
     const query = q.trim().toLowerCase();
     let list = tokens.filter((t) => {
       if (!query) return true;
@@ -96,7 +103,6 @@ export function TokenScreener({
       );
     });
 
-    // tab presets (frontend ranking on draft seed)
     if (tab === "gainers") {
       list = [...list].sort((a, b) => b.change24hPct - a.change24hPct);
     } else if (tab === "new") {
@@ -104,7 +110,6 @@ export function TokenScreener({
     } else if (tab === "top") {
       list = [...list].sort((a, b) => b.fdvUsd - a.fdvUsd);
     } else {
-      // trending ~ vol * |change|
       list = [...list].sort(
         (a, b) =>
           b.volume24hUsd * (1 + Math.abs(b.change24hPct) / 100) -
@@ -112,14 +117,13 @@ export function TokenScreener({
       );
     }
 
-    // manual column sort overrides tab order when user clicks
     list = [...list].sort((a, b) => {
       const d = (a[sort] as number) - (b[sort] as number);
       return asc ? d : -d;
     });
 
     return list;
-  }, [tokens, q, tab, sort, asc]);
+  }, [tokens, q, tab, sort, asc, showEmpty]);
 
   const toggleSort = (key: SortKey) => {
     if (sort === key) setAsc(!asc);
@@ -143,6 +147,7 @@ export function TokenScreener({
               className="vs-tab"
               data-active={tab === t.id}
               aria-selected={tab === t.id}
+              disabled={showEmpty}
               onClick={() => setTab(t.id)}
             >
               {t.label}
@@ -159,56 +164,71 @@ export function TokenScreener({
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="Search"
+              disabled={showEmpty}
             />
           </label>
         </div>
       </div>
 
-      <div className="vs-table-wrap">
-        <table className="vs-table">
-          <thead>
-            <tr>
-              <th className="col-name">Name</th>
-              <th>Price / %Δ</th>
-              <th className="hide-md">
-                <button type="button" className="sort-btn" onClick={() => toggleSort("fdvUsd")}>
-                  FDV{mark("fdvUsd")}
-                </button>
-              </th>
-              <th>
-                <button type="button" className="sort-btn" onClick={() => toggleSort("volume24hUsd")}>
-                  Vol{mark("volume24hUsd")}
-                </button>
-              </th>
-              <th className="hide-lg">Last 24h</th>
-              <th className="hide-lg">24h Range</th>
-              <th className="hide-md">
-                <button type="button" className="sort-btn" onClick={() => toggleSort("liquidityUsd")}>
-                  Liq{mark("liquidityUsd")}
-                </button>
-              </th>
-              <th className="hide-sm">
-                <button type="button" className="sort-btn" onClick={() => toggleSort("ageHours")}>
-                  Age{mark("ageHours")}
-                </button>
-              </th>
-              <th className="hide-md">
-                <button type="button" className="sort-btn" onClick={() => toggleSort("holders")}>
-                  Holders{mark("holders")}
-                </button>
-              </th>
-              <th className="col-buy">Buy</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.length === 0 ? (
+      {showEmpty ? (
+        <div className="vs-empty-state">
+          <div className="vs-empty-badge">Not live yet</div>
+          <h3>{launchpadName} launches coming soon</h3>
+          <p>
+            {ecosystemName ? (
+              <>
+                Part of the <strong>{ecosystemName}</strong> ecosystem.{" "}
+              </>
+            ) : null}
+            DBC integration is in progress — this screener will fill with
+            launches once StonkOptions goes live. No placeholder tokens by
+            design.
+          </p>
+          <div className="vs-empty-tags">
+            <span className="tag">integrating</span>
+            <span className="tag">DBC integrating</span>
+            {ecosystemName ? <span className="tag">{ecosystemName}</span> : null}
+          </div>
+        </div>
+      ) : (
+        <div className="vs-table-wrap">
+          <table className="vs-table">
+            <thead>
               <tr>
-                <td colSpan={10} className="vs-empty">
-                  No draft tokens match.
-                </td>
+                <th className="col-name">Name</th>
+                <th>Price / %Δ</th>
+                <th className="hide-md">
+                  <button type="button" className="sort-btn" onClick={() => toggleSort("fdvUsd")}>
+                    FDV{mark("fdvUsd")}
+                  </button>
+                </th>
+                <th>
+                  <button type="button" className="sort-btn" onClick={() => toggleSort("volume24hUsd")}>
+                    Vol{mark("volume24hUsd")}
+                  </button>
+                </th>
+                <th className="hide-lg">Last 24h</th>
+                <th className="hide-lg">24h Range</th>
+                <th className="hide-md">
+                  <button type="button" className="sort-btn" onClick={() => toggleSort("liquidityUsd")}>
+                    Liq{mark("liquidityUsd")}
+                  </button>
+                </th>
+                <th className="hide-sm">
+                  <button type="button" className="sort-btn" onClick={() => toggleSort("ageHours")}>
+                    Age{mark("ageHours")}
+                  </button>
+                </th>
+                <th className="hide-md">
+                  <button type="button" className="sort-btn" onClick={() => toggleSort("holders")}>
+                    Holders{mark("holders")}
+                  </button>
+                </th>
+                <th className="col-buy">Buy</th>
               </tr>
-            ) : (
-              rows.map((t) => {
+            </thead>
+            <tbody>
+              {rows.map((t) => {
                 const up = t.change24hPct >= 0;
                 const h = hue(t.symbol);
                 return (
@@ -231,7 +251,6 @@ export function TokenScreener({
                           <span className="token-status" data-status={t.status}>
                             {t.status}
                           </span>
-                          {t.draft ? <span className="draft-pill">draft</span> : null}
                         </span>
                       </span>
                     </td>
@@ -274,14 +293,15 @@ export function TokenScreener({
                     </td>
                   </tr>
                 );
-              })
-            )}
-          </tbody>
-        </table>
-      </div>
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       <p className="vs-note">
-        {launchpadName} launches · {tokensDisclaimer}
+        {launchpadName}
+        {ecosystemName ? ` · ${ecosystemName} ecosystem` : ""} · {tokensDisclaimer}
       </p>
     </section>
   );

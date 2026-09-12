@@ -11,45 +11,55 @@
   "projects": [
     {
       "id": "stardotfun",
-      "displayName": "Star",
+      "displayName": "StonkOptions",
       "slug": "stardotfun",
       "website": "https://star.fun",
-      "x": "https://x.com/stardotfun",
+      "x": "https://x.com/getstonkoptions",
       "docs": "https://star-fun.gitbook.io/star",
-      "summary": "Onchain startup fundraising: public token sales, livestream pitches, then Meteora liquidity. Named as a Meteora launchpad partner.",
+      "summary": "StonkOptions is a star.fun ecosystem product \u2014 the launchpad surface integrating Meteora DBC. Token launches are not live yet; DBC integration is in progress.",
       "built": [
-        "Public token fundraising on Solana",
-        "Livestream / Shark Tank-style raises",
-        "Post-raise Meteora liquidity; listed among Meteora DBC/DAMM partners"
+        "Part of the star.fun ecosystem (startup fundraising / launch stack)",
+        "DBC-oriented launchpad product under StonkOptions (@getstonkoptions)",
+        "Public token screener will populate here once launches go live"
       ],
-      "status": "live",
+      "status": "integrating",
       "verified": [
         "public_site",
         "x_handle",
-        "meteora_partner_mention"
+        "ecosystem_affiliation"
       ],
       "contact": "unknown",
       "dbc": {
-        "integrated": true,
-        "evidence": "Meteora 2026 Q1 update lists Star.fun among launchpad partners on DBC/DAMM primitives; on-chain config/fee_claimer not yet pinned in this seed",
+        "integrated": null,
+        "evidence": "Integrating Meteora DBC \u2014 not live for launches yet; star.fun ecosystem context confirmed by owner.",
         "configKeys": [],
         "feeClaimers": []
       },
       "sources": [
         {
-          "label": "X",
-          "url": "https://x.com/stardotfun"
+          "label": "StonkOptions X",
+          "url": "https://x.com/getstonkoptions"
         },
         {
-          "label": "Site",
+          "label": "star.fun",
           "url": "https://star.fun"
+        },
+        {
+          "label": "Star X",
+          "url": "https://x.com/stardotfun"
         },
         {
           "label": "Docs",
           "url": "https://star-fun.gitbook.io/star"
         }
       ],
-      "notes": "Confirm specific DBC config pubkeys in a later pass."
+      "notes": "Empty screener until live. Ecosystem parent: star.fun.",
+      "ecosystem": {
+        "name": "Star",
+        "website": "https://star.fun",
+        "x": "https://x.com/stardotfun"
+      },
+      "screenerLive": false
     },
     {
       "id": "ethics",

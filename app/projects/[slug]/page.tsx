@@ -7,6 +7,7 @@ import {
   disclaimer,
   domainOf,
   getProject,
+  isScreenerLive,
   projects,
   updatedAt,
 } from "../../../lib/projects";
@@ -68,6 +69,9 @@ export default async function ProjectPage({ params }: Props) {
             <div className="tags project-tags">
               <span className="tag">{p.status.replace("_", " ")}</span>
               <span className="tag">{dbcLabel(p)}</span>
+              {p.ecosystem ? (
+                <span className="tag">{p.ecosystem.name} ecosystem</span>
+              ) : null}
               <span className="tag">contact: {p.contact}</span>
             </div>
           </div>
@@ -145,6 +149,8 @@ export default async function ProjectPage({ params }: Props) {
         <TokenScreener
           launchpadName={p.displayName}
           tokens={tokensForLaunchpad(p.id)}
+          live={isScreenerLive(p)}
+          ecosystemName={p.ecosystem?.name}
         />
 
         <p className="disclaimer">
