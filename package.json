@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "refresh:bags": "node scripts/refresh-bags-tokens.mjs",
-    "backfill:dbc": "node scripts/dbc-backfill.mjs"
+    "backfill:dbc": "node scripts/dbc-backfill.mjs",
+    "summarize:fee-claimers": "node scripts/summarize-fee-claimers.mjs"
   },
   "dependencies": {
     "@meteora-ag/dynamic-bonding-curve-sdk": "^1.5.12",

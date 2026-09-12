@@ -1,8 +1,22 @@
 {
-  "fee_claimer_labels": {},
+  "fee_claimer_labels": {
+    "GZjYfGyUNQfDChcQ66Gc3ZMcQqPEisyRYe1nPyQhP9bp": {
+      "label": "Ember Curve",
+      "launchpadId": "embercurve",
+      "website": "https://embercurve.fun/",
+      "evidence": "embercurve.fun/api/solana/markets pool+config keys match 285/288 stock-quote DBC pools with this fee_claimer (observed 2026-09-12)."
+    },
+    "2gymU5YgYvfxmjTThCvVZV695Mw22Eq4YpZzF1vRJfKc": {
+      "label": "Ethics",
+      "launchpadId": "ethics",
+      "website": "https://ethics.ltd",
+      "evidence": "ethics.ltd/api/launches DBC stock-quote launches (FARM/hoodx, FAIR/spyx, BIT/coinx) match all 3 backfill pools for this fee_claimer by mint+poolAddress (observed 2026-09-12)."
+    }
+  },
   "notes": [
-    "Empty map on purpose. Do not invent Bags / Perpspad / other launchpad fee_claimer pubkeys.",
-    "Bags docs (docs.bags.fm/principles/program-ids) publish program IDs only — Fee Share V1/V2 are programs, not DBC PoolConfig fee_claimers.",
-    "Label a claimer only after it is observed on-chain as fee_claimer on a stock-quote DBC PoolConfig (quote_mint ∈ data/quote-mints.json, created_at ≥ DBC_021_CUTOFF_ISO)."
+    "Label a claimer only after pad API / docs / on-chain evidence ties it to stock-quote DBC PoolConfig.fee_claimer (quote_mint ∈ data/quote-mints.json, created_at ≥ DBC_021_CUTOFF_ISO).",
+    "Bags docs publish program IDs / Fee Share programs only — not DBC PoolConfig fee_claimers. Bags pools catalog had 0 overlaps with this stock-quote backfill; leave Bags unlabeled.",
+    "Unknown claimers stay as pubkey. Do not invent Bags / Perpspad / ClawPump / LFOwn / StonkOptions pubkeys from names alone.",
+    "Aggregation report (gitignored): data/fee-claimer-attribution.json + .md from scripts/summarize-fee-claimers.mjs / local attribution pass."
   ]
 }

@@ -11,3 +11,7 @@ tsconfig.tsbuildinfo
 
 # DBC backfill output (may contain on-chain pubkeys; regenerated locally)
 data/dbc-backfill-result.json
+
+# Fee claimer aggregation report (derived from gitignored backfill)
+data/fee-claimer-attribution.json
+data/fee-claimer-attribution.md

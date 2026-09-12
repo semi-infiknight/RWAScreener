@@ -53,5 +53,11 @@ Source of truth for the **quote screener** is **quote → pool → config**, not
 
 ## Launchpad labels (`launchpad-labels.json`)
 
-`fee_claimer → label` map. Empty until a real DBC PoolConfig fee_claimer is observed on-chain for a stock-quote pool. Do not invent Bags / Perpspad pubkeys.
+`fee_claimer → label` map. Only proven pad mappings (pad API / docs / on-chain pool+config overlap). Unknown claimers stay as pubkey — do not invent Bags / Perpspad / other pubkeys.
+
+Observed (2026-09-12, from Helius stock-quote backfill):
+- `GZjYfGyUNQfDChcQ66Gc3ZMcQqPEisyRYe1nPyQhP9bp` → Ember Curve (`embercurve.fun/api/solana/markets`)
+- `2gymU5YgYvfxmjTThCvVZV695Mw22Eq4YpZzF1vRJfKc` → Ethics (`ethics.ltd/api/launches`)
+
+Aggregate locally: `npm run summarize:fee-claimers` (optional `--json` → gitignored `data/fee-claimer-attribution.json`).
 
