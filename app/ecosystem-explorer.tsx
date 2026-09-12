@@ -62,7 +62,11 @@ export function EcosystemExplorer({
     <div className="page">
       <section className="hero">
         <HeroDark />
-        <h1>meteora DBC screener</h1>
+        <h1 className="hero-title">
+          <span className="hero-title-light">The </span>
+          <span className="hero-title-brand">Meteora</span>
+          <span className="hero-title-light"> DBC Screener</span>
+        </h1>
       </section>
 
       <div className="shell">
