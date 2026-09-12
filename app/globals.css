@@ -1,6 +1,8 @@
 :root {
   color-scheme: dark;
-  --bg: #070708;
+  --bg: #121214;
+  --wash: url("/textures/mineral-wash.png");
+  --wash-size: 420px;
   --panel: #101012;
   --text: #f4f4f5;
   --muted: #a1a1aa;
@@ -19,6 +21,9 @@ html, body {
   margin: 0;
   padding: 0;
   background: var(--bg);
+  background-image: var(--wash);
+  background-size: var(--wash-size) var(--wash-size);
+  background-repeat: repeat;
   color: var(--text);
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   line-height: 1.4;
@@ -31,9 +36,13 @@ button, input { font: inherit; color: inherit; }
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background:
-    radial-gradient(900px 420px at 50% -10%, rgba(255, 106, 0, 0.14), transparent 60%),
-    var(--bg);
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(900px 420px at 50% -10%, rgba(255, 106, 0, 0.10), transparent 60%),
+    var(--wash);
+  background-size: auto, var(--wash-size) var(--wash-size);
+  background-repeat: no-repeat, repeat;
+  background-attachment: scroll, scroll;
 }
 
 .topnav {
@@ -546,9 +555,18 @@ button, input { font: inherit; color: inherit; }
 
 /* Base WebGL hero — light stage so pastel ASCII/fluid reads on dark page */
 .hero-base-wrap {
-  background: #ffffff;
+  /* mineral-wash stage — Base WebGL reads over dark charcoal dye */
+  background-color: #161618;
+  background-image: var(--wash);
+  background-size: var(--wash-size) var(--wash-size);
+  background-repeat: repeat;
   border-radius: 0;
   overflow: hidden;
+  isolation: isolate;
+}
+.hero-base-wrap > div {
+  mix-blend-mode: screen;
+  opacity: 0.92;
 }
 .hero-base-wrap canvas {
   display: block;
