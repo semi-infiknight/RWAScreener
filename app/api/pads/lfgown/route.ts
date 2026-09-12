@@ -8,7 +8,9 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 /**
- * ?phase=fast — list identity + status + age (no uri icon fetches)
+ * LFOwn live pad — not Meteora DBC.
+ * Bonding/on-curve vs MetaDAO quote; graduated = DAMM v2 (isMigrated).
+ * ?phase=fast — list identity + status + raised-USD proxy + age (no uri icon fetches)
  * ?mint=… — single-token icon enrich from launch.uri metadata
  * ?phase=full — list + concurrent uri→image icons
  */

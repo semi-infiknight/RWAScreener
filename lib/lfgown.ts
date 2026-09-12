@@ -141,6 +141,28 @@ function ageHoursFromSlot(
   return Math.max(0, Math.round(hours));
 }
 
+/** Raised USD from pad payload — NOT token mcap. quoteReserve is 6-decimal quote units. */
+function raisedUsdFromLaunch(l: LfgownLaunch): number | null {
+  const reserveRaw = l.quoteReserve;
+  const price = numOrNull(l.quoteUsdPrice);
+  if (price == null || price < 0) return null;
+  if (typeof reserveRaw !== "string" && typeof reserveRaw !== "number") return null;
+  const reserve = Number(reserveRaw);
+  if (!Number.isFinite(reserve) || reserve < 0) return null;
+  const raised = (reserve / 1e6) * price;
+  if (!Number.isFinite(raised) || raised < 0) return null;
+  return raised;
+}
+
+/**
+ * Status matches LFOwn site:
+ * - bonding / on-curve: still on LFOwn curve vs MetaDAO ownership-coin quote (not Meteora DBC)
+ * - graduated: isMigrated → Meteora DAMM v2
+ */
+function statusFromLaunch(l: LfgownLaunch): TokenRow["status"] {
+  return l.isMigrated === true ? "graduated" : "bonding";
+}
+
 function mapLaunch(
   l: LfgownLaunch,
   icon: string | null,
@@ -148,6 +170,8 @@ function mapLaunch(
 ): TokenRow | null {
   const mint = typeof l.baseMint === "string" ? l.baseMint.trim() : "";
   if (!mint) return null;
+  // Real derived raised USD only — never invent token mcap/price/vol.
+  const raisedUsd = raisedUsdFromLaunch(l);
   return {
     id: `lfgown-${mint}`,
     launchpadId: "lfgown",
@@ -155,12 +179,11 @@ function mapLaunch(
     name: String(l.name || "").trim() || String(l.symbol || "").trim() || mint.slice(0, 8),
     mint,
     icon,
-    status: l.isMigrated === true ? "graduated" : "bonding",
-    // No invented price/mcap/vol — API has quoteUsdPrice + reserves but not base USD.
+    status: statusFromLaunch(l),
     priceUsd: null,
     change24hPct: null,
-    mcapUsd: null,
-    fdvUsd: null,
+    mcapUsd: raisedUsd,
+    fdvUsd: raisedUsd,
     volume24hUsd: null,
     liquidityUsd: null,
     holders: null,
@@ -181,10 +204,13 @@ export type FetchLfgownOptions = {
 
 /**
  * Live LFOwn launches from letsfuckingown.fun.
- * Source: GET https://letsfuckingown.fun/api/launches
- * Icons from launch.uri metadata `image`. Status from isMigrated.
+ * Source: GET https://letsfuckingown.fun/api/launches (keep all rows; do not filter isMigrated).
+ * Bonding = on-curve vs MetaDAO ownership-coin quote — not Meteora DBC.
+ * Graduated (isMigrated) = Meteora DAMM v2.
+ * mcapUsd/fdvUsd = raised USD proxy (quoteReserve/1e6 * quoteUsdPrice), not token mcap.
+ * Sorted highest raised-USD first. Icons from launch.uri metadata `image`.
  * Age from activationPoint (Solana slot) vs current slot — null if RPC unavailable.
- * No invented price/mcap/vol.
+ * No invented price/vol.
  */
 export async function fetchLfgownTokens(
   opts: FetchLfgownOptions = {},
@@ -220,8 +246,11 @@ export async function fetchLfgownTokens(
       if (row) rows.push(row);
     }
 
-    // Newest activationPoint first when available; else stable API order.
+    // Highest raised USD first (mcapUsd/fdvUsd carry that proxy). Nulls last.
     rows.sort((a, b) => {
+      const ar = a.mcapUsd ?? Number.NEGATIVE_INFINITY;
+      const br = b.mcapUsd ?? Number.NEGATIVE_INFINITY;
+      if (ar !== br) return br - ar;
       const ah = a.ageHours ?? Number.POSITIVE_INFINITY;
       const bh = b.ageHours ?? Number.POSITIVE_INFINITY;
       if (ah !== bh) return ah - bh;
@@ -256,7 +285,9 @@ export async function enrichLfgownToken(
       mint: trimmed,
       icon,
       ageHours: ageHoursFromSlot(launch.activationPoint, currentSlot),
-      status: launch.isMigrated === true ? "graduated" : "bonding",
+      status: statusFromLaunch(launch),
+      mcapUsd: raisedUsdFromLaunch(launch),
+      fdvUsd: raisedUsdFromLaunch(launch),
     };
   } catch {
     return null;

@@ -77,9 +77,10 @@ const CLAWPUMP: ScreenerColumns = {
   buy: false,
 };
 
-/** LFOwn /api/launches: identity + icon + age (slot); no price/vol. */
+/** LFOwn /api/launches: identity + icon + age + raised-USD proxy in FDV (not token mcap); no price/vol. */
 const LFGOWN: ScreenerColumns = {
   ...ALL_OFF,
+  fdv: true,
   age: true,
   buy: false,
 };

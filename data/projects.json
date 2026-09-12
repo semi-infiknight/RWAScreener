@@ -16,7 +16,7 @@
       "website": "https://star.fun",
       "x": "https://x.com/getstonkoptions",
       "docs": "https://star-fun.gitbook.io/star",
-      "summary": "StonkOptions is a star.fun ecosystem product — the launchpad surface integrating Meteora DBC. Token launches are not live yet; DBC integration is in progress.",
+      "summary": "StonkOptions is a star.fun ecosystem product \u2014 the launchpad surface integrating Meteora DBC. Token launches are not live yet; DBC integration is in progress.",
       "built": [
         "Part of the star.fun ecosystem (startup fundraising / launch stack)",
         "DBC-oriented launchpad product under StonkOptions (@getstonkoptions)",
@@ -31,7 +31,7 @@
       "contact": "unknown",
       "dbc": {
         "integrated": null,
-        "evidence": "Integrating Meteora DBC — not live for launches yet; star.fun ecosystem context confirmed by owner.",
+        "evidence": "Integrating Meteora DBC \u2014 not live for launches yet; star.fun ecosystem context confirmed by owner.",
         "configKeys": [],
         "feeClaimers": []
       },
@@ -69,7 +69,7 @@
       "website": "https://ethics.ltd",
       "x": "https://x.com/ethicslaunch",
       "docs": null,
-      "summary": "Ethics Launch — market-backed token launches with locked liquidity; pairs with SOL, stables, and RWAs; site markets Instant DAMMv2 launches.",
+      "summary": "Ethics Launch \u2014 market-backed token launches with locked liquidity; pairs with SOL, stables, and RWAs; site markets Instant DAMMv2 launches.",
       "built": [
         "Market-backed launches (SOL / stables / RWAs)",
         "Locked liquidity + fee earn or airdrop to holders",
@@ -155,7 +155,7 @@
       "built": [
         "DBC SOL-quoted bonding curve launches",
         "DAMM v2 graduation with locked LP",
-        "Per-coin treasury → Imperial/Phoenix leveraged perps",
+        "Per-coin treasury \u2192 Imperial/Phoenix leveraged perps",
         "Optional xStock / tokenized-stock DLMM pairing"
       ],
       "status": "live",
@@ -167,7 +167,7 @@
       "contact": "unknown",
       "dbc": {
         "integrated": true,
-        "evidence": "Whitepaper §2: trading against Meteora DBC quoted in SOL; migrates to DAMM v2",
+        "evidence": "Whitepaper \u00a72: trading against Meteora DBC quoted in SOL; migrates to DAMM v2",
         "configKeys": [],
         "feeClaimers": []
       },
@@ -238,20 +238,21 @@
       "website": "https://letsfuckingown.fun/",
       "x": "https://x.com/LFOWNDOTFUN",
       "docs": null,
-      "summary": "LFOwn (letsfuckingown.fun) — memecoin launchpad where the pair asset is a MetaDAO ownership coin (redeemable treasury), not SOL or a tokenized stock.",
+      "summary": "LFOwn (letsfuckingown.fun) \u2014 memecoin launchpad paired with MetaDAO ownership coins (redeemable treasury), not SOL or a tokenized stock. Bonding is LFOwn's own curve vs that MetaDAO quote; graduation migrates to Meteora DAMM v2 (not Meteora DBC).",
       "built": [
-        "Memecoin launches paired against MetaDAO ownership coins",
-        "Futarchy-aware risk framing for ownership-coin quote assets",
-        "Product aimed at routing meme volume back into ownership-coin treasuries"
+        "Memecoin launches paired against MetaDAO ownership coins (quoteMint ends in meta)",
+        "Bonding / on-curve: LFOwn curve vs MetaDAO ownership-coin quote (not Meteora DBC)",
+        "Graduation: isMigrated \u2192 Meteora DAMM v2 pool"
       ],
-      "status": "integrating",
+      "status": "live",
       "verified": [
-        "public_site"
+        "public_site",
+        "api_launches"
       ],
       "contact": "unknown",
       "dbc": {
-        "integrated": null,
-        "evidence": "Public site describes ownership-coin paired launches; Meteora DBC program path not stated on the homepage yet",
+        "integrated": false,
+        "evidence": "Not Meteora DBC. Live /api/launches: bonding = LFOwn curve vs MetaDAO ownership-coin quote; isMigrated:true graduates to Meteora DAMM v2.",
         "configKeys": [],
         "feeClaimers": []
       },
@@ -265,7 +266,7 @@
           "url": "https://x.com/LFOWNDOTFUN"
         }
       ],
-      "notes": "Confirm whether launches use DBC configs or another Meteora primitive.",
+      "notes": "Screener: GET /api/launches (~39). Status bonding/on-curve vs graduated (DAMM v2). Duplicate symbols kept (distinct baseMints). Sort by raised USD proxy.",
       "icon": "/avatars/lfgown.jpg",
       "screenerLive": true
     },
@@ -276,7 +277,7 @@
       "website": "https://embercurve.fun/",
       "x": "https://x.com/embercurve",
       "docs": null,
-      "summary": "Ember Curve — Solana launchpad for bonding-curve coins paired with SOL, USDC, tokenized stocks (xStocks), or selected memes; trade tax routing and graduation into Meteora liquidity.",
+      "summary": "Ember Curve \u2014 Solana launchpad for bonding-curve coins paired with SOL, USDC, tokenized stocks (xStocks), or selected memes; trade tax routing and graduation into Meteora liquidity.",
       "built": [
         "Bonding-curve launches paired with SOL / USDC / tokenized stocks / selected memes",
         "On-chain trade-tax routing (holders, burns, lottery, team)",
