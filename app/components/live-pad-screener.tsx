@@ -135,6 +135,7 @@ export function LivePadScreener({
         </p>
       ) : null}
       <TokenScreener
+        launchpadId={launchpadId}
         launchpadName={launchpadName}
         tokens={tokens}
         live={live}

@@ -10,6 +10,11 @@ import {
   tokensDisclaimer,
   type TokenRow,
 } from "../../lib/tokens";
+import {
+  defaultSortFor,
+  screenerColumnsFor,
+  type ScreenerColumns,
+} from "../../lib/screener-columns";
 
 type TabId = "trending" | "top" | "gainers" | "new";
 type SortKey =
@@ -83,13 +88,16 @@ function RangeBar({ pos }: { pos: number | null }) {
 }
 
 export function TokenScreener({
+  launchpadId,
   launchpadName,
   tokens,
   live = true,
   loading = false,
   feedPending = false,
   ecosystemName,
+  columns: columnsProp,
 }: {
+  launchpadId?: string;
   launchpadName: string;
   tokens: TokenRow[];
   live?: boolean;
@@ -98,11 +106,15 @@ export function TokenScreener({
   /** API route exists but pad feed not reverse-engineered yet. */
   feedPending?: boolean;
   ecosystemName?: string;
+  /** Override; defaults from launchpadId via screener-columns. */
+  columns?: ScreenerColumns;
 }) {
+  const cols = columnsProp ?? screenerColumnsFor(launchpadId || "");
+  const initialSort = defaultSortFor(cols);
   const [tab, setTab] = useState<TabId>("trending");
   const [q, setQ] = useState("");
-  const [sort, setSort] = useState<SortKey>("volume24hUsd");
-  const [asc, setAsc] = useState(false);
+  const [sort, setSort] = useState<SortKey>(initialSort.key);
+  const [asc, setAsc] = useState(initialSort.asc);
 
   /** Only StonkOptions (screenerLive=false) gets the not-live empty state. */
   const showNotLive = !live;
@@ -229,15 +241,16 @@ export function TokenScreener({
             <thead>
               <tr>
                 <th className="col-name">Name</th>
-                <th>Price / %Δ</th>
-                <th className="hide-md">FDV</th>
-                <th>Vol</th>
+                {cols.price ? <th>Price / %Δ</th> : null}
+                {cols.fdv ? <th className="hide-md">FDV</th> : null}
+                {cols.volume ? <th>Vol</th> : null}
+                {cols.age ? <th className="hide-sm">Age</th> : null}
               </tr>
             </thead>
             <tbody>
               {Array.from({ length: 6 }).map((_, i) => (
                 <tr key={i} className="vs-row skeleton">
-                  <td className="col-name" colSpan={4}>
+                  <td className="col-name" colSpan={6}>
                     <span className="skel-bar" />
                   </td>
                 </tr>
@@ -265,35 +278,45 @@ export function TokenScreener({
             <thead>
               <tr>
                 <th className="col-name">Name</th>
-                <th>Price / %Δ</th>
-                <th className="hide-md">
-                  <button type="button" className="sort-btn" onClick={() => toggleSort("fdvUsd")}>
-                    FDV{mark("fdvUsd")}
-                  </button>
-                </th>
-                <th>
-                  <button type="button" className="sort-btn" onClick={() => toggleSort("volume24hUsd")}>
-                    Vol{mark("volume24hUsd")}
-                  </button>
-                </th>
-                <th className="hide-lg">Last 24h</th>
-                <th className="hide-lg">24h Range</th>
-                <th className="hide-md">
-                  <button type="button" className="sort-btn" onClick={() => toggleSort("liquidityUsd")}>
-                    Liq{mark("liquidityUsd")}
-                  </button>
-                </th>
-                <th className="hide-sm">
-                  <button type="button" className="sort-btn" onClick={() => toggleSort("ageHours")}>
-                    Age{mark("ageHours")}
-                  </button>
-                </th>
-                <th className="hide-md">
-                  <button type="button" className="sort-btn" onClick={() => toggleSort("holders")}>
-                    Holders{mark("holders")}
-                  </button>
-                </th>
-                <th className="col-buy">Buy</th>
+                {cols.price ? <th>Price / %Δ</th> : null}
+                {cols.fdv ? (
+                  <th className="hide-md">
+                    <button type="button" className="sort-btn" onClick={() => toggleSort("fdvUsd")}>
+                      FDV{mark("fdvUsd")}
+                    </button>
+                  </th>
+                ) : null}
+                {cols.volume ? (
+                  <th>
+                    <button type="button" className="sort-btn" onClick={() => toggleSort("volume24hUsd")}>
+                      Vol{mark("volume24hUsd")}
+                    </button>
+                  </th>
+                ) : null}
+                {cols.spark ? <th className="hide-lg">Last 24h</th> : null}
+                {cols.range ? <th className="hide-lg">24h Range</th> : null}
+                {cols.liquidity ? (
+                  <th className="hide-md">
+                    <button type="button" className="sort-btn" onClick={() => toggleSort("liquidityUsd")}>
+                      Liq{mark("liquidityUsd")}
+                    </button>
+                  </th>
+                ) : null}
+                {cols.age ? (
+                  <th className="hide-sm">
+                    <button type="button" className="sort-btn" onClick={() => toggleSort("ageHours")}>
+                      Age{mark("ageHours")}
+                    </button>
+                  </th>
+                ) : null}
+                {cols.holders ? (
+                  <th className="hide-md">
+                    <button type="button" className="sort-btn" onClick={() => toggleSort("holders")}>
+                      Holders{mark("holders")}
+                    </button>
+                  </th>
+                ) : null}
+                {cols.buy ? <th className="col-buy">Buy</th> : null}
               </tr>
             </thead>
             <tbody>
@@ -338,50 +361,66 @@ export function TokenScreener({
                         </span>
                       </span>
                     </td>
-                    <td>
-                      <div className="stack">
-                        <span className="num">{formatUsd(t.priceUsd)}</span>
-                        <span
-                          className={
-                            ch == null ? "pct muted" : up ? "pct up" : "pct down"
-                          }
-                        >
-                          {formatPct(ch)}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="num hide-md">{formatUsd(t.fdvUsd)}</td>
-                    <td className="num">{formatUsd(t.volume24hUsd)}</td>
-                    <td className="hide-lg">
-                      <Sparkline values={t.spark24h} up={up} />
-                    </td>
-                    <td className="hide-lg">
-                      <RangeBar pos={t.rangePos} />
-                    </td>
-                    <td className="num hide-md">{formatUsd(t.liquidityUsd)}</td>
-                    <td className="num hide-sm">{formatAge(t.ageHours)}</td>
-                    <td className="hide-md">
-                      <div className="stack">
-                        <span className="num">{formatCompact(t.holders)}</span>
-                        {t.holdersDelta24h == null ? (
-                          <span className="pct muted">—</span>
-                        ) : (
+                    {cols.price ? (
+                      <td>
+                        <div className="stack">
+                          <span className="num">{formatUsd(t.priceUsd)}</span>
                           <span
                             className={
-                              t.holdersDelta24h >= 0 ? "pct up" : "pct down"
+                              ch == null ? "pct muted" : up ? "pct up" : "pct down"
                             }
                           >
-                            {t.holdersDelta24h >= 0 ? "+" : ""}
-                            {t.holdersDelta24h}
+                            {formatPct(ch)}
                           </span>
-                        )}
-                      </div>
-                    </td>
-                    <td className="col-buy">
-                      <button type="button" className="buy-btn" aria-label={`Buy ${t.symbol}`} disabled>
-                        ⚡
-                      </button>
-                    </td>
+                        </div>
+                      </td>
+                    ) : null}
+                    {cols.fdv ? (
+                      <td className="num hide-md">{formatUsd(t.fdvUsd)}</td>
+                    ) : null}
+                    {cols.volume ? (
+                      <td className="num">{formatUsd(t.volume24hUsd)}</td>
+                    ) : null}
+                    {cols.spark ? (
+                      <td className="hide-lg">
+                        <Sparkline values={t.spark24h} up={up} />
+                      </td>
+                    ) : null}
+                    {cols.range ? (
+                      <td className="hide-lg">
+                        <RangeBar pos={t.rangePos} />
+                      </td>
+                    ) : null}
+                    {cols.liquidity ? (
+                      <td className="num hide-md">{formatUsd(t.liquidityUsd)}</td>
+                    ) : null}
+                    {cols.age ? (
+                      <td className="num hide-sm">{formatAge(t.ageHours)}</td>
+                    ) : null}
+                    {cols.holders ? (
+                      <td className="hide-md">
+                        <div className="stack">
+                          <span className="num">{formatCompact(t.holders)}</span>
+                          {t.holdersDelta24h == null ? null : (
+                            <span
+                              className={
+                                t.holdersDelta24h >= 0 ? "pct up" : "pct down"
+                              }
+                            >
+                              {t.holdersDelta24h >= 0 ? "+" : ""}
+                              {t.holdersDelta24h}
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                    ) : null}
+                    {cols.buy ? (
+                      <td className="col-buy">
+                        <button type="button" className="buy-btn" aria-label={`Buy ${t.symbol}`} disabled>
+                          ⚡
+                        </button>
+                      </td>
+                    ) : null}
                   </tr>
                 );
               })}
