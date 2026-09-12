@@ -110,8 +110,9 @@ export function defaultSortFor(cols: ScreenerColumns): {
   key: "fdvUsd" | "volume24hUsd" | "change24hPct" | "liquidityUsd" | "ageHours" | "holders";
   asc: boolean;
 } {
-  if (cols.volume) return { key: "volume24hUsd", asc: false };
+  // Highest mcap/FDV first when the pad has that column (Semi order).
   if (cols.fdv) return { key: "fdvUsd", asc: false };
+  if (cols.volume) return { key: "volume24hUsd", asc: false };
   if (cols.age) return { key: "ageHours", asc: true };
   if (cols.holders) return { key: "holders", asc: false };
   return { key: "ageHours", asc: true };

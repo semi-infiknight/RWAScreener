@@ -149,10 +149,10 @@ export async function fetchClawPumpTokens(): Promise<TokenRow[]> {
   }
 
   rows.sort((a, b) => {
-    const av = a.volume24hUsd ?? -1;
-    const bv = b.volume24hUsd ?? -1;
-    if (bv !== av) return bv - av;
-    return (b.mcapUsd ?? -1) - (a.mcapUsd ?? -1);
+    const am = a.mcapUsd ?? -1;
+    const bm = b.mcapUsd ?? -1;
+    if (bm !== am) return bm - am;
+    return (b.volume24hUsd ?? -1) - (a.volume24hUsd ?? -1);
   });
 
   return rows;
