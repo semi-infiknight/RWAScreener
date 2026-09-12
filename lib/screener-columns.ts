@@ -57,6 +57,15 @@ const BAGS: ScreenerColumns = {
   buy: false,
 };
 
+/** Perpspad /tokens catalog: price, mcap, age (no vol/liq/holders). */
+const PERPSPAD: ScreenerColumns = {
+  ...ALL_OFF,
+  price: true,
+  fdv: true,
+  age: true,
+  buy: false,
+};
+
 /** Unwired pads — name only until their API is mapped. */
 const PENDING: ScreenerColumns = {
   ...ALL_OFF,
@@ -67,7 +76,7 @@ const BY_PAD: Record<string, ScreenerColumns> = {
   ethics: ETHICS,
   embercurve: EMBER,
   bags: BAGS,
-  perpspad: PENDING,
+  perpspad: PERPSPAD,
   clawpump: PENDING,
   lfgown: PENDING,
   stardotfun: PENDING,
