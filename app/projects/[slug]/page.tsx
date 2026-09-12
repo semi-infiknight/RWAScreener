@@ -13,6 +13,7 @@ import {
 } from "../../../lib/projects";
 import { tokensForLaunchpad } from "../../../lib/tokens";
 import { fetchEthicsTokens } from "../../../lib/ethics";
+import { fetchEmberCurveTokens } from "../../../lib/embercurve";
 import { TokenScreener } from "../../components/token-screener";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -65,7 +66,9 @@ export default async function ProjectPage({ params }: Props) {
   const tokens =
     p.id === "ethics"
       ? await fetchEthicsTokens().catch(() => [])
-      : tokensForLaunchpad(p.id);
+      : p.id === "embercurve"
+        ? await fetchEmberCurveTokens().catch(() => [])
+        : tokensForLaunchpad(p.id);
 
   return (
     <div className="page">

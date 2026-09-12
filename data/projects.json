@@ -305,8 +305,8 @@
           "url": "https://x.com/embercurve"
         }
       ],
-      "notes": "Strong stock-as-quote product fit. Screener empty until quote→pool→fee_claimer attribution lands. Do not invent fee_claimer.",
-      "screenerLive": false,
+      "notes": "Live pad feed from embercurve.fun/api/solana/markets (Ethics-style). Indexer attribution still separate.",
+      "screenerLive": true,
       "icon": "/avatars/embercurve.jpg"
     }
   ]
