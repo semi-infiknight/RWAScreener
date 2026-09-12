@@ -1,6 +1,10 @@
 import type { TokenRow } from "./tokens";
 
 const ETHICS_ORIGIN = "https://www.ethics.ltd";
+/** Cap detail enrichment so SSR does not open 89 parallel sockets (undici "network error"). */
+const DETAIL_LIMIT = 24;
+const DETAIL_CONCURRENCY = 4;
+const DETAIL_TIMEOUT_MS = 6_000;
 
 type EthicsLaunch = {
   mint: string;
@@ -42,7 +46,8 @@ function ethicsHeaders(extra?: HeadersInit): HeadersInit {
 async function getJson<T>(path: string): Promise<T> {
   const res = await fetch(`${ETHICS_ORIGIN}${path}`, {
     headers: ethicsHeaders(),
-    next: { revalidate: 60 },
+    cache: "no-store",
+    signal: AbortSignal.timeout(15_000),
   });
   if (!res.ok) {
     throw new Error(`Ethics ${path} → HTTP ${res.status}`);
@@ -56,6 +61,7 @@ async function postJson<T>(path: string, body: unknown): Promise<T> {
     headers: ethicsHeaders({ "Content-Type": "application/json" }),
     body: JSON.stringify(body),
     cache: "no-store",
+    signal: AbortSignal.timeout(20_000),
   });
   if (!res.ok) {
     throw new Error(`Ethics POST ${path} → HTTP ${res.status}`);
@@ -103,7 +109,11 @@ async function fetchTokenInfo(mint: string): Promise<TokenInfoEnrich | null> {
   try {
     const res = await fetch(
       `${ETHICS_ORIGIN}/api/launches/token-info?mint=${encodeURIComponent(mint)}`,
-      { headers: ethicsHeaders(), cache: "no-store" },
+      {
+        headers: ethicsHeaders(),
+        cache: "no-store",
+        signal: AbortSignal.timeout(DETAIL_TIMEOUT_MS),
+      },
     );
     if (!res.ok) return null;
     const data = (await res.json()) as {
@@ -137,62 +147,21 @@ async function fetchTokenInfo(mint: string): Promise<TokenInfoEnrich | null> {
   }
 }
 
-/**
- * Live Ethics launches as shown on ethics.ltd.
- * Identity + icons: GET /api/launches
- * Board mcap/vol: GET /api/launches/board + POST enrich
- * Price / % / liq: GET /api/launches/token-info?mint=… (concurrent; missing stay null)
- * Spark/range/holders: not on these public endpoints — stay null.
- */
-export async function fetchEthicsTokens(): Promise<TokenRow[]> {
-  const [all, board] = await Promise.all([
-    getJson<{ launches?: EthicsLaunch[] }>("/api/launches"),
-    getJson<BoardPayload>("/api/launches/board"),
-  ]);
-
-  const launches = Array.isArray(all.launches) ? all.launches : [];
-  if (launches.length === 0) return [];
-
-  const mcaps: Record<string, number> = { ...(board.mcaps ?? {}) };
-  const volumes: Record<string, number> = { ...(board.volumes ?? {}) };
-
-  const mints = [
-    ...new Set(launches.map((l) => l.mint).filter(Boolean)),
-  ] as string[];
-
-  try {
-    const enriched = await postJson<{
-      mcaps?: Record<string, number>;
-      volumes?: Record<string, number>;
-    }>("/api/launches/enrich", { mints });
-    Object.assign(mcaps, enriched.mcaps ?? {});
-    Object.assign(volumes, enriched.volumes ?? {});
-  } catch {
-    // board metrics alone still prod
-  }
-
-  // Prefer enriching board + high-volume mints first, then the rest.
-  const boardSet = new Set((board.launches ?? []).map((l) => l.mint));
-  const ordered = [
-    ...mints.filter((m) => boardSet.has(m)),
-    ...mints.filter((m) => !boardSet.has(m)),
-  ];
-
-  const detailsList = await mapPool(ordered, 10, fetchTokenInfo);
-  const details = new Map<string, TokenInfoEnrich | null>();
-  ordered.forEach((m, i) => details.set(m, detailsList[i] ?? null));
-
+function buildRows(
+  launches: EthicsLaunch[],
+  mcaps: Record<string, number>,
+  volumes: Record<string, number>,
+  details: Map<string, TokenInfoEnrich | null>,
+): TokenRow[] {
   const rows: TokenRow[] = [];
   const seen = new Set<string>();
   for (const l of launches) {
     if (!l?.mint || seen.has(l.mint)) continue;
     seen.add(l.mint);
     const d = details.get(l.mint);
-    const mcap =
-      numOrNull(d?.mcap) ?? numOrNull(mcaps[l.mint]);
+    const mcap = numOrNull(d?.mcap) ?? numOrNull(mcaps[l.mint]);
     const fdv = numOrNull(d?.fdv) ?? mcap;
-    const vol =
-      numOrNull(d?.volume24h) ?? numOrNull(volumes[l.mint]);
+    const vol = numOrNull(d?.volume24h) ?? numOrNull(volumes[l.mint]);
     rows.push({
       id: `ethics-${l.mint}`,
       launchpadId: "ethics",
@@ -217,13 +186,66 @@ export async function fetchEthicsTokens(): Promise<TokenRow[]> {
       draft: false,
     });
   }
-
   rows.sort((a, b) => {
     const av = a.volume24hUsd ?? -1;
     const bv = b.volume24hUsd ?? -1;
     if (bv !== av) return bv - av;
     return (b.mcapUsd ?? -1) - (a.mcapUsd ?? -1);
   });
-
   return rows;
+}
+
+/**
+ * Live Ethics launches. Never throws — returns [] on hard failure.
+ * Icons from /api/launches; mcap/vol from board/enrich; price/% for top DETAIL_LIMIT only.
+ */
+export async function fetchEthicsTokens(): Promise<TokenRow[]> {
+  try {
+    const [all, board] = await Promise.all([
+      getJson<{ launches?: EthicsLaunch[] }>("/api/launches"),
+      getJson<BoardPayload>("/api/launches/board"),
+    ]);
+
+    const launches = Array.isArray(all.launches) ? all.launches : [];
+    if (launches.length === 0) return [];
+
+    const mcaps: Record<string, number> = { ...(board.mcaps ?? {}) };
+    const volumes: Record<string, number> = { ...(board.volumes ?? {}) };
+    const mints = [
+      ...new Set(launches.map((l) => l.mint).filter(Boolean)),
+    ] as string[];
+
+    try {
+      const enriched = await postJson<{
+        mcaps?: Record<string, number>;
+        volumes?: Record<string, number>;
+      }>("/api/launches/enrich", { mints });
+      Object.assign(mcaps, enriched.mcaps ?? {});
+      Object.assign(volumes, enriched.volumes ?? {});
+    } catch {
+      // board metrics alone still usable
+    }
+
+    // Rank candidates for detail enrichment by known volume.
+    const detailMints = [...mints]
+      .sort((a, b) => (volumes[b] ?? 0) - (volumes[a] ?? 0))
+      .slice(0, DETAIL_LIMIT);
+
+    const details = new Map<string, TokenInfoEnrich | null>();
+    try {
+      const detailRows = await mapPool(
+        detailMints,
+        DETAIL_CONCURRENCY,
+        fetchTokenInfo,
+      );
+      detailMints.forEach((m, i) => details.set(m, detailRows[i] ?? null));
+    } catch {
+      // identity + board metrics still render
+    }
+
+    return buildRows(launches, mcaps, volumes, details);
+  } catch (err) {
+    console.error("[ethics] fetchEthicsTokens failed", err);
+    return [];
+  }
 }
