@@ -17,6 +17,7 @@ const heroBackgroundConfig = {
   velocityDissipation: 0.94,
   radius: 0.25,
   bottomFade: true,
+  darkMode: true,
 };
 
 /** Base.org EcosystemHero WebGL background (R3F + fluid/ASCII). */

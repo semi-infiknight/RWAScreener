@@ -38,6 +38,7 @@ export type HeroBackgroundConfig = {
   velocityDissipation?: number;
   densityDissipation?: number;
   bottomFade?: boolean;
+  darkMode?: boolean;
 };
 
 const DEFAULT_CONFIG: HeroBackgroundConfig = {
@@ -54,6 +55,7 @@ const DEFAULT_CONFIG: HeroBackgroundConfig = {
   velocityDissipation: 0.94,
   densityDissipation: 0.98,
   bottomFade: false,
+  darkMode: false,
 };
 
 type HeroBackgroundProps = {
@@ -74,6 +76,7 @@ function HeroBackground({ config = {} }: HeroBackgroundProps) {
     velocityDissipation,
     densityDissipation,
     bottomFade,
+    darkMode,
   } = finalConfig;
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -88,9 +91,9 @@ function HeroBackground({ config = {} }: HeroBackgroundProps) {
         resize={CANVAS_RESIZE_CONFIG}
         orthographic
         camera={CAMERA_CONFIG as CameraProps}
-        gl={{ alpha: true, antialias: true, premultipliedAlpha: true }}
+        gl={{ alpha: false, antialias: true, powerPreference: "high-performance" }}
         onCreated={({ gl }) => {
-          gl.setClearColor(0x000000, 0);
+          gl.setClearColor(0x000000, 1);
         }}
       >
         <Scene
@@ -103,6 +106,7 @@ function HeroBackground({ config = {} }: HeroBackgroundProps) {
           velocityDissipation={velocityDissipation}
           densityDissipation={densityDissipation}
           bottomFade={bottomFade}
+          darkMode={darkMode ?? false}
         />
       </Canvas>
     </div>

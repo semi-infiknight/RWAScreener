@@ -1,8 +1,8 @@
 :root {
   color-scheme: dark;
   --bg: #121214;
-  --wash: url("/textures/mineral-wash.png");
-  --wash-size: 420px;
+  --wash: url("/textures/mineral-wash.svg");
+  --wash-size: 100vmax;
   --panel: #101012;
   --text: #f4f4f5;
   --muted: #a1a1aa;
@@ -22,7 +22,7 @@ html, body {
   padding: 0;
   background: var(--bg);
   background-image: var(--wash);
-  background-size: var(--wash-size) var(--wash-size);
+  background-size: cover;
   background-repeat: repeat;
   color: var(--text);
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -40,9 +40,10 @@ button, input { font: inherit; color: inherit; }
   background-image:
     radial-gradient(900px 420px at 50% -10%, rgba(255, 106, 0, 0.10), transparent 60%),
     var(--wash);
-  background-size: auto, var(--wash-size) var(--wash-size);
-  background-repeat: no-repeat, repeat;
-  background-attachment: scroll, scroll;
+  background-size: auto, cover;
+  background-repeat: no-repeat, no-repeat;
+  background-position: center, center;
+  background-attachment: scroll, fixed;
 }
 
 .topnav {
@@ -123,10 +124,10 @@ button, input { font: inherit; color: inherit; }
   content: "";
   position: absolute;
   left: 0; right: 0; bottom: 0;
-  height: 7rem;
+  height: 8rem;
   z-index: 2;
   pointer-events: none;
-  background: linear-gradient(to bottom, transparent, rgba(10, 10, 12, 0.55) 55%, rgba(10, 10, 12, 0.92));
+  background: linear-gradient(to bottom, transparent, rgba(12, 12, 14, 0.75) 70%, rgba(12, 12, 14, 0.98));
 }
 .hero-canvas-wrap {
   position: absolute;
@@ -149,10 +150,7 @@ button, input { font: inherit; color: inherit; }
   font-size: clamp(2.75rem, 7vw, 4.25rem);
   letter-spacing: -0.045em;
   font-weight: 700;
-  color: #f4f4f5;
-  text-shadow:
-    0 1px 0 rgba(0,0,0,0.55),
-    0 12px 40px rgba(0,0,0,0.45);
+  color: #fafafa;
   pointer-events: none;
 }
 .hero p {
@@ -160,10 +158,9 @@ button, input { font: inherit; color: inherit; }
   z-index: 3;
   margin: 0.9rem auto 0;
   max-width: 36rem;
-  color: rgba(228, 228, 231, 0.72);
+  color: rgba(244, 244, 245, 0.68);
   font-size: 1.05rem;
   line-height: 1.45;
-  text-shadow: 0 1px 12px rgba(0,0,0,0.5);
   pointer-events: none;
 }
 
@@ -570,21 +567,16 @@ button, input { font: inherit; color: inherit; }
 .other-row:hover { background: var(--hover); }
 
 
-/* Base WebGL hero — screen-blended over mineral wash (no white stage) */
+/* Base WebGL hero — Base darkMode pastels over mineral SVG wash */
 .hero-base-wrap {
   background: transparent !important;
   border-radius: 0;
   overflow: hidden;
-  isolation: isolate;
-}
-.hero-base-wrap > div,
-.hero-base-wrap canvas {
-  mix-blend-mode: screen;
 }
 .hero-base-wrap > div {
-  opacity: 0.88;
   width: 100%;
   height: 100%;
+  opacity: 1;
 }
 .hero-base-wrap canvas {
   display: block;
