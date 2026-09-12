@@ -150,6 +150,7 @@ export function TokenScreener({
   live = true,
   loading = false,
   feedPending = false,
+  ecosystemName,
   columns: columnsProp,
 }: {
   launchpadId?: string;
@@ -207,7 +208,26 @@ export function TokenScreener({
 
   return (
     <section className="vs-screener" aria-label={`${launchpadName} tokens`}>
-      {showNotLive ? null : showLoadingTable ? (
+      {showNotLive ? (
+        <div className="vs-empty-state">
+          <div className="vs-empty-badge">Not live yet</div>
+          <h3>{launchpadName} launches coming soon</h3>
+          <p>
+            {ecosystemName ? (
+              <>
+                Part of the <strong>{ecosystemName}</strong> ecosystem.{" "}
+              </>
+            ) : null}
+            Token launches are not live yet — this screener stays empty until
+            they are.
+          </p>
+          <div className="vs-empty-tags">
+            <span className="tag">integrating</span>
+            <span className="tag">DBC integrating</span>
+            {ecosystemName ? <span className="tag">{ecosystemName}</span> : null}
+          </div>
+        </div>
+      ) : showLoadingTable ? (
         <div className="vs-table-wrap">
           <table className="vs-table vs-table-loading">
             <thead>
