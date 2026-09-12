@@ -8,23 +8,20 @@ function padApi(launchpadId: string): string {
   return `/api/pads/${launchpadId}`;
 }
 
-function mergeById(prev: TokenRow[], next: TokenRow[]): TokenRow[] {
-  if (prev.length === 0) return next;
-  const map = new Map(prev.map((t) => [t.id, t]));
-  for (const t of next) map.set(t.id, { ...map.get(t.id), ...t });
-  const order = next.map((t) => t.id);
-  const seen = new Set(order);
-  const merged = order.map((id) => map.get(id)!);
-  for (const t of prev) {
-    if (!seen.has(t.id)) merged.push(t);
-  }
-  return merged;
+function patchToken(prev: TokenRow[], patch: Partial<TokenRow> & { id?: string; mint?: string }): TokenRow[] {
+  const key = patch.id || (patch.mint ? undefined : undefined);
+  return prev.map((t) => {
+    const match =
+      (patch.id && t.id === patch.id) ||
+      (patch.mint && t.mint === patch.mint);
+    if (!match) return t;
+    return { ...t, ...patch };
+  });
 }
 
 /**
  * Universal live-pad screener: never blocks SSR.
- * - live=false (StonkOptions only) → Not live yet empty state
- * - live=true → skeleton, then ?phase=fast rows, then ?phase=full enrich
+ * Fast list first, then enrich ONE mint at a time (paint after each).
  */
 export function LivePadScreener({
   launchpadId,
@@ -40,10 +37,10 @@ export function LivePadScreener({
   ecosystemName?: string;
 }) {
   const api = live ? padApi(launchpadId) : null;
-  // Live pads start empty + skeleton (ignore static seed) so loading never flashes stubs.
   const [tokens, setTokens] = useState<TokenRow[]>(live ? [] : initialTokens);
   const [loading, setLoading] = useState(Boolean(api));
   const [enriching, setEnriching] = useState(false);
+  const [enrichLabel, setEnrichLabel] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -55,6 +52,7 @@ export function LivePadScreener({
       setLoading(true);
       setError(null);
       setPending(false);
+      setEnrichLabel(null);
       try {
         const fastRes = await fetch(`${api}?phase=fast`);
         const fastBody = await fastRes.json().catch(() => ({}));
@@ -64,28 +62,48 @@ export function LivePadScreener({
           );
         }
         if (cancelled) return;
-        const fastTokens = Array.isArray(fastBody.tokens) ? fastBody.tokens : [];
+        const fastTokens: TokenRow[] = Array.isArray(fastBody.tokens)
+          ? fastBody.tokens
+          : [];
         setPending(Boolean(fastBody.pending) && fastTokens.length === 0);
         setTokens(fastTokens);
         setLoading(false);
 
-        // Phase 2 enrich (pads that ignore phase just return the same payload)
-        if (fastBody.pending) {
+        if (fastBody.pending || fastTokens.length === 0) {
           setEnriching(false);
           return;
         }
+
+        // Sequential one-by-one enrich (supports ?mint=). Skip if pad returns 404.
         setEnriching(true);
-        try {
-          const fullRes = await fetch(`${api}?phase=full`);
-          const fullBody = await fullRes.json().catch(() => ({}));
-          if (!cancelled && fullRes.ok && Array.isArray(fullBody.tokens)) {
-            setTokens((prev) => mergeById(prev, fullBody.tokens));
-            setPending(Boolean(fullBody.pending) && fullBody.tokens.length === 0);
+        const queue = fastTokens.filter((t) => t.mint);
+        for (let i = 0; i < queue.length; i++) {
+          if (cancelled) break;
+          const row = queue[i];
+          const mint = row.mint!;
+          setEnrichLabel(
+            `${row.symbol || mint.slice(0, 6)} (${i + 1}/${queue.length})`,
+          );
+          try {
+            const res = await fetch(
+              `${api}?mint=${encodeURIComponent(mint)}`,
+            );
+            if (res.status === 404) {
+              // Pad does not support per-mint enrich — stop sequential loop once.
+              if (i === 0) break;
+              continue;
+            }
+            const body = await res.json().catch(() => ({}));
+            if (!res.ok || !body?.token) continue;
+            if (cancelled) break;
+            setTokens((prev) => patchToken(prev, body.token));
+          } catch {
+            // skip this mint, continue
           }
-        } catch {
-          // keep fast rows
-        } finally {
-          if (!cancelled) setEnriching(false);
+        }
+        if (!cancelled) {
+          setEnriching(false);
+          setEnrichLabel(null);
         }
       } catch (err: unknown) {
         if (cancelled) return;
@@ -93,6 +111,7 @@ export function LivePadScreener({
         setTokens([]);
         setLoading(false);
         setEnriching(false);
+        setEnrichLabel(null);
       }
     }
 
@@ -107,8 +126,8 @@ export function LivePadScreener({
       {loading ? (
         <p className="live-pad-status">Loading live tokens…</p>
       ) : null}
-      {enriching && tokens.length > 0 ? (
-        <p className="live-pad-status">Updating prices…</p>
+      {enriching && enrichLabel ? (
+        <p className="live-pad-status">Updating {enrichLabel}…</p>
       ) : null}
       {error && !loading && tokens.length === 0 ? (
         <p className="live-pad-status error">

@@ -147,6 +147,26 @@ async function fetchTokenInfo(mint: string): Promise<TokenInfoEnrich | null> {
   }
 }
 
+
+/** One-mint detail enrich for sequential UI updates. */
+export async function enrichEthicsToken(
+  mint: string,
+): Promise<Partial<TokenRow> | null> {
+  const d = await fetchTokenInfo(mint);
+  if (!d) return null;
+  return {
+    id: `ethics-${mint}`,
+    mint,
+    priceUsd: numOrNull(d.usdPrice),
+    change24hPct: numOrNull(d.change24h),
+    mcapUsd: numOrNull(d.mcap),
+    fdvUsd: numOrNull(d.fdv) ?? numOrNull(d.mcap),
+    volume24hUsd: numOrNull(d.volume24h),
+    liquidityUsd: numOrNull(d.liquidity),
+    icon: d.icon ?? null,
+  };
+}
+
 function buildRows(
   launches: EthicsLaunch[],
   mcaps: Record<string, number>,
@@ -209,7 +229,7 @@ export type FetchEthicsOptions = {
 export async function fetchEthicsTokens(
   opts: FetchEthicsOptions = {},
 ): Promise<TokenRow[]> {
-  const enrichDetails = opts.enrichDetails !== false;
+  const enrichDetails = opts.enrichDetails === true;
   const enrichBoard = opts.enrichBoard !== false;
   try {
     const [all, board] = await Promise.all([
