@@ -60,7 +60,10 @@
         "x": "https://x.com/stardotfun"
       },
       "screenerLive": false,
-      "icon": "/avatars/stardotfun.jpg"
+      "icon": "/avatars/stardotfun.jpg",
+      "github": null,
+      "devX": null,
+      "devGithub": null
     },
     {
       "id": "ethics",
@@ -99,7 +102,10 @@
       ],
       "notes": "Confirm whether DBC is live vs DAMM-only.",
       "icon": "/avatars/ethics.jpg",
-      "screenerLive": true
+      "screenerLive": true,
+      "github": null,
+      "devX": null,
+      "devGithub": null
     },
     {
       "id": "bags",
@@ -142,7 +148,10 @@
         }
       ],
       "icon": "/avatars/bags.jpg",
-      "screenerLive": true
+      "screenerLive": true,
+      "github": "https://github.com/bagsfm",
+      "devX": null,
+      "devGithub": null
     },
     {
       "id": "perpspad",
@@ -186,7 +195,10 @@
         }
       ],
       "icon": "/avatars/perpspad.jpg",
-      "screenerLive": true
+      "screenerLive": true,
+      "github": null,
+      "devX": null,
+      "devGithub": null
     },
     {
       "id": "clawpump",
@@ -229,7 +241,10 @@
       ],
       "notes": "Confirm if DBC integration is planned / in progress / different product.",
       "icon": "/avatars/clawpump.jpg",
-      "screenerLive": true
+      "screenerLive": true,
+      "github": "https://github.com/Clawpump",
+      "devX": null,
+      "devGithub": null
     },
     {
       "id": "lfgown",
@@ -268,7 +283,10 @@
       ],
       "notes": "Screener: GET /api/launches (~39). Status bonding/on-curve vs graduated (DAMM v2). Duplicate symbols kept (distinct baseMints). Sort by raised USD proxy.",
       "icon": "/avatars/lfgown.jpg",
-      "screenerLive": true
+      "screenerLive": true,
+      "github": null,
+      "devX": null,
+      "devGithub": null
     },
     {
       "id": "embercurve",
@@ -308,7 +326,10 @@
       ],
       "notes": "Live pad feed from embercurve.fun/api/solana/markets (Ethics-style). Indexer attribution still separate.",
       "screenerLive": true,
-      "icon": "/avatars/embercurve.jpg"
+      "icon": "/avatars/embercurve.jpg",
+      "github": null,
+      "devX": null,
+      "devGithub": null
     }
   ]
 }

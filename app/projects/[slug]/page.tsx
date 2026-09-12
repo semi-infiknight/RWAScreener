@@ -136,33 +136,40 @@ export default async function ProjectPage({ params }: Props) {
           </div>
         </article>
 
-        <section className="aarna-row aarna-connect">
-          <span className="aarna-row-label">Connect</span>
-          <div className="aarna-connect-btns">
-            {p.x ? (
-              <a href={p.x} target="_blank" rel="noreferrer">
-                See Twitter/X ↗
-              </a>
-            ) : null}
-            {p.docs ? (
-              <a href={p.docs} target="_blank" rel="noreferrer">
-                Read Docs ↗
-              </a>
-            ) : null}
-            {p.website ? (
-              <a href={p.website} target="_blank" rel="noreferrer">
-                Open App ↗
-              </a>
-            ) : null}
-            {p.ecosystem?.website ? (
-              <a href={p.ecosystem.website} target="_blank" rel="noreferrer">
-                {p.ecosystem.name} ↗
-              </a>
-            ) : null}
-            {!p.x && !p.docs && !p.website && !p.ecosystem?.website ? (
-              <span className="aarna-connect-empty">No public links yet</span>
-            ) : null}
-          </div>
+        <section className="aarna-link-pills" aria-label="Links">
+          {p.x ? (
+            <a href={p.x} target="_blank" rel="noreferrer">
+              X
+            </a>
+          ) : null}
+          {p.website ? (
+            <a href={p.website} target="_blank" rel="noreferrer">
+              App
+            </a>
+          ) : null}
+          {p.docs ? (
+            <a href={p.docs} target="_blank" rel="noreferrer">
+              Docs
+            </a>
+          ) : null}
+          {p.github ? (
+            <a href={p.github} target="_blank" rel="noreferrer">
+              GitHub
+            </a>
+          ) : null}
+          {p.devX ? (
+            <a href={p.devX} target="_blank" rel="noreferrer">
+              Dev X
+            </a>
+          ) : null}
+          {p.devGithub ? (
+            <a href={p.devGithub} target="_blank" rel="noreferrer">
+              Dev GitHub
+            </a>
+          ) : null}
+          {!p.x && !p.website && !p.docs && !p.github && !p.devX && !p.devGithub ? (
+            <span className="aarna-link-empty">No public links yet</span>
+          ) : null}
         </section>
 
         <div className="aarna-meta">
