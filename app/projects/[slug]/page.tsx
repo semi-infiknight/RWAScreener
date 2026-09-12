@@ -12,9 +12,7 @@ import {
   updatedAt,
 } from "../../../lib/projects";
 import { tokensForLaunchpad } from "../../../lib/tokens";
-import { fetchEthicsTokens } from "../../../lib/ethics";
-import { fetchEmberCurveTokens } from "../../../lib/embercurve";
-import { TokenScreener } from "../../components/token-screener";
+import { LivePadScreener } from "../../components/live-pad-screener";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -63,12 +61,9 @@ export default async function ProjectPage({ params }: Props) {
   const color = AVATAR_COLORS[Math.max(0, idx) % AVATAR_COLORS.length];
   const live = isScreenerLive(p);
   const about = [p.summary, p.notes].filter(Boolean).join(" ");
-  const tokens =
-    p.id === "ethics"
-      ? await fetchEthicsTokens().catch(() => [])
-      : p.id === "embercurve"
-        ? await fetchEmberCurveTokens().catch(() => [])
-        : tokensForLaunchpad(p.id);
+  // Live pads (ethics/ember/…) load tokens client-side via /api/pads/*
+  // so soft-nav from the homepage is instant.
+  const tokens = tokensForLaunchpad(p.id);
 
   return (
     <div className="page">
@@ -209,9 +204,10 @@ export default async function ProjectPage({ params }: Props) {
           </section>
         </div>
 
-        <TokenScreener
+        <LivePadScreener
+          launchpadId={p.id}
           launchpadName={p.displayName}
-          tokens={tokens}
+          initialTokens={tokens}
           live={live}
           ecosystemName={p.ecosystem?.name}
         />

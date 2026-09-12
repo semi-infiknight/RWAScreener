@@ -1148,3 +1148,13 @@ td.col-name { display: flex; }
   object-fit: cover;
   display: block;
 }
+
+
+.live-pad-status {
+  margin: 0 0 0.75rem;
+  color: #a1a1aa;
+  font-size: 0.9rem;
+}
+.live-pad-status.error {
+  color: #f87171;
+}
