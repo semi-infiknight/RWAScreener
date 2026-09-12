@@ -77,6 +77,13 @@ const CLAWPUMP: ScreenerColumns = {
   buy: false,
 };
 
+/** LFOwn /api/launches: identity + icon + age (slot); no price/vol. */
+const LFGOWN: ScreenerColumns = {
+  ...ALL_OFF,
+  age: true,
+  buy: false,
+};
+
 /** Unwired pads — name only until their API is mapped. */
 const PENDING: ScreenerColumns = {
   ...ALL_OFF,
@@ -89,7 +96,7 @@ const BY_PAD: Record<string, ScreenerColumns> = {
   bags: BAGS,
   perpspad: PERPSPAD,
   clawpump: CLAWPUMP,
-  lfgown: PENDING,
+  lfgown: LFGOWN,
   stardotfun: PENDING,
 };
 
