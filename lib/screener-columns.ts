@@ -66,6 +66,17 @@ const PERPSPAD: ScreenerColumns = {
   buy: false,
 };
 
+/** ClawPump /api/tokens: price, mcap, vol, liq, age (no %/holders/spark). */
+const CLAWPUMP: ScreenerColumns = {
+  ...ALL_OFF,
+  price: true,
+  fdv: true,
+  volume: true,
+  liquidity: true,
+  age: true,
+  buy: false,
+};
+
 /** Unwired pads — name only until their API is mapped. */
 const PENDING: ScreenerColumns = {
   ...ALL_OFF,
@@ -77,7 +88,7 @@ const BY_PAD: Record<string, ScreenerColumns> = {
   embercurve: EMBER,
   bags: BAGS,
   perpspad: PERPSPAD,
-  clawpump: PENDING,
+  clawpump: CLAWPUMP,
   lfgown: PENDING,
   stardotfun: PENDING,
 };

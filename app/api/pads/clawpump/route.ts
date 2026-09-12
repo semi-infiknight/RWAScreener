@@ -1,13 +1,26 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { fetchClawPumpTokens } from "../../../../lib/clawpump";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
-/** Placeholder until this pad's site API is reverse-engineered. */
-export async function GET() {
-  return NextResponse.json({
-    source: null,
-    pending: true,
-    count: 0,
-    tokens: [],
-  });
+/**
+ * ClawPump public list — fast and full are the same rows (no enrich step).
+ * Honors ?phase= for LivePadScreener.
+ */
+export async function GET(req: NextRequest) {
+  const phase = req.nextUrl.searchParams.get("phase") || "full";
+  const fast = phase === "fast";
+  try {
+    const tokens = await fetchClawPumpTokens();
+    return NextResponse.json({
+      source: "https://clawpump.tech/api/tokens?sort=trending|new",
+      phase: fast ? "fast" : "full",
+      count: tokens.length,
+      tokens,
+    });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "ClawPump fetch failed";
+    return NextResponse.json({ error: message, tokens: [] }, { status: 502 });
+  }
 }
