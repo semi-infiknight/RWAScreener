@@ -88,6 +88,10 @@ function HeroBackground({ config = {} }: HeroBackgroundProps) {
         resize={CANVAS_RESIZE_CONFIG}
         orthographic
         camera={CAMERA_CONFIG as CameraProps}
+        gl={{ alpha: true, antialias: true, premultipliedAlpha: true }}
+        onCreated={({ gl }) => {
+          gl.setClearColor(0x000000, 0);
+        }}
       >
         <Scene
           imageUrl={imageUrl ?? DEFAULT_BACKGROUND_IMAGE}
