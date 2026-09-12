@@ -102,16 +102,47 @@ export default async function ProjectPage({ params }: Props) {
                 initials(p.displayName)
               )}
             </span>
-            {p.website ? (
-              <a
-                className="aarna-visit"
-                href={p.website}
-                target="_blank"
-                rel="noreferrer"
-              >
-                Visit Website ↗
-              </a>
-            ) : null}
+            <div className="aarna-hero-actions">
+              {p.website ? (
+                <a
+                  className="aarna-visit"
+                  href={p.website}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Go to App
+                </a>
+              ) : null}
+              {(p.x || p.docs || p.github || p.devX || p.devGithub) ? (
+                <div className="aarna-hero-link-pills" aria-label="Links">
+                  {p.x ? (
+                    <a href={p.x} target="_blank" rel="noreferrer">
+                      X
+                    </a>
+                  ) : null}
+                  {p.docs ? (
+                    <a href={p.docs} target="_blank" rel="noreferrer">
+                      Docs
+                    </a>
+                  ) : null}
+                  {p.github ? (
+                    <a href={p.github} target="_blank" rel="noreferrer">
+                      GitHub
+                    </a>
+                  ) : null}
+                  {p.devX ? (
+                    <a href={p.devX} target="_blank" rel="noreferrer">
+                      Dev X
+                    </a>
+                  ) : null}
+                  {p.devGithub ? (
+                    <a href={p.devGithub} target="_blank" rel="noreferrer">
+                      Dev GitHub
+                    </a>
+                  ) : null}
+                </div>
+              ) : null}
+            </div>
           </div>
 
           <div className="aarna-hero-body">
@@ -135,41 +166,6 @@ export default async function ProjectPage({ params }: Props) {
           </div>
         </article>
 
-        <section className="aarna-link-pills" aria-label="Links">
-          {p.x ? (
-            <a href={p.x} target="_blank" rel="noreferrer">
-              X
-            </a>
-          ) : null}
-          {p.website ? (
-            <a href={p.website} target="_blank" rel="noreferrer">
-              App
-            </a>
-          ) : null}
-          {p.docs ? (
-            <a href={p.docs} target="_blank" rel="noreferrer">
-              Docs
-            </a>
-          ) : null}
-          {p.github ? (
-            <a href={p.github} target="_blank" rel="noreferrer">
-              GitHub
-            </a>
-          ) : null}
-          {p.devX ? (
-            <a href={p.devX} target="_blank" rel="noreferrer">
-              Dev X
-            </a>
-          ) : null}
-          {p.devGithub ? (
-            <a href={p.devGithub} target="_blank" rel="noreferrer">
-              Dev GitHub
-            </a>
-          ) : null}
-          {!p.x && !p.website && !p.docs && !p.github && !p.devX && !p.devGithub ? (
-            <span className="aarna-link-empty">No public links yet</span>
-          ) : null}
-        </section>
 
         <LivePadScreener
           launchpadId={p.id}
