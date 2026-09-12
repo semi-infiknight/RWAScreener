@@ -8,7 +8,8 @@ import {
   isScreenerLive,
   projects,
 } from "../../../lib/projects";
-import { tokensForLaunchpad } from "../../../lib/tokens";
+import { peekPadFeed } from "../../../lib/pad-cache";
+import { tokensForLaunchpad, type TokenRow } from "../../../lib/tokens";
 import { LivePadScreener } from "../../components/live-pad-screener";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -58,9 +59,24 @@ export default async function ProjectPage({ params }: Props) {
   const color = AVATAR_COLORS[Math.max(0, idx) % AVATAR_COLORS.length];
   const live = isScreenerLive(p);
   const about = [p.summary, p.notes].filter(Boolean).join(" ");
-  // Live pads (ethics/ember/…) load tokens client-side via /api/pads/*
-  // so soft-nav from the homepage is instant.
-  const tokens = tokensForLaunchpad(p.id);
+  // Live pads: SSR-seed last-good Redis padfeed (shared), then client refreshes.
+  let tokens: TokenRow[] = tokensForLaunchpad(p.id);
+  if (live) {
+    const peeked = await peekPadFeed<TokenRow[] | { tokens?: TokenRow[] }>(
+      p.id,
+      "fast",
+    );
+    if (Array.isArray(peeked) && peeked.length > 0) {
+      tokens = peeked;
+    } else if (
+      peeked &&
+      typeof peeked === "object" &&
+      Array.isArray((peeked as { tokens?: TokenRow[] }).tokens) &&
+      ((peeked as { tokens: TokenRow[] }).tokens.length > 0)
+    ) {
+      tokens = (peeked as { tokens: TokenRow[] }).tokens;
+    }
+  }
 
   return (
     <div className="page">

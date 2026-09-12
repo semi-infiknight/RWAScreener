@@ -1,32 +1,45 @@
 /**
- * Short-TTL cache for pad live list feeds (Ethics, Ember, Bags, Perpspad, ClawPump, LFOwn, RevShare, …).
+ * Stale-while-revalidate cache for pad feeds + summary rollups.
  *
- * - Redis when REDIS_URL or REDIS_PRIVATE_URL is set (Railway).
- * - In-memory Map fallback for local / when Redis is missing or down (fail open).
- * - TTL: PAD_CACHE_TTL_SECONDS (default 25s). Near-live, not static.
- * - Keys: `padfeed:<padId>:<phase>` (phase = fast | full).
- * - Summary rollups: `padsummary:<padId>` (same TTL; successful ok rows only).
- * - Cache only successful non-empty payloads — never invent rows, never pin pending stubs.
- * - Routes stay force-dynamic; this helper is the throttle.
+ * - Redis when REDIS_URL / REDIS_PRIVATE_URL is set (Railway); memory fallback.
+ * - Soft TTL (PAD_CACHE_TTL_SECONDS, default 30s): after this, serve last-good
+ *   immediately and refresh in the background (shared across all visitors).
+ * - Hard TTL (PAD_CACHE_HARD_TTL_SECONDS, default 600s / 10m): drop the key.
+ * - Keys: padfeed:<padId>:<phase>, padsummary:<padId>
+ * - Envelope: { savedAt, value } — legacy bare JSON still readable.
+ * - Never cache empty / pending stubs.
  */
 
 import { createClient, type RedisClientType } from "redis";
 
-/** Default TTL seconds when PAD_CACHE_TTL_SECONDS unset / invalid. Documented: 25s. */
-export const PAD_CACHE_TTL_DEFAULT_SECONDS = 25;
+export const PAD_CACHE_TTL_DEFAULT_SECONDS = 30;
+export const PAD_CACHE_HARD_TTL_DEFAULT_SECONDS = 600;
 
-type MemoryEntry = { expiresAt: number; payload: string };
+type Envelope<T> = { savedAt: number; value: T };
+type MemoryEntry = { hardExpiresAt: number; payload: string };
 
 const memory = new Map<string, MemoryEntry>();
+/** In-flight refresh/load per key — stampede protection. */
+const inflight = new Map<string, Promise<unknown>>();
 
 let redisClient: RedisClientType | null = null;
 let redisConnectPromise: Promise<RedisClientType | null> | null = null;
 
-function ttlSeconds(): number {
+function softTtlSeconds(): number {
   const raw = process.env.PAD_CACHE_TTL_SECONDS?.trim();
   const n = raw ? Number(raw) : PAD_CACHE_TTL_DEFAULT_SECONDS;
   if (!Number.isFinite(n) || n < 1 || n > 3600) {
     return PAD_CACHE_TTL_DEFAULT_SECONDS;
+  }
+  return Math.floor(n);
+}
+
+function hardTtlSeconds(): number {
+  const raw = process.env.PAD_CACHE_HARD_TTL_SECONDS?.trim();
+  const soft = softTtlSeconds();
+  const n = raw ? Number(raw) : PAD_CACHE_HARD_TTL_DEFAULT_SECONDS;
+  if (!Number.isFinite(n) || n < soft || n > 86400) {
+    return Math.max(soft * 20, PAD_CACHE_HARD_TTL_DEFAULT_SECONDS);
   }
   return Math.floor(n);
 }
@@ -42,7 +55,6 @@ export function padCacheKey(padId: string, phase: string): string {
   return `padfeed:${padId}:${p}`;
 }
 
-/** Homepage single-pad rollup cache key (aggregates from fast feed). */
 export function padSummaryCacheKey(padId: string): string {
   return `padsummary:${padId}`;
 }
@@ -56,9 +68,7 @@ async function getRedis(): Promise<RedisClientType | null> {
   redisConnectPromise = (async () => {
     try {
       const client = createClient({ url });
-      client.on("error", () => {
-        // Fail open — callers fall through to memory / upstream.
-      });
+      client.on("error", () => {});
       await client.connect();
       redisClient = client as RedisClientType;
       return redisClient;
@@ -73,32 +83,68 @@ async function getRedis(): Promise<RedisClientType | null> {
   return redisConnectPromise;
 }
 
-function memoryGet<T>(key: string): T | undefined {
-  const entry = memory.get(key);
-  if (!entry) return undefined;
-  if (Date.now() > entry.expiresAt) {
-    memory.delete(key);
-    return undefined;
-  }
+function parseEnvelope<T>(raw: string): Envelope<T> | null {
   try {
-    return JSON.parse(entry.payload) as T;
+    const parsed = JSON.parse(raw) as unknown;
+    if (
+      parsed &&
+      typeof parsed === "object" &&
+      "savedAt" in parsed &&
+      "value" in parsed &&
+      typeof (parsed as Envelope<T>).savedAt === "number"
+    ) {
+      return parsed as Envelope<T>;
+    }
+    // Legacy bare payload — treat as immediately soft-stale so we refresh.
+    return { savedAt: 0, value: parsed as T };
   } catch {
-    memory.delete(key);
-    return undefined;
+    return null;
   }
 }
 
-function memorySet(key: string, value: unknown, ttlSec: number): void {
+function memoryRead<T>(key: string): Envelope<T> | null {
+  const entry = memory.get(key);
+  if (!entry) return null;
+  if (Date.now() > entry.hardExpiresAt) {
+    memory.delete(key);
+    return null;
+  }
+  return parseEnvelope<T>(entry.payload);
+}
+
+function memoryWrite(key: string, envelope: Envelope<unknown>, hardSec: number): void {
   memory.set(key, {
-    expiresAt: Date.now() + ttlSec * 1000,
-    payload: JSON.stringify(value),
+    hardExpiresAt: Date.now() + hardSec * 1000,
+    payload: JSON.stringify(envelope),
   });
 }
 
-/**
- * Default: cache non-empty token arrays / objects with non-empty `tokens`.
- * Skip pending stubs and empty failure stand-ins.
- */
+async function redisRead<T>(key: string): Promise<Envelope<T> | null> {
+  try {
+    const redis = await getRedis();
+    if (!redis) return null;
+    const hit = await redis.get(key);
+    if (hit == null) return null;
+    return parseEnvelope<T>(hit);
+  } catch {
+    return null;
+  }
+}
+
+async function redisWrite(
+  key: string,
+  envelope: Envelope<unknown>,
+  hardSec: number,
+): Promise<void> {
+  try {
+    const redis = await getRedis();
+    if (!redis) return;
+    await redis.setEx(key, hardSec, JSON.stringify(envelope));
+  } catch {
+    // fail open
+  }
+}
+
 export function defaultPadCacheable(value: unknown): boolean {
   if (value == null) return false;
   if (Array.isArray(value)) return value.length > 0;
@@ -114,53 +160,95 @@ export type CachedPadFeedOptions<T> = {
   shouldCache?: (value: T) => boolean;
 };
 
+function isFresh(savedAt: number, softSec: number): boolean {
+  return Date.now() - savedAt < softSec * 1000;
+}
+
+async function storeValue<T>(
+  key: string,
+  value: T,
+  shouldCache: (value: T) => boolean,
+): Promise<void> {
+  if (!shouldCache(value)) return;
+  const hard = hardTtlSeconds();
+  const envelope: Envelope<T> = { savedAt: Date.now(), value };
+  memoryWrite(key, envelope, hard);
+  await redisWrite(key, envelope, hard);
+}
+
+async function runLoader<T>(
+  key: string,
+  loader: () => Promise<T>,
+  shouldCache: (value: T) => boolean,
+): Promise<T> {
+  const existing = inflight.get(key);
+  if (existing) return existing as Promise<T>;
+
+  const promise = (async () => {
+    try {
+      const value = await loader();
+      await storeValue(key, value, shouldCache);
+      return value;
+    } finally {
+      inflight.delete(key);
+    }
+  })();
+
+  inflight.set(key, promise);
+  return promise;
+}
+
 /**
- * Check Redis → memory → loader for an arbitrary key. Fail open on Redis errors.
+ * Peek last-good within hard TTL — never hits upstream.
+ * Used to SSR-seed homepage / pad pages for every visitor.
+ */
+export async function peekByKey<T>(key: string): Promise<T | undefined> {
+  const fromRedis = await redisRead<T>(key);
+  if (fromRedis) return fromRedis.value;
+  const fromMem = memoryRead<T>(key);
+  if (fromMem) return fromMem.value;
+  return undefined;
+}
+
+export async function peekPadFeed<T>(
+  padId: string,
+  phase: string,
+): Promise<T | undefined> {
+  return peekByKey(padCacheKey(padId, phase));
+}
+
+export async function peekPadSummary<T>(padId: string): Promise<T | undefined> {
+  return peekByKey(padSummaryCacheKey(padId));
+}
+
+/**
+ * Soft-fresh → return.
+ * Soft-stale but hard-present → return immediately + background refresh.
+ * Miss → await loader (first visitor / cold hard expiry).
  */
 export async function cachedByKey<T>(
   key: string,
   loader: () => Promise<T>,
   opts?: CachedPadFeedOptions<T>,
 ): Promise<T> {
-  const ttl = ttlSeconds();
+  const soft = softTtlSeconds();
   const shouldCache = opts?.shouldCache ?? defaultPadCacheable;
 
-  try {
-    const redis = await getRedis();
-    if (redis) {
-      const hit = await redis.get(key);
-      if (hit != null) {
-        return JSON.parse(hit) as T;
-      }
+  const hit =
+    (await redisRead<T>(key)) ?? memoryRead<T>(key) ?? null;
+
+  if (hit) {
+    if (isFresh(hit.savedAt, soft)) {
+      return hit.value;
     }
-  } catch {
-    // Redis down / parse error — try memory then upstream.
+    // Stale-while-revalidate: paint last-good for this visitor + everyone else.
+    void runLoader(key, loader, shouldCache).catch(() => {});
+    return hit.value;
   }
 
-  const memHit = memoryGet<T>(key);
-  if (memHit !== undefined) return memHit;
-
-  const value = await loader();
-
-  if (shouldCache(value as unknown as T)) {
-    memorySet(key, value, ttl);
-    try {
-      const redis = await getRedis();
-      if (redis) {
-        await redis.setEx(key, ttl, JSON.stringify(value));
-      }
-    } catch {
-      // Memory already warmed; upstream still returned.
-    }
-  }
-
-  return value;
+  return runLoader(key, loader, shouldCache);
 }
 
-/**
- * Check Redis → memory → loader. On Redis errors, fall through (fail open).
- * On hit, return parsed JSON. On miss, run loader; setex / memory when cacheable.
- */
 export async function cachedPadFeed<T>(
   padId: string,
   phase: string,

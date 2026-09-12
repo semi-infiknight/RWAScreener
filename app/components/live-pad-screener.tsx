@@ -53,6 +53,7 @@ export function LivePadScreener({
   const api = live ? padApi(launchpadId) : null;
   const [tokens, setTokens] = useState<TokenRow[]>(() => {
     if (!live) return initialTokens;
+    if (initialTokens.length > 0) return initialTokens;
     const stale = readStale<TokenRow[]>(
       padTokensCacheKey(launchpadId),
       PAD_TOKENS_MAX_AGE_MS,
@@ -62,6 +63,7 @@ export function LivePadScreener({
   // Only show full loading skeleton when we have nothing to paint.
   const [loading, setLoading] = useState(() => {
     if (!api) return false;
+    if (initialTokens.length > 0) return false;
     const stale = readStale<TokenRow[]>(
       padTokensCacheKey(launchpadId),
       PAD_TOKENS_MAX_AGE_MS,

@@ -111,26 +111,33 @@ function parsePadRow(body: unknown, resOk: boolean): PadAggregate | null {
 
 export function EcosystemExplorer({
   projects,
+  initialMetrics = {},
 }: {
   projects: Project[];
+  /** SSR Redis peek — shared snapshot for every visitor, including first paint. */
+  initialMetrics?: PadMetricsMap;
 }) {
   const [query, setQuery] = useState("");
   const [visible, setVisible] = useState(PAGE_SIZE);
   const [metrics, setMetrics] = useState<PadMetricsMap>(() => {
-    // Hydrate last-good homepage rollups so reload does not flash spinners.
+    // Prefer shared SSR snapshot; fall back to this browser's session cache.
     const stale = readStale<PadMetricsMap>(
       HOME_METRICS_CACHE,
       HOME_METRICS_MAX_AGE_MS,
     );
-    return stale?.value ?? {};
+    const fromSession = stale?.value ?? {};
+    return { ...fromSession, ...initialMetrics };
   });
   const [sort, setSort] = useState<SortKey>("sortOrder");
   const [asc, setAsc] = useState(true);
   /** False until a column header is clicked — default = curated sortOrder. */
   const [userSorted, setUserSorted] = useState(false);
 
-  // Stale-while-revalidate: paint session cache immediately, refresh in parallel.
+  // Stale-while-revalidate: paint SSR/session snapshot, refresh in parallel.
   useEffect(() => {
+    if (Object.keys(initialMetrics).length > 0) {
+      writeStale(HOME_METRICS_CACHE, { ...initialMetrics });
+    }
     let cancelled = false;
     const ac = new AbortController();
 
@@ -216,7 +223,7 @@ export function EcosystemExplorer({
       cancelled = true;
       ac.abort();
     };
-  }, [projects]);
+  }, [projects, initialMetrics]);
 
   const metricsPending = useMemo(() => {
     return projects.some((p) => isScreenerLive(p) && metrics[p.id] === undefined);
