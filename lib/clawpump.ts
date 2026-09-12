@@ -1,6 +1,9 @@
 import type { TokenRow } from "./tokens";
 
 const CLAW_ORIGIN = "https://clawpump.tech";
+/** Max offset for snapshot pagination. Offset is ignored unless `snapshot` is pinned. */
+const PAGE_SIZE = 200;
+const MAX_OFFSET = 4000; // large window; full catalog ~14k is too slow for request path
 
 type ClawToken = {
   mintAddress?: string;
@@ -13,6 +16,16 @@ type ClawToken = {
   liquidity?: number | null;
   isGraduated?: boolean | null;
   createdAt?: string | null;
+  launchPlatform?: string | null;
+};
+
+type ClawListResponse = {
+  tokens?: ClawToken[];
+  total?: number;
+  limit?: number;
+  offset?: number;
+  hasMore?: boolean;
+  snapshot?: string | number;
 };
 
 function clawHeaders(): HeadersInit {
@@ -20,7 +33,7 @@ function clawHeaders(): HeadersInit {
     Accept: "application/json",
     Origin: CLAW_ORIGIN,
     Referer: `${CLAW_ORIGIN}/`,
-    "User-Agent": "RWAScreener/1.0 (+clawpump live pad feed)",
+    "User-Agent": "RWAScreener/1.0 (+clawpump meteora_dbc feed)",
   };
 }
 
@@ -74,36 +87,65 @@ function mapToken(t: ClawToken): TokenRow | null {
   };
 }
 
-async function fetchSort(sort: "trending" | "new"): Promise<ClawToken[]> {
-  const res = await fetch(`${CLAW_ORIGIN}/api/tokens?sort=${sort}`, {
+async function fetchPage(
+  offset: number,
+  snapshot?: string,
+): Promise<ClawListResponse> {
+  const params = new URLSearchParams({
+    sort: "new",
+    limit: String(PAGE_SIZE),
+    offset: String(offset),
+  });
+  // Offset only applies when snapshot is pinned (otherwise API echoes offset:0).
+  if (snapshot) params.set("snapshot", snapshot);
+  const res = await fetch(`${CLAW_ORIGIN}/api/tokens?${params}`, {
     headers: clawHeaders(),
-    next: { revalidate: 60 },
+    next: { revalidate: 120 },
   });
   if (!res.ok) {
-    throw new Error(`ClawPump /api/tokens?sort=${sort} → HTTP ${res.status}`);
+    throw new Error(`ClawPump /api/tokens → HTTP ${res.status}`);
   }
-  const data = (await res.json()) as { tokens?: ClawToken[] };
-  return Array.isArray(data.tokens) ? data.tokens : [];
+  return (await res.json()) as ClawListResponse;
 }
 
 /**
- * Live ClawPump tokens from clawpump.tech.
- * Source: GET https://clawpump.tech/api/tokens?sort=trending|new
- * (union of both sorts; public list — no auth). Missing fields stay null.
+ * Live ClawPump tokens launched on Meteora DBC only.
+ *
+ * Source: GET https://clawpump.tech/api/tokens?sort=new&limit=200&offset=&snapshot=
+ * - Server-side launchPlatform filters are ignored — client filter only:
+ *   keep launchPlatform === "meteora_dbc" (drop pump_fun / pons / …).
+ * - Pagination requires pinning `snapshot` from the first page; bare offset is a no-op.
+ * - Cap: offset ≤ 4000 (~20 pages). Full catalog ~14k is too slow for the request path;
+ *   meteora_dbc density is low and clustered early in sort=new under current snapshots.
  */
 export async function fetchClawPumpTokens(): Promise<TokenRow[]> {
-  const [trending, neu] = await Promise.all([
-    fetchSort("trending"),
-    fetchSort("new"),
-  ]);
+  const first = await fetchPage(0);
+  const snapshot =
+    first.snapshot != null && first.snapshot !== ""
+      ? String(first.snapshot)
+      : undefined;
+  if (!snapshot) {
+    throw new Error("ClawPump response missing snapshot — cannot paginate");
+  }
+
+  const offsets: number[] = [];
+  for (let off = PAGE_SIZE; off <= MAX_OFFSET; off += PAGE_SIZE) {
+    offsets.push(off);
+  }
+  const rest = await Promise.all(offsets.map((off) => fetchPage(off, snapshot)));
 
   const rows: TokenRow[] = [];
   const seen = new Set<string>();
-  for (const raw of [...trending, ...neu]) {
-    const row = mapToken(raw);
-    if (!row || !row.mint || seen.has(row.mint)) continue;
-    seen.add(row.mint);
-    rows.push(row);
+  for (const body of [first, ...rest]) {
+    const tokens = Array.isArray(body.tokens) ? body.tokens : [];
+    for (const raw of tokens) {
+      if (raw?.launchPlatform !== "meteora_dbc") continue;
+      const row = mapToken(raw);
+      if (!row || !row.mint || seen.has(row.mint)) continue;
+      seen.add(row.mint);
+      rows.push(row);
+    }
+    if (body.hasMore === false) break;
   }
 
   rows.sort((a, b) => {

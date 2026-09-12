@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
   try {
     const tokens = await fetchClawPumpTokens();
     return NextResponse.json({
-      source: "https://clawpump.tech/api/tokens?sort=trending|new",
+      source: "https://clawpump.tech/api/tokens?sort=new&limit=200&offset=&snapshot= (filter launchPlatform===meteora_dbc)",
       phase: fast ? "fast" : "full",
       count: tokens.length,
       tokens,
