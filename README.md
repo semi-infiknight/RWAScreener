@@ -1,11 +1,28 @@
 # RWAScreener
 
-Niche Solana screener for **Meteora DBC 0.2.1** stock-token quote launches.
+Niche Solana screener for **Meteora DBC** ecosystem tracking (static seed first) and, later, **0.2.1** stock-token quote launches.
 
-- DBC pools (after the upgrade) whose quote mint is a badged stock token
-- Launchpads/configs creating those pools
+## Now (static)
 
-Not a general RWA dashboard. Not a SOL/USDC launch feed.
+Dashboard of launchpads/builders integrating DBC:
+
+- what they built
+- live vs integrating
+- what we verified
+- contact level with the team
+
+Statuses (`live` / `integrating` / `in_contact` / `discovered`) describe what we know and our relationship. **Not endorsements.**
+
+Seed: [`data/projects.json`](data/projects.json)
+
+```bash
+npm install
+npm run dev
+```
+
+## Later
+
+DBC pools (after 0.2.1) whose quote mint is a badged stock token, grouped by config/fee_claimer.
 
 ## Spec kit
 
@@ -18,6 +35,6 @@ Not a general RWA dashboard. Not a SOL/USDC launch feed.
 
 ## Status
 
-Spec kit on `main`. App scaffold not started.
+Static ecosystem seed + Next.js UI on `main`. Indexer not started.
 
 **Host (for now):** Railway project [`rwascreener`](https://railway.com/project/7ede8677-ff5f-44cf-911e-fa8bb4100695) — empty shell; web, worker, and Postgres go here (not `oracle`).

@@ -4,6 +4,23 @@
 **Repo:** `semi-infiknight/RWAScreener`  
 **Checkout:** `/Users/semi/Vibecode/RWAScreener`
 
+## 0. Ecosystem tracking (static seed first)
+
+DBC is permissionless: builders will integrate Meteora without a direct relationship. Before (and alongside) the quote-mint screener, we ship a **static seed** of known launchpads/projects:
+
+| Field | Purpose |
+| --- | --- |
+| Built | What they shipped on / around DBC |
+| Status | `live` / `integrating` / `in_contact` / `discovered` |
+| Verified | Concrete public proofs (docs, program IDs, site) |
+| Contact | Our relationship (`unknown` until a human sets it) |
+
+**Disclaimer:** status labels describe what we know and our relationship with builders. They are **not** endorsements of a project or token.
+
+Source of truth: `data/projects.json`. UI reads the seed at build time. On-chain config/fee_claimer attribution comes later.
+
+Initial seed: stardotfun, ethics, bags, perpspad, clawpump, lfgown.
+
 ## 1. Problem
 
 After Meteora DBC **0.2.1**, quote mints that are not permissionless-supported (notably **xStocks / stock tokens**) can be used on Dynamic Bonding Curve via **token badges**.

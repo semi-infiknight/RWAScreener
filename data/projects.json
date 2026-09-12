@@ -1,0 +1,170 @@
+{
+  "version": 1,
+  "updatedAt": "2026-09-12",
+  "disclaimer": "Status labels describe what we know about a DBC integration and our relationship with builders. They are not endorsements of a project or token.",
+  "statuses": ["live", "integrating", "in_contact", "discovered"],
+  "projects": [
+    {
+      "id": "stardotfun",
+      "displayName": "Star",
+      "slug": "stardotfun",
+      "website": "https://star.fun",
+      "x": "https://x.com/stardotfun",
+      "docs": "https://star-fun.gitbook.io/star",
+      "summary": "Onchain startup fundraising: public token sales, livestream pitches, then Meteora liquidity. Named as a Meteora launchpad partner.",
+      "built": [
+        "Public token fundraising on Solana",
+        "Livestream / Shark Tank-style raises",
+        "Post-raise Meteora liquidity; listed among Meteora DBC/DAMM partners"
+      ],
+      "status": "live",
+      "verified": ["public_site", "x_handle", "meteora_partner_mention"],
+      "contact": "unknown",
+      "dbc": {
+        "integrated": true,
+        "evidence": "Meteora 2026 Q1 update lists Star.fun among launchpad partners on DBC/DAMM primitives; on-chain config/fee_claimer not yet pinned in this seed",
+        "configKeys": [],
+        "feeClaimers": []
+      },
+      "sources": [
+        {"label": "X", "url": "https://x.com/stardotfun"},
+        {"label": "Site", "url": "https://star.fun"},
+        {"label": "Docs", "url": "https://star-fun.gitbook.io/star"}
+      ],
+      "notes": "Confirm specific DBC config pubkeys in a later pass."
+    },
+    {
+      "id": "ethics",
+      "displayName": "Ethics",
+      "slug": "ethics",
+      "website": "https://ethics.ltd",
+      "x": null,
+      "docs": null,
+      "summary": "Ethics Launch — market-backed token launches with locked liquidity; pairs with SOL, stables, and RWAs; site markets Instant DAMMv2 launches.",
+      "built": [
+        "Market-backed launches (SOL / stables / RWAs)",
+        "Locked liquidity + fee earn or airdrop to holders",
+        "v2 Instant DAMMv2 launch UX on ethics.ltd"
+      ],
+      "status": "integrating",
+      "verified": ["public_site"],
+      "contact": "unknown",
+      "dbc": {
+        "integrated": null,
+        "evidence": "Homepage emphasizes DAMMv2; DBC path not clearly documented publicly yet",
+        "configKeys": [],
+        "feeClaimers": []
+      },
+      "sources": [
+        {"label": "Site", "url": "https://ethics.ltd"}
+      ],
+      "notes": "Need X handle + whether DBC is live vs DAMM-only."
+    },
+    {
+      "id": "bags",
+      "displayName": "Bags",
+      "slug": "bags",
+      "website": "https://bags.fm",
+      "x": null,
+      "docs": "https://docs.bags.fm",
+      "summary": "Token launchpad with documented Meteora DBC creation/curve flow and DAMM v2 migration; Fee Share V1/V2 + public SDK/API.",
+      "built": [
+        "DBC token launches",
+        "DAMM v2 post-migration pools",
+        "Bags Fee Share V1/V2 + launch API/SDK"
+      ],
+      "status": "live",
+      "verified": ["docs_program_ids", "dbc_program", "damm_v2"],
+      "contact": "unknown",
+      "dbc": {
+        "integrated": true,
+        "evidence": "docs.bags.fm program IDs list Meteora DBC dbcij3LWUppWqq96dh6gJWwBifmcGfLSB5D4DuSMaqN",
+        "configKeys": [],
+        "feeClaimers": []
+      },
+      "sources": [
+        {"label": "Program IDs", "url": "https://docs.bags.fm/principles/program-ids"},
+        {"label": "Launch guide", "url": "https://docs.bags.fm/how-to-guides/launch-token"}
+      ],
+      "notes": "Need official X handle for the dashboard."
+    },
+    {
+      "id": "perpspad",
+      "displayName": "Perpspad",
+      "slug": "perpspad",
+      "website": "https://perpspad.fun",
+      "x": null,
+      "docs": "https://perpspad.fun/paper",
+      "summary": "Launchpad where coins trade on Meteora DBC (SOL quote), migrate to DAMM v2, and route fees into per-coin sub-wallets that back Phoenix perps; also stock-paired DLMM mode.",
+      "built": [
+        "DBC SOL-quoted bonding curve launches",
+        "DAMM v2 graduation with locked LP",
+        "Per-coin treasury → Imperial/Phoenix leveraged perps",
+        "Optional xStock / tokenized-stock DLMM pairing"
+      ],
+      "status": "live",
+      "verified": ["whitepaper", "public_site", "dbc_described"],
+      "contact": "unknown",
+      "dbc": {
+        "integrated": true,
+        "evidence": "Whitepaper §2: trading against Meteora DBC quoted in SOL; migrates to DAMM v2",
+        "configKeys": [],
+        "feeClaimers": []
+      },
+      "sources": [
+        {"label": "Whitepaper", "url": "https://perpspad.fun/paper"},
+        {"label": "Site", "url": "https://perpspad.fun"}
+      ],
+      "notes": "Need official X handle."
+    },
+    {
+      "id": "clawpump",
+      "displayName": "ClawPump",
+      "slug": "clawpump",
+      "website": "https://clawpump.tech",
+      "x": null,
+      "docs": "https://clawpump.tech/docs",
+      "summary": "Agentic finance runtime for launching/trading via agents. Public docs emphasize pump.fun / Metaplex Genesis / Pons; DBC as a launch path not documented yet.",
+      "built": [
+        "Agent wallets + MCP/CLI launch tooling",
+        "Public launch paths: pump.fun, Metaplex Genesis, Pons",
+        "DeFi tooling that can touch Meteora pools (not DBC launchpad docs)"
+      ],
+      "status": "discovered",
+      "verified": ["public_site", "docs"],
+      "contact": "unknown",
+      "dbc": {
+        "integrated": false,
+        "evidence": "No public DBC launch integration found in docs as of seed date; seeded because it is on the owner track list",
+        "configKeys": [],
+        "feeClaimers": []
+      },
+      "sources": [
+        {"label": "Site", "url": "https://clawpump.tech"},
+        {"label": "Docs", "url": "https://clawpump.tech/docs"}
+      ],
+      "notes": "Confirm if DBC integration is planned / in progress / different product."
+    },
+    {
+      "id": "lfgown",
+      "displayName": "LFGOWN",
+      "slug": "lfgown",
+      "website": null,
+      "x": null,
+      "docs": null,
+      "summary": "Placeholder — no reliable public site or X under this exact name found during seed pass.",
+      "built": [],
+      "status": "discovered",
+      "verified": [],
+      "contact": "unknown",
+      "dbc": {
+        "integrated": null,
+        "evidence": "Awaiting owner context",
+        "configKeys": [],
+        "feeClaimers": []
+      },
+      "sources": [],
+      "notes": "Need website, X, what they built, and status/contact."
+    }
+  ]
+}

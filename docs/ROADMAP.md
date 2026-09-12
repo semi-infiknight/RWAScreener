@@ -1,7 +1,9 @@
 # Roadmap
 
-## Phase 0 — Spec kit
+## Phase 0 — Spec kit + static ecosystem
 - [x] SPEC + PATTERNS + AGENTS
+- [x] Static ecosystem seed (`data/projects.json`) + Next.js dashboard
+- [ ] Owner fill: contact levels, LFGOWN identity, missing X handles
 - [ ] Confirm 0.2.1 exact deploy slot
 - [ ] Draft data/quote-mints.json (xStocks)
 

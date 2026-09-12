@@ -1,8 +1,8 @@
 # AGENTS.md — RWAScreener
 
 ## Mission
-Niche screener for Meteora DBC 0.2.1 stock-as-quote launches only.
-Seed badged quote mints → DBC pools after cutoff → group by config/fee_claimer → label launchpads.
+1. **Ecosystem (now):** static-seeded dashboard of DBC-integrating launchpads/builders — what they built, live vs integrating, verified facts, contact level. Status labels are not endorsements.
+2. **Quote screener (later):** niche tracker for Meteora DBC 0.2.1 stock-as-quote launches — seed badged quote mints → DBC pools after cutoff → group by config/fee_claimer → label launchpads.
 
 ## Read first
 - docs/SPEC.md
@@ -10,6 +10,7 @@ Seed badged quote mints → DBC pools after cutoff → group by config/fee_claim
 - docs/ROADMAP.md
 
 ## Invariants
+0. Ecosystem statuses describe knowledge/relationship only — never frame as endorsements.
 1. Never list pools whose quote mint is outside quote_mints seed.
 2. Never list pools before DBC_021_CUTOFF.
 3. Prefer on-chain proof over website scraping.
