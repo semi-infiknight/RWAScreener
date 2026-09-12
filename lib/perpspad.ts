@@ -58,6 +58,25 @@ function resolveMint(t: PerpspadToken): string | null {
 }
 
 /**
+ * Semi filter: Meteora DBC → DAMM v2 native path only.
+ * Drop fee-router / pump.fun adopts (`source: external`, `externalPlatform: pump_fun`).
+ * Site docs: native trading = Meteora Dynamic Bonding Curve (SOL) then DAMM v2 on fill.
+ */
+function isNativeMeteora(t: PerpspadToken): boolean {
+  if (t.source === "external") return false;
+  if (t.externalPlatform === "pump_fun") return false;
+  // Native catalog rows use source "perpspad" and a real `mint` (not externalMint-only).
+  if (t.source != null && t.source !== "perpspad") return false;
+  const mint = typeof t.mint === "string" ? t.mint.trim() : "";
+  return Boolean(mint);
+}
+
+/** Site badge order (tokens page): graduated → STOCK PAIRED → FEE ROUTER → NEW. */
+function mapStatus(t: PerpspadToken): TokenRow["status"] {
+  return t.graduated ? "graduated" : "bonding";
+}
+
+/**
  * Minimal TanStack Start / seroval JSON decoder for the shapes Perpspad returns.
  * Types observed: 0 number, 1 string, 2 boolean (s:0|1|2), 3 null, 9 array, 10 object.
  */
@@ -211,20 +230,31 @@ async function loadRawTokens(): Promise<{ source: string; tokens: PerpspadToken[
 }
 
 /**
- * Live Perpspad coin market as shown on perpspad.fun/tokens.
- * Source: TanStack Start GET `_serverFn/<hash>` (no public /api/launches).
- * Real fields: mint/externalMint, ticker, name, imageUrl, priceUsd, changePct,
- * marketCap, graduated, createdAt. No volume/liquidity/holders — left null.
+ * Live Perpspad coin market (native Meteora path only).
+ * Source: TanStack Start GET `_serverFn/<hash>` behind perpspad.fun/tokens.
+ * Semi filter drops `source:external` / pump.fun fee-router adopts.
+ * Status: site `graduated` boolean → graduated|bonding (upstream catalog often
+ * all graduated; do not invent bonding from graduationProgress).
+ * Columns: price, mcap, age. No volume/liquidity/holders — left null.
+ * Sort: highest mcap.
  */
 export async function fetchPerpspadTokens(): Promise<{
   source: string;
   tokens: TokenRow[];
+  kept: number;
+  droppedExternal: number;
+  rawCount: number;
 }> {
   const { source, tokens: raw } = await loadRawTokens();
   const rows: TokenRow[] = [];
   const seen = new Set<string>();
 
+  let droppedExternal = 0;
   for (const t of raw) {
+    if (!isNativeMeteora(t)) {
+      droppedExternal += 1;
+      continue;
+    }
     const mint = resolveMint(t);
     if (!mint || seen.has(mint)) continue;
     seen.add(mint);
@@ -238,7 +268,7 @@ export async function fetchPerpspadTokens(): Promise<{
       name,
       mint,
       icon: absoluteIcon(t.imageUrl ?? null),
-      status: t.graduated ? "graduated" : "bonding",
+      status: mapStatus(t),
       priceUsd: numOrNull(t.priceUsd),
       change24hPct: numOrNull(t.changePct),
       mcapUsd: mcap,
@@ -263,5 +293,11 @@ export async function fetchPerpspadTokens(): Promise<{
     return (a.ageHours ?? 1e9) - (b.ageHours ?? 1e9);
   });
 
-  return { source, tokens: rows };
+  return {
+    source,
+    tokens: rows,
+    kept: rows.length,
+    droppedExternal,
+    rawCount: raw.length,
+  };
 }

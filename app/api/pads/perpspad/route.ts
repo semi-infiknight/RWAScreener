@@ -12,11 +12,16 @@ export async function GET(req: NextRequest) {
   const phase = req.nextUrl.searchParams.get("phase") || "full";
   const fast = phase === "fast";
   try {
-    const { source, tokens } = await fetchPerpspadTokens();
+    const { source, tokens, kept, droppedExternal, rawCount } =
+      await fetchPerpspadTokens();
     return NextResponse.json({
       source,
       phase: fast ? "fast" : "full",
       count: tokens.length,
+      kept,
+      droppedExternal,
+      rawCount,
+      filter: "native_meteora_dbc_damm_v2",
       tokens,
     });
   } catch (err) {
