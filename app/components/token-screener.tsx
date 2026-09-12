@@ -34,6 +34,27 @@ const IPFS_GATEWAYS = [
   "https://ipfs.io/ipfs/",
 ] as const;
 
+/**
+ * Pad/CDN hosts that already serve durable https icons.
+ * Never put rotating IPFS gateways ahead of these (browser cache key thrash).
+ */
+const DURABLE_ICON_HOST_SUFFIXES = [
+  "revshare.dev",
+  "r2.dev",
+  "embercurve.fun",
+  "clawpump.tech",
+  "ethics.ltd",
+  "letsfuckingown.fun",
+  "perpspad.fun",
+  "cloudfront.net",
+  "amazonaws.com",
+  "supabase.co",
+] as const;
+
+const ICON_GW_STORAGE_PREFIX = "rwa-icon-gw:";
+/** In-memory mirror of sessionStorage (SSR-safe + private-mode fallback). */
+const rememberedIconByCid = new Map<string, string>();
+
 function ipfsCid(url: string): string | null {
   if (url.startsWith("ipfs://")) {
     return url.slice("ipfs://".length).replace(/^ipfs\//, "") || null;
@@ -42,37 +63,91 @@ function ipfsCid(url: string): string | null {
   return m?.[1] ?? null;
 }
 
-/** Hosts that should not be rewritten through rotating IPFS gateways. */
+function isHttpUrl(url: string): boolean {
+  return url.startsWith("https://") || url.startsWith("http://");
+}
+
 function isDurableIconHost(url: string): boolean {
+  if (url.startsWith("/")) return true;
   try {
     const host = new URL(url).hostname.toLowerCase();
-    if (host === "images.revshare.dev" || host.endsWith(".revshare.dev")) return true;
-    if (host.endsWith(".cloudfront.net")) return true;
-    if (host.endsWith(".amazonaws.com")) return true;
-    if (host.endsWith(".supabase.co")) return true;
-    // Local / same-origin avatars
     if (!host || host === "localhost") return true;
-    return false;
+    return DURABLE_ICON_HOST_SUFFIXES.some(
+      (suffix) => host === suffix || host.endsWith(`.${suffix}`),
+    );
   } catch {
-    return url.startsWith("/");
+    return false;
   }
 }
 
+function readRememberedIcon(cid: string): string | null {
+  const mem = rememberedIconByCid.get(cid);
+  if (mem) return mem;
+  try {
+    if (typeof sessionStorage === "undefined") return null;
+    const v = sessionStorage.getItem(ICON_GW_STORAGE_PREFIX + cid);
+    if (v) rememberedIconByCid.set(cid, v);
+    return v;
+  } catch {
+    return null;
+  }
+}
+
+function writeRememberedIcon(cid: string, url: string) {
+  rememberedIconByCid.set(cid, url);
+  try {
+    if (typeof sessionStorage === "undefined") return;
+    sessionStorage.setItem(ICON_GW_STORAGE_PREFIX + cid, url);
+  } catch {
+    /* quota / private mode */
+  }
+}
+
+function clearRememberedIcon(cid: string, url: string) {
+  if (rememberedIconByCid.get(cid) === url) rememberedIconByCid.delete(cid);
+  try {
+    if (typeof sessionStorage === "undefined") return;
+    if (sessionStorage.getItem(ICON_GW_STORAGE_PREFIX + cid) === url) {
+      sessionStorage.removeItem(ICON_GW_STORAGE_PREFIX + cid);
+    }
+  } catch {
+    /* ignore */
+  }
+}
+
+/**
+ * Prefer the original https icon URL first so the browser hits a stable cache key.
+ * Only append alternate IPFS gateways as onError fallbacks — never ahead of
+ * durable hosts (images.revshare.dev, *.r2.dev, embercurve, clawpump, …).
+ * Last-good URL per CID is sticky in sessionStorage so reloads do not thrash.
+ */
 function iconCandidates(icon: string | null | undefined): string[] {
   if (!icon) return [];
-  // Prefer the original URL first so the browser can hit a stable cache key.
-  // Only fan out to IPFS gateways when the source is ipfs:// or an /ipfs/ path
-  // and not already a durable CDN host.
-  if (isDurableIconHost(icon) || icon.startsWith("/")) return [icon];
+  if (icon.startsWith("/")) return [icon];
+
   const cid = ipfsCid(icon);
   if (!cid) return [icon];
+
+  // Durable pad CDNs: never rewrite / never lead with a stale remembered gateway.
+  if (isHttpUrl(icon) && isDurableIconHost(icon)) {
+    return [icon];
+  }
+
   const out: string[] = [];
-  if (icon.startsWith("https://") || icon.startsWith("http://")) out.push(icon);
+  const remembered = readRememberedIcon(cid);
+  // Sticky last-good gateway so reload skips a previously-failing host.
+  if (remembered) out.push(remembered);
+
+  // Prefer the source https URL before any rebuilt gateway.
+  if (isHttpUrl(icon)) out.push(icon);
+
+  // Alternate IPFS gateways as onError fallbacks only.
   for (const g of IPFS_GATEWAYS) {
     const u = `${g}${cid}`;
     if (!out.includes(u)) out.push(u);
   }
-  return out;
+
+  return [...new Set(out)];
 }
 
 function TokenAvatar({
@@ -82,6 +157,7 @@ function TokenAvatar({
   icon?: string | null;
   symbol: string;
 }) {
+  const cid = useMemo(() => (icon ? ipfsCid(icon) : null), [icon]);
   const candidates = useMemo(() => iconCandidates(icon), [icon]);
   const [idx, setIdx] = useState(0);
   const [failed, setFailed] = useState(candidates.length === 0);
@@ -111,7 +187,11 @@ function TokenAvatar({
           decoding="async"
           width={36}
           height={36}
+          onLoad={() => {
+            if (cid && src) writeRememberedIcon(cid, src);
+          }}
           onError={() => {
+            if (cid && src) clearRememberedIcon(cid, src);
             if (idx + 1 < candidates.length) setIdx((i) => i + 1);
             else setFailed(true);
           }}
