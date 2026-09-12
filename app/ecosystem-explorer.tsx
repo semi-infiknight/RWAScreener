@@ -1,7 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import type { Project } from "./page";
+import Link from "next/link";
+import type { Project } from "../lib/projects";
 import { HeroBars } from "./hero-bars";
 
 const PAGE_SIZE = 15;
@@ -54,7 +55,6 @@ export function EcosystemExplorer({
 }) {
   const [status, setStatus] = useState<string>("all");
   const [query, setQuery] = useState("");
-  const [openId, setOpenId] = useState<string | null>(null);
   const [visible, setVisible] = useState(PAGE_SIZE);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
@@ -83,12 +83,12 @@ export function EcosystemExplorer({
   return (
     <div className="page">
       <header className="topnav">
-        <div className="brand">
+        <Link href="/" className="brand">
           <span className="mark" aria-hidden />
           RWAScreener
-        </div>
+        </Link>
         <nav className="nav-links" aria-label="Primary">
-          <span>Launchpads</span>
+          <Link href="/">Launchpads</Link>
           <span>Quotes</span>
           <span>Docs</span>
         </nav>
@@ -129,7 +129,6 @@ export function EcosystemExplorer({
                   onClick={() => {
                     setStatus(f.id);
                     setVisible(PAGE_SIZE);
-                    setOpenId(null);
                   }}
                 >
                   {f.label}
@@ -200,23 +199,12 @@ export function EcosystemExplorer({
             <div className="empty">No projects match.</div>
           ) : (
             shown.map((p, idx) => {
-              const open = openId === p.id;
               const href = p.website ?? p.x ?? p.docs ?? "#";
               return (
-                <div key={p.id} role="listitem">
-                  <div
+                <div key={p.id} role="listitem" className="row-wrap">
+                  <Link
+                    href={`/projects/${p.slug}`}
                     className="row"
-                    data-open={open}
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => setOpenId(open ? null : p.id)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " ") {
-                        e.preventDefault();
-                        setOpenId(open ? null : p.id);
-                      }
-                    }}
-                    aria-expanded={open}
                   >
                     <span
                       className="avatar"
@@ -235,74 +223,21 @@ export function EcosystemExplorer({
                       <span className="tag">{p.status.replace("_", " ")}</span>
                       <span className="tag">{dbcTag(p)}</span>
                     </span>
+                    <span className="row-chevron" aria-hidden>
+                      →
+                    </span>
+                  </Link>
+                  {href !== "#" ? (
                     <a
-                      className="ext"
+                      className="ext row-ext"
                       href={href}
                       target="_blank"
                       rel="noreferrer"
-                      aria-label={`Open ${p.displayName}`}
-                      onClick={(e) => e.stopPropagation()}
+                      aria-label={`Open ${p.displayName} website`}
                     >
                       ↗
                     </a>
-                    <div className="expand">
-                      <p>{p.summary}</p>
-                      {p.built.length > 0 ? (
-                        <ul>
-                          {p.built.map((b) => (
-                            <li key={b}>{b}</li>
-                          ))}
-                        </ul>
-                      ) : null}
-                      <table className="meta-table">
-                        <tbody>
-                          <tr>
-                            <th>Status</th>
-                            <td>{p.status.replace("_", " ")}</td>
-                          </tr>
-                          <tr>
-                            <th>Contact</th>
-                            <td>{p.contact}</td>
-                          </tr>
-                          <tr>
-                            <th>DBC</th>
-                            <td>{p.dbc.evidence}</td>
-                          </tr>
-                          <tr>
-                            <th>Verified</th>
-                            <td>
-                              {p.verified.length
-                                ? p.verified.join(", ")
-                                : "—"}
-                            </td>
-                          </tr>
-                          {p.notes ? (
-                            <tr>
-                              <th>Notes</th>
-                              <td>{p.notes}</td>
-                            </tr>
-                          ) : null}
-                        </tbody>
-                      </table>
-                      <div className="expand-links">
-                        {p.website ? (
-                          <a href={p.website} target="_blank" rel="noreferrer">
-                            Website
-                          </a>
-                        ) : null}
-                        {p.x ? (
-                          <a href={p.x} target="_blank" rel="noreferrer">
-                            X
-                          </a>
-                        ) : null}
-                        {p.docs ? (
-                          <a href={p.docs} target="_blank" rel="noreferrer">
-                            Docs
-                          </a>
-                        ) : null}
-                      </div>
-                    </div>
-                  </div>
+                  ) : null}
                 </div>
               );
             })
@@ -386,7 +321,6 @@ export function EcosystemExplorer({
             onClick={() => {
               setDrawerOpen(false);
               setVisible(PAGE_SIZE);
-              setOpenId(null);
             }}
           >
             Apply

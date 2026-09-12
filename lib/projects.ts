@@ -1,0 +1,30 @@
+import seed from "../data/projects.json";
+
+export type Project = (typeof seed.projects)[number];
+
+export const disclaimer = seed.disclaimer;
+export const updatedAt = seed.updatedAt;
+export const projects = seed.projects as Project[];
+
+export function getProject(slug: string): Project | undefined {
+  return projects.find((p) => p.slug === slug || p.id === slug);
+}
+
+export function allSlugs(): string[] {
+  return projects.map((p) => p.slug);
+}
+
+export function domainOf(website: string | null): string {
+  if (!website) return "—";
+  try {
+    return new URL(website).hostname.replace(/^www\./, "");
+  } catch {
+    return website;
+  }
+}
+
+export function dbcLabel(p: Project): string {
+  if (p.dbc.integrated === true) return "DBC integrated";
+  if (p.dbc.integrated === false) return "DBC not verified";
+  return "DBC unknown";
+}
