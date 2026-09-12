@@ -4,18 +4,14 @@ import { useEffect, useState } from "react";
 import type { TokenRow } from "../../lib/tokens";
 import { TokenScreener } from "./token-screener";
 
-/** Pads whose tokens are fetched live from /api/pads/<id> (never block SSR). */
-const LIVE_PAD_API: Record<string, string> = {
-  ethics: "/api/pads/ethics",
-  embercurve: "/api/pads/embercurve",
-  bags: "/api/pads/bags",
-};
+function padApi(launchpadId: string): string {
+  return `/api/pads/${launchpadId}`;
+}
 
 function mergeById(prev: TokenRow[], next: TokenRow[]): TokenRow[] {
   if (prev.length === 0) return next;
   const map = new Map(prev.map((t) => [t.id, t]));
   for (const t of next) map.set(t.id, { ...map.get(t.id), ...t });
-  // Keep next order (usually volume-ranked)
   const order = next.map((t) => t.id);
   const seen = new Set(order);
   const merged = order.map((id) => map.get(id)!);
@@ -25,6 +21,11 @@ function mergeById(prev: TokenRow[], next: TokenRow[]): TokenRow[] {
   return merged;
 }
 
+/**
+ * Universal live-pad screener: never blocks SSR.
+ * - live=false (StonkOptions only) → Not live yet empty state
+ * - live=true → skeleton, then ?phase=fast rows, then ?phase=full enrich
+ */
 export function LivePadScreener({
   launchpadId,
   launchpadName,
@@ -38,38 +39,48 @@ export function LivePadScreener({
   live?: boolean;
   ecosystemName?: string;
 }) {
-  const api = LIVE_PAD_API[launchpadId];
-  const [tokens, setTokens] = useState<TokenRow[]>(initialTokens);
-  const [loading, setLoading] = useState(Boolean(api) && live);
+  const api = live ? padApi(launchpadId) : null;
+  // Live pads start empty + skeleton (ignore static seed) so loading never flashes stubs.
+  const [tokens, setTokens] = useState<TokenRow[]>(live ? [] : initialTokens);
+  const [loading, setLoading] = useState(Boolean(api));
   const [enriching, setEnriching] = useState(false);
+  const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!api || !live) return;
+    if (!api) return;
     let cancelled = false;
 
     async function load() {
       setLoading(true);
       setError(null);
+      setPending(false);
       try {
-        // Phase 1 — fast list (icons + mcap/vol) so rows appear ASAP
         const fastRes = await fetch(`${api}?phase=fast`);
-        const fastBody = await fastRes.json();
+        const fastBody = await fastRes.json().catch(() => ({}));
         if (!fastRes.ok) {
-          throw new Error(fastBody?.error || `HTTP ${fastRes.status}`);
+          throw new Error(
+            (fastBody as { error?: string })?.error || `HTTP ${fastRes.status}`,
+          );
         }
         if (cancelled) return;
         const fastTokens = Array.isArray(fastBody.tokens) ? fastBody.tokens : [];
+        setPending(Boolean(fastBody.pending) && fastTokens.length === 0);
         setTokens(fastTokens);
         setLoading(false);
 
-        // Phase 2 — enrich prices/% (optional; pads without phase support just re-fetch)
+        // Phase 2 enrich (pads that ignore phase just return the same payload)
+        if (fastBody.pending) {
+          setEnriching(false);
+          return;
+        }
         setEnriching(true);
         try {
           const fullRes = await fetch(`${api}?phase=full`);
-          const fullBody = await fullRes.json();
+          const fullBody = await fullRes.json().catch(() => ({}));
           if (!cancelled && fullRes.ok && Array.isArray(fullBody.tokens)) {
             setTokens((prev) => mergeById(prev, fullBody.tokens));
+            setPending(Boolean(fullBody.pending) && fullBody.tokens.length === 0);
           }
         } catch {
           // keep fast rows
@@ -79,6 +90,7 @@ export function LivePadScreener({
       } catch (err: unknown) {
         if (cancelled) return;
         setError(err instanceof Error ? err.message : "Failed to load tokens");
+        setTokens([]);
         setLoading(false);
         setEnriching(false);
       }
@@ -88,7 +100,7 @@ export function LivePadScreener({
     return () => {
       cancelled = true;
     };
-  }, [api, live]);
+  }, [api]);
 
   return (
     <div className="live-pad-screener">
@@ -108,6 +120,7 @@ export function LivePadScreener({
         tokens={tokens}
         live={live}
         loading={loading}
+        feedPending={pending}
         ecosystemName={ecosystemName}
       />
     </div>

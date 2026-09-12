@@ -87,6 +87,7 @@ export function TokenScreener({
   tokens,
   live = true,
   loading = false,
+  feedPending = false,
   ecosystemName,
 }: {
   launchpadName: string;
@@ -94,6 +95,8 @@ export function TokenScreener({
   live?: boolean;
   /** Live feed still fetching — never show "Not live yet". */
   loading?: boolean;
+  /** API route exists but pad feed not reverse-engineered yet. */
+  feedPending?: boolean;
   ecosystemName?: string;
 }) {
   const [tab, setTab] = useState<TabId>("trending");
@@ -244,11 +247,16 @@ export function TokenScreener({
         </div>
       ) : showLiveEmpty ? (
         <div className="vs-empty-state">
-          <div className="vs-empty-badge">Live</div>
-          <h3>No launches returned</h3>
+          <div className="vs-empty-badge">{feedPending ? "Wiring" : "Live"}</div>
+          <h3>
+            {feedPending
+              ? `${launchpadName} feed coming online`
+              : "No launches returned"}
+          </h3>
           <p>
-            The live feed for {launchpadName} is up, but it returned no rows
-            right now. Try refreshing.
+            {feedPending
+              ? "This pad is live in the ecosystem list. Token rows will appear here once its public API is wired — no placeholder data."
+              : `The live feed for ${launchpadName} is up, but it returned no rows right now. Try refreshing.`}
           </p>
         </div>
       ) : (

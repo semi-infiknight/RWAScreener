@@ -186,7 +186,7 @@
         }
       ],
       "icon": "/avatars/perpspad.jpg",
-      "screenerLive": false
+      "screenerLive": true
     },
     {
       "id": "clawpump",
@@ -229,7 +229,7 @@
       ],
       "notes": "Confirm if DBC integration is planned / in progress / different product.",
       "icon": "/avatars/clawpump.jpg",
-      "screenerLive": false
+      "screenerLive": true
     },
     {
       "id": "lfgown",
@@ -267,7 +267,7 @@
       ],
       "notes": "Confirm whether launches use DBC configs or another Meteora primitive.",
       "icon": "/avatars/lfgown.jpg",
-      "screenerLive": false
+      "screenerLive": true
     },
     {
       "id": "embercurve",
