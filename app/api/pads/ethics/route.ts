@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { PAD_JSON_CACHE_CONTROL, PAD_JSON_NO_STORE } from "../../../../lib/http-cache";
 import {
   enrichEthicsToken,
   fetchEthicsTokens,
@@ -12,21 +13,31 @@ export const revalidate = 0;
  * ?mint=… — single-token detail enrich (price / % / liq)
  * ?phase=full — legacy bulk enrich (avoid; prefer sequential ?mint=)
  */
+function jsonCached(body: unknown, ok: boolean, status = 200) {
+  const res = NextResponse.json(body, { status });
+  res.headers.set(
+    "Cache-Control",
+    ok ? PAD_JSON_CACHE_CONTROL : PAD_JSON_NO_STORE,
+  );
+  return res;
+}
+
 export async function GET(req: NextRequest) {
   const mint = req.nextUrl.searchParams.get("mint")?.trim();
   if (mint) {
     try {
       const patch = await enrichEthicsToken(mint);
       if (!patch) {
-        return NextResponse.json(
+        return jsonCached(
           { error: "No token-info for mint", mint, token: null },
-          { status: 404 },
+          false,
+          404,
         );
       }
-      return NextResponse.json({ mint, token: patch });
+      return jsonCached({ mint, token: patch }, true);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Ethics mint enrich failed";
-      return NextResponse.json({ error: message, mint, token: null }, { status: 502 });
+      return jsonCached({ error: message, mint, token: null }, false, 502);
     }
   }
 
@@ -38,15 +49,15 @@ export async function GET(req: NextRequest) {
       enrichBoard: true,
       enrichDetails: full,
     });
-    return NextResponse.json({
+    return jsonCached({
       source: "https://www.ethics.ltd/api/launches (+ board/enrich)",
       phase: full ? "full" : "fast",
       sequential: true,
       count: tokens.length,
       tokens,
-    });
+    }, true);
   } catch (err) {
     const message = err instanceof Error ? err.message : "Ethics fetch failed";
-    return NextResponse.json({ error: message, tokens: [] }, { status: 502 });
+    return jsonCached({ error: message, tokens: [] }, false, 502);
   }
 }

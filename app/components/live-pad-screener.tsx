@@ -1,6 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import {
+  PAD_TOKENS_MAX_AGE_MS,
+  padTokensCacheKey,
+  readStale,
+  writeStale,
+} from "../../lib/client-stale-cache";
 import type { TokenRow } from "../../lib/tokens";
 import { PadMetrics } from "./pad-metrics";
 import { TokenScreener } from "./token-screener";
@@ -45,8 +51,23 @@ export function LivePadScreener({
   ecosystemName?: string;
 }) {
   const api = live ? padApi(launchpadId) : null;
-  const [tokens, setTokens] = useState<TokenRow[]>(live ? [] : initialTokens);
-  const [loading, setLoading] = useState(Boolean(api));
+  const [tokens, setTokens] = useState<TokenRow[]>(() => {
+    if (!live) return initialTokens;
+    const stale = readStale<TokenRow[]>(
+      padTokensCacheKey(launchpadId),
+      PAD_TOKENS_MAX_AGE_MS,
+    );
+    return stale?.value?.length ? stale.value : [];
+  });
+  // Only show full loading skeleton when we have nothing to paint.
+  const [loading, setLoading] = useState(() => {
+    if (!api) return false;
+    const stale = readStale<TokenRow[]>(
+      padTokensCacheKey(launchpadId),
+      PAD_TOKENS_MAX_AGE_MS,
+    );
+    return !(stale?.value && stale.value.length > 0);
+  });
   const [pending, setPending] = useState(false);
   const pendingPatches = useRef<
     Array<Partial<TokenRow> & { id?: string; mint?: string }>
@@ -74,7 +95,7 @@ export function LivePadScreener({
     }
 
     async function load() {
-      setLoading(true);
+      // Keep stale rows visible (loading already true only when empty).
       setPending(false);
       pendingPatches.current = [];
       try {
@@ -88,6 +109,9 @@ export function LivePadScreener({
         setPending(Boolean(fastBody.pending) && fastTokens.length === 0);
         setTokens(fastTokens);
         setLoading(false);
+        if (fastTokens.length > 0) {
+          writeStale(padTokensCacheKey(launchpadId), fastTokens);
+        }
 
         // Only Ethics-style feeds opt into sequential ?mint= enrich.
         // Pads without it (Bags/Ember/ClawPump/RevShare/…) must not storm the list endpoint.
@@ -121,7 +145,8 @@ export function LivePadScreener({
         if (!cancelled) flushPatches();
       } catch (err) {
         if (cancelled || (err instanceof DOMException && err.name === "AbortError")) return;
-        setTokens([]);
+        // Keep last-good rows on network flap; only clear if we never had any.
+        setTokens((prev) => prev);
         setLoading(false);
       }
     }

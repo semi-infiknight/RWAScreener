@@ -9,6 +9,12 @@ import {
 import type { Project } from "../lib/projects";
 import { isScreenerLive } from "../lib/projects";
 import { formatUsd } from "../lib/tokens";
+import {
+  HOME_METRICS_CACHE,
+  HOME_METRICS_MAX_AGE_MS,
+  readStale,
+  writeStale,
+} from "../lib/client-stale-cache";
 import { HeroDark } from "./hero-dark";
 
 const PAGE_SIZE = 15;
@@ -110,14 +116,20 @@ export function EcosystemExplorer({
 }) {
   const [query, setQuery] = useState("");
   const [visible, setVisible] = useState(PAGE_SIZE);
-  const [metrics, setMetrics] = useState<PadMetricsMap>({});
+  const [metrics, setMetrics] = useState<PadMetricsMap>(() => {
+    // Hydrate last-good homepage rollups so reload does not flash spinners.
+    const stale = readStale<PadMetricsMap>(
+      HOME_METRICS_CACHE,
+      HOME_METRICS_MAX_AGE_MS,
+    );
+    return stale?.value ?? {};
+  });
   const [sort, setSort] = useState<SortKey>("sortOrder");
   const [asc, setAsc] = useState(true);
   /** False until a column header is clicked — default = curated sortOrder. */
   const [userSorted, setUserSorted] = useState(false);
 
-  // Progressive pad-by-pad metrics: paint names immediately, fill cells as each
-  // /api/pads/summary?pad=id returns (never block first paint on monolithic summary).
+  // Stale-while-revalidate: paint session cache immediately, refresh in parallel.
   useEffect(() => {
     let cancelled = false;
     const ac = new AbortController();
@@ -152,40 +164,54 @@ export function EcosystemExplorer({
           }
           lastErr = err;
         }
-        // Brief backoff before retry (cold Redis / upstream flap).
         if (attempt < PAD_FETCH_ATTEMPTS - 1) {
           await new Promise((r) => setTimeout(r, 350 * (attempt + 1)));
         }
       }
       void lastErr;
-      // Exhausted retries — null counts → — (never pin EMPTY zeros).
       return { ...FAILED_PAD_AGGREGATE };
     }
 
-    async function loadSequential() {
-      for (const p of livePads) {
-        if (cancelled) return;
-        try {
-          const agg = await loadWithRetry(p.id);
+    async function loadParallel() {
+      await Promise.all(
+        livePads.map(async (p) => {
           if (cancelled) return;
-          setMetrics((prev) => ({ ...prev, [p.id]: agg }));
-        } catch (err) {
-          if (
-            cancelled ||
-            (err instanceof DOMException && err.name === "AbortError")
-          ) {
-            return;
+          try {
+            const agg = await loadWithRetry(p.id);
+            if (cancelled) return;
+            setMetrics((prev) => {
+              const next = { ...prev, [p.id]: agg };
+              writeStale(HOME_METRICS_CACHE, next);
+              return next;
+            });
+          } catch (err) {
+            if (
+              cancelled ||
+              (err instanceof DOMException && err.name === "AbortError")
+            ) {
+              return;
+            }
+            setMetrics((prev) => {
+              // Keep prior good cell if we already had one (stale or earlier).
+              if (prev[p.id] && prev[p.id] !== undefined) {
+                const existing = prev[p.id]!;
+                if (existing.coins != null || existing.mcapUsd != null) {
+                  return prev;
+                }
+              }
+              const next = {
+                ...prev,
+                [p.id]: { ...FAILED_PAD_AGGREGATE },
+              };
+              writeStale(HOME_METRICS_CACHE, next);
+              return next;
+            });
           }
-          // Leave pending? Steering: never write zeros on fail — use — via FAILED.
-          setMetrics((prev) => ({
-            ...prev,
-            [p.id]: { ...FAILED_PAD_AGGREGATE },
-          }));
-        }
-      }
+        }),
+      );
     }
 
-    void loadSequential();
+    void loadParallel();
     return () => {
       cancelled = true;
       ac.abort();

@@ -14,6 +14,7 @@ import {
   cachedByKey,
   padSummaryCacheKey,
 } from "../../../../lib/pad-cache";
+import { PAD_JSON_CACHE_CONTROL, PAD_JSON_NO_STORE } from "../../../../lib/http-cache";
 import { fetchPerpspadTokens } from "../../../../lib/perpspad";
 import { getProject, isScreenerLive, projects } from "../../../../lib/projects";
 import { fetchRevShareTokens } from "../../../../lib/revshare";
@@ -21,9 +22,6 @@ import type { TokenRow } from "../../../../lib/tokens";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
-
-const SUMMARY_CACHE_CONTROL =
-  "public, s-maxage=15, stale-while-revalidate=30";
 
 export type PadSummaryRow = PadAggregate & {
   id: string;
@@ -107,7 +105,7 @@ function jsonWithCache(body: unknown, cacheable: boolean): NextResponse {
   const res = NextResponse.json(body);
   res.headers.set(
     "Cache-Control",
-    cacheable ? SUMMARY_CACHE_CONTROL : "no-store",
+    cacheable ? PAD_JSON_CACHE_CONTROL : PAD_JSON_NO_STORE,
   );
   return res;
 }

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { PAD_JSON_CACHE_CONTROL, PAD_JSON_NO_STORE } from "../../../../lib/http-cache";
 import {
   enrichLfgownToken,
   fetchLfgownTokens,
@@ -14,6 +15,15 @@ export const revalidate = 0;
  * ?mint=… — single-token icon enrich from launch.uri metadata
  * ?phase=full — list + concurrent uri→image icons
  */
+function jsonCached(body: unknown, ok: boolean, status = 200) {
+  const res = NextResponse.json(body, { status });
+  res.headers.set(
+    "Cache-Control",
+    ok ? PAD_JSON_CACHE_CONTROL : PAD_JSON_NO_STORE,
+  );
+  return res;
+}
+
 export async function GET(req: NextRequest) {
   const mint = req.nextUrl.searchParams.get("mint")?.trim();
   if (mint) {
@@ -25,7 +35,7 @@ export async function GET(req: NextRequest) {
           { status: 404 },
         );
       }
-      return NextResponse.json({ mint, token: patch });
+      return jsonCached({ mint, token: patch }, true);
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "LFOwn mint enrich failed";
@@ -40,15 +50,15 @@ export async function GET(req: NextRequest) {
   const full = phase === "full";
   try {
     const tokens = await fetchLfgownTokens({ enrichIcons: full });
-    return NextResponse.json({
+    return jsonCached({
       source: "https://letsfuckingown.fun/api/launches (+ uri metadata.image)",
       phase: full ? "full" : "fast",
       sequential: true,
       count: tokens.length,
       tokens,
-    });
+    }, true);
   } catch (err) {
     const message = err instanceof Error ? err.message : "LFOwn fetch failed";
-    return NextResponse.json({ error: message, tokens: [] }, { status: 502 });
+    return jsonCached({ error: message, tokens: [] }, false, 502);
   }
 }
