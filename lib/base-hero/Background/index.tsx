@@ -93,7 +93,7 @@ function HeroBackground({ config = {} }: HeroBackgroundProps) {
         camera={CAMERA_CONFIG as CameraProps}
         gl={{ alpha: false, antialias: true, powerPreference: "high-performance" }}
         onCreated={({ gl }) => {
-          gl.setClearColor(0x000000, 1);
+          gl.setClearColor(0xffffff, 1);
         }}
       >
         <Scene
