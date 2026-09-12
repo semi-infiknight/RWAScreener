@@ -110,7 +110,7 @@ export function defaultSortFor(cols: ScreenerColumns): {
   key: "fdvUsd" | "volume24hUsd" | "change24hPct" | "liquidityUsd" | "ageHours" | "holders";
   asc: boolean;
 } {
-  // Highest mcap/FDV first when the pad has that column (Semi order).
+  // Within graduated/bonding blocks (TokenScreener default): highest mcap/FDV first.
   if (cols.fdv) return { key: "fdvUsd", asc: false };
   if (cols.volume) return { key: "volume24hUsd", asc: false };
   if (cols.age) return { key: "ageHours", asc: true };

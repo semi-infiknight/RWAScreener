@@ -166,6 +166,8 @@ export function TokenScreener({
   const initialSort = defaultSortFor(cols);
   const [sort, setSort] = useState<SortKey>(initialSort.key);
   const [asc, setAsc] = useState(initialSort.asc);
+  /** False until a column header is clicked — default = graduated first, then metric. */
+  const [userSorted, setUserSorted] = useState(false);
 
   const showNotLive = !live;
   const showLoadingTable = live && loading && tokens.length === 0;
@@ -186,14 +188,22 @@ export function TokenScreener({
     if (showNotLive || tokens.length === 0) return [];
     const list = [...tokens];
     list.sort((a, b) => {
+      // Default: graduated block first, then bonding; within block use metric.
+      // Column header click sets userSorted and overrides status grouping.
+      if (!userSorted) {
+        const ag = a.status === "graduated" ? 0 : 1;
+        const bg = b.status === "graduated" ? 0 : 1;
+        if (ag !== bg) return ag - bg;
+      }
       const av = metricOrNaN(a[sort] as number | null);
       const bv = metricOrNaN(b[sort] as number | null);
       return asc ? av - bv : bv - av;
     });
     return list;
-  }, [tokens, sort, asc, showNotLive]);
+  }, [tokens, sort, asc, showNotLive, userSorted]);
 
   function toggleSort(key: SortKey) {
+    setUserSorted(true);
     if (sort === key) setAsc(!asc);
     else {
       setSort(key);
