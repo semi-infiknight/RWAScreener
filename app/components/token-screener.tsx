@@ -49,6 +49,7 @@ const DURABLE_ICON_HOST_SUFFIXES = [
   "cloudfront.net",
   "amazonaws.com",
   "supabase.co",
+  "firebasestorage.googleapis.com",
 ] as const;
 
 const ICON_GW_STORAGE_PREFIX = "rwa-icon-gw:";

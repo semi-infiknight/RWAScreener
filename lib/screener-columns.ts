@@ -94,6 +94,19 @@ const REVSHARE: ScreenerColumns = {
   buy: false,
 };
 
+
+/** OTC Desks /api/coins (venue=meteora): price, mcap, vol, liq, holders, age (no spark/range). */
+const OTCDESKS: ScreenerColumns = {
+  ...ALL_OFF,
+  price: true,
+  fdv: true,
+  volume: true,
+  liquidity: true,
+  holders: true,
+  age: true,
+  buy: false,
+};
+
 /** Unwired pads — name only until their API is mapped. */
 const PENDING: ScreenerColumns = {
   ...ALL_OFF,
@@ -108,6 +121,7 @@ const BY_PAD: Record<string, ScreenerColumns> = {
   clawpump: CLAWPUMP,
   lfgown: LFGOWN,
   revshare: REVSHARE,
+  otcdesks: OTCDESKS,
   stardotfun: PENDING,
 };
 

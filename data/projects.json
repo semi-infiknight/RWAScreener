@@ -399,6 +399,50 @@
       "devX": null,
       "devGithub": null,
       "sortOrder": 8
+    },
+    {
+      "id": "otcdesks",
+      "displayName": "OTC Desks",
+      "slug": "otcdesks",
+      "website": "https://otcdesks.cash/",
+      "x": "https://x.com/otc_labs",
+      "docs": null,
+      "summary": "Over-The-Counter Protocol — earn stocks, pre-IPO, and yield on Solana.",
+      "built": [
+        "Launch coins that pay stock, pre-IPO, crypto, or custom rewards to holders",
+        "Meteora DBC venue launches with a distinct curve, fee, and locked pool at graduation",
+        "On-protocol revenue split across holders, pot, protocol, and buyback",
+        "Desks, rewards, and analytics surfaces for OTC market activity"
+      ],
+      "status": "live",
+      "verified": [
+        "public_site",
+        "api_coins"
+      ],
+      "contact": "unknown",
+      "dbc": {
+        "integrated": true,
+        "evidence": "otcdesks.cash live UI badges venue===\"meteora\" as Meteora launches (different curve, 2% fee, locked pool at graduation). List SoT: GET /api/coins?page=&size=&sort=newest&dir=desc filtered to venue===meteora. Detail (?q=mint) also ships meteoraConfig base58 pubkey per row.",
+        "configKeys": [],
+        "feeClaimers": []
+      },
+      "sources": [
+        {
+          "label": "Site",
+          "url": "https://otcdesks.cash/"
+        },
+        {
+          "label": "X",
+          "url": "https://x.com/otc_labs"
+        }
+      ],
+      "notes": "Screener: venue===meteora only (mixed catalog). Newest MAX_PAGES window. No graduated field in payload — status bonding. Snapshot metrics mapped 1:1 when present.",
+      "icon": "/avatars/otcdesks.jpg",
+      "screenerLive": true,
+      "github": null,
+      "devX": null,
+      "devGithub": null,
+      "sortOrder": 9
     }
   ]
 }

@@ -19,6 +19,7 @@ import {
 } from "./pad-cache";
 import { fetchPerpspadTokens } from "./perpspad";
 import { getProject, isScreenerLive, projects } from "./projects";
+import { fetchOtcDesksTokens } from "./otcdesks";
 import { fetchRevShareTokens } from "./revshare";
 import type { TokenRow } from "./tokens";
 
@@ -46,6 +47,8 @@ async function loadPadTokens(padId: string): Promise<TokenRow[]> {
       return fetchEthicsTokens({ enrichBoard: true, enrichDetails: false });
     case "revshare":
       return fetchRevShareTokens({ phase: "fast" });
+    case "otcdesks":
+      return fetchOtcDesksTokens({ phase: "fast" });
     default:
       return [];
   }
