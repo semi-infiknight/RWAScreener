@@ -5,6 +5,7 @@
  * - In-memory Map fallback for local / when Redis is missing or down (fail open).
  * - TTL: PAD_CACHE_TTL_SECONDS (default 25s). Near-live, not static.
  * - Keys: `padfeed:<padId>:<phase>` (phase = fast | full).
+ * - Summary rollups: `padsummary:<padId>` (same TTL; successful ok rows only).
  * - Cache only successful non-empty payloads — never invent rows, never pin pending stubs.
  * - Routes stay force-dynamic; this helper is the throttle.
  */
@@ -39,6 +40,11 @@ function redisUrl(): string | undefined {
 export function padCacheKey(padId: string, phase: string): string {
   const p = phase === "fast" ? "fast" : "full";
   return `padfeed:${padId}:${p}`;
+}
+
+/** Homepage single-pad rollup cache key (aggregates from fast feed). */
+export function padSummaryCacheKey(padId: string): string {
+  return `padsummary:${padId}`;
 }
 
 async function getRedis(): Promise<RedisClientType | null> {
@@ -109,16 +115,13 @@ export type CachedPadFeedOptions<T> = {
 };
 
 /**
- * Check Redis → memory → loader. On Redis errors, fall through (fail open).
- * On hit, return parsed JSON. On miss, run loader; setex / memory when cacheable.
+ * Check Redis → memory → loader for an arbitrary key. Fail open on Redis errors.
  */
-export async function cachedPadFeed<T>(
-  padId: string,
-  phase: string,
+export async function cachedByKey<T>(
+  key: string,
   loader: () => Promise<T>,
   opts?: CachedPadFeedOptions<T>,
 ): Promise<T> {
-  const key = padCacheKey(padId, phase);
   const ttl = ttlSeconds();
   const shouldCache = opts?.shouldCache ?? defaultPadCacheable;
 
@@ -152,4 +155,17 @@ export async function cachedPadFeed<T>(
   }
 
   return value;
+}
+
+/**
+ * Check Redis → memory → loader. On Redis errors, fall through (fail open).
+ * On hit, return parsed JSON. On miss, run loader; setex / memory when cacheable.
+ */
+export async function cachedPadFeed<T>(
+  padId: string,
+  phase: string,
+  loader: () => Promise<T>,
+  opts?: CachedPadFeedOptions<T>,
+): Promise<T> {
+  return cachedByKey(padCacheKey(padId, phase), loader, opts);
 }

@@ -23,12 +23,12 @@ export function computePadMetrics(tokens: TokenRow[]): PadMetric[] {
     {
       key: "coins",
       label: "Coins",
-      value: agg.coins.toLocaleString(),
+      value: (agg.coins ?? 0).toLocaleString(),
     },
     {
       key: "status-split",
       label: "Bonding / Graduated",
-      value: `${agg.bonding.toLocaleString()} / ${agg.graduated.toLocaleString()}`,
+      value: `${(agg.bonding ?? 0).toLocaleString()} / ${(agg.graduated ?? 0).toLocaleString()}`,
     },
   ];
 

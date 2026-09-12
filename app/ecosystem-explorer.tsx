@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import Link from "next/link";
 import {
-  EMPTY_PAD_AGGREGATE,
+  FAILED_PAD_AGGREGATE,
   type PadAggregate,
 } from "../lib/pad-aggregates";
 import type { Project } from "../lib/projects";
@@ -20,6 +20,8 @@ const AVATAR_COLORS = [
   "#f48c06",
   "#dc2f02",
 ];
+/** Retries per pad so a cold first fetch (e.g. Ember) does not pin zeros. */
+const PAD_FETCH_ATTEMPTS = 3;
 
 type SortKey =
   | "sortOrder"
@@ -51,9 +53,20 @@ function curatedOrder(p: Project): number {
   return typeof p.sortOrder === "number" ? p.sortOrder : Number.MAX_SAFE_INTEGER;
 }
 
-function fmtCount(n: number | null | undefined, loading: boolean, live: boolean): string {
+function CellLoader() {
+  return (
+    <span className="cell-loader" aria-hidden="true" title="Loading" />
+  );
+}
+
+/** Pending → mini spinner; non-live / null → —; real 0 only after successful load. */
+function fmtCount(
+  n: number | null | undefined,
+  loading: boolean,
+  live: boolean,
+): ReactNode {
   if (!live) return "—";
-  if (loading) return "…";
+  if (loading) return <CellLoader />;
   if (n == null || Number.isNaN(n)) return "—";
   return n.toLocaleString();
 }
@@ -62,10 +75,32 @@ function fmtUsdCell(
   n: number | null | undefined,
   loading: boolean,
   live: boolean,
-): string {
+): ReactNode {
   if (!live) return "—";
-  if (loading) return "…";
+  if (loading) return <CellLoader />;
   return formatUsd(n);
+}
+
+function parsePadRow(body: unknown, resOk: boolean): PadAggregate | null {
+  const row =
+    body && typeof body === "object" && "pad" in body
+      ? (body as { pad?: Record<string, unknown> }).pad
+      : undefined;
+  if (!resOk || !row || typeof row !== "object") return null;
+  if (row.ok === false) return null;
+
+  const numOrNull = (v: unknown): number | null =>
+    typeof v === "number" && Number.isFinite(v) ? v : null;
+
+  return {
+    // Do not coerce missing → 0 (that looked like a loaded zero on fail).
+    coins: numOrNull(row.coins),
+    bonding: numOrNull(row.bonding),
+    graduated: numOrNull(row.graduated),
+    mcapUsd: numOrNull(row.mcapUsd),
+    volume24hUsd: numOrNull(row.volume24hUsd),
+    liquidityUsd: numOrNull(row.liquidityUsd),
+  };
 }
 
 export function EcosystemExplorer({
@@ -91,31 +126,47 @@ export function EcosystemExplorer({
       .filter((p) => isScreenerLive(p))
       .sort((a, b) => curatedOrder(a) - curatedOrder(b));
 
-    async function loadOne(id: string): Promise<PadAggregate> {
+    async function loadOne(id: string): Promise<PadAggregate | null> {
       const res = await fetch(
         `/api/pads/summary?pad=${encodeURIComponent(id)}`,
         { signal: ac.signal },
       );
       const body = await res.json().catch(() => ({}));
-      const row = body?.pad;
-      if (!res.ok || !row || typeof row !== "object") {
-        return { ...EMPTY_PAD_AGGREGATE };
+      return parsePadRow(body, res.ok);
+    }
+
+    async function loadWithRetry(id: string): Promise<PadAggregate> {
+      let lastErr: unknown;
+      for (let attempt = 0; attempt < PAD_FETCH_ATTEMPTS; attempt++) {
+        if (cancelled) return { ...FAILED_PAD_AGGREGATE };
+        try {
+          const agg = await loadOne(id);
+          if (agg) return agg;
+          lastErr = new Error("empty/failed pad summary");
+        } catch (err) {
+          if (
+            cancelled ||
+            (err instanceof DOMException && err.name === "AbortError")
+          ) {
+            throw err;
+          }
+          lastErr = err;
+        }
+        // Brief backoff before retry (cold Redis / upstream flap).
+        if (attempt < PAD_FETCH_ATTEMPTS - 1) {
+          await new Promise((r) => setTimeout(r, 350 * (attempt + 1)));
+        }
       }
-      return {
-        coins: row.coins ?? 0,
-        bonding: row.bonding ?? 0,
-        graduated: row.graduated ?? 0,
-        mcapUsd: row.mcapUsd ?? null,
-        volume24hUsd: row.volume24hUsd ?? null,
-        liquidityUsd: row.liquidityUsd ?? null,
-      };
+      void lastErr;
+      // Exhausted retries — null counts → — (never pin EMPTY zeros).
+      return { ...FAILED_PAD_AGGREGATE };
     }
 
     async function loadSequential() {
       for (const p of livePads) {
         if (cancelled) return;
         try {
-          const agg = await loadOne(p.id);
+          const agg = await loadWithRetry(p.id);
           if (cancelled) return;
           setMetrics((prev) => ({ ...prev, [p.id]: agg }));
         } catch (err) {
@@ -125,8 +176,11 @@ export function EcosystemExplorer({
           ) {
             return;
           }
-          // Stop showing … for this pad even on failure.
-          setMetrics((prev) => ({ ...prev, [p.id]: { ...EMPTY_PAD_AGGREGATE } }));
+          // Leave pending? Steering: never write zeros on fail — use — via FAILED.
+          setMetrics((prev) => ({
+            ...prev,
+            [p.id]: { ...FAILED_PAD_AGGREGATE },
+          }));
         }
       }
     }
@@ -384,25 +438,37 @@ export function EcosystemExplorer({
                             </span>
                           </Link>
                         </td>
-                        <td className="num">
+                        <td className="num" aria-busy={rowLoading || undefined}>
                           {fmtCount(m?.coins, rowLoading, live)}
                         </td>
-                        <td className="num hide-sm">
+                        <td
+                          className="num hide-sm"
+                          aria-busy={rowLoading || undefined}
+                        >
                           {fmtCount(m?.bonding, rowLoading, live)}
                         </td>
-                        <td className="num hide-sm">
+                        <td
+                          className="num hide-sm"
+                          aria-busy={rowLoading || undefined}
+                        >
                           {fmtCount(m?.graduated, rowLoading, live)}
                         </td>
-                        <td className="num">
+                        <td className="num" aria-busy={rowLoading || undefined}>
                           {fmtUsdCell(m?.mcapUsd, rowLoading, live)}
                         </td>
                         {showVol ? (
-                          <td className="num hide-md">
+                          <td
+                            className="num hide-md"
+                            aria-busy={rowLoading || undefined}
+                          >
                             {fmtUsdCell(m?.volume24hUsd, rowLoading, live)}
                           </td>
                         ) : null}
                         {showLiq ? (
-                          <td className="num hide-lg">
+                          <td
+                            className="num hide-lg"
+                            aria-busy={rowLoading || undefined}
+                          >
                             {fmtUsdCell(m?.liquidityUsd, rowLoading, live)}
                           </td>
                         ) : null}

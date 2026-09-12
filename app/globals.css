@@ -1501,3 +1501,18 @@ td.col-name { display: flex; }
     font-size: 0.65rem;
   }
 }
+
+/* Per-cell mini spinner while pad summary is pending */
+.cell-loader {
+  display: inline-block;
+  width: 0.72rem;
+  height: 0.72rem;
+  border: 1.5px solid rgba(255, 106, 0, 0.22);
+  border-top-color: #ff6a00;
+  border-radius: 50%;
+  animation: cell-spin 0.65s linear infinite;
+  vertical-align: -0.05rem;
+}
+@keyframes cell-spin {
+  to { transform: rotate(360deg); }
+}

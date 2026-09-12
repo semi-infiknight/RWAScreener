@@ -1,10 +1,10 @@
 import type { TokenRow } from "./tokens";
 
-/** Numeric pad rollup from live TokenRow[] — null means feed had no values (show —). */
+/** Numeric pad rollup from live TokenRow[] — null means unknown / failed (show —). */
 export type PadAggregate = {
-  coins: number;
-  bonding: number;
-  graduated: number;
+  coins: number | null;
+  bonding: number | null;
+  graduated: number | null;
   mcapUsd: number | null;
   volume24hUsd: number | null;
   liquidityUsd: number | null;
@@ -33,10 +33,21 @@ export function aggregatePadMetrics(tokens: TokenRow[]): PadAggregate {
   };
 }
 
+/** Non-live / placeholder — UI gates on live so zeros never flash as real. */
 export const EMPTY_PAD_AGGREGATE: PadAggregate = {
   coins: 0,
   bonding: 0,
   graduated: 0,
+  mcapUsd: null,
+  volume24hUsd: null,
+  liquidityUsd: null,
+};
+
+/** Fetch/error stand-in — counts are null so UI shows — (not loaded zeros). */
+export const FAILED_PAD_AGGREGATE: PadAggregate = {
+  coins: null,
+  bonding: null,
+  graduated: null,
   mcapUsd: null,
   volume24hUsd: null,
   liquidityUsd: null,

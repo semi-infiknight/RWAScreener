@@ -222,7 +222,8 @@ function mapLaunch(
     mcapUsd: raisedUsd,
     fdvUsd: raisedUsd,
     volume24hUsd: null,
-    liquidityUsd: null,
+    // Quote locked in curve (raised USD) — same real fields as mcap proxy.
+    liquidityUsd: raisedUsd,
     holders: null,
     holdersDelta24h: null,
     ageHours: ageHoursFromSlot(l.activationPoint, currentSlot),

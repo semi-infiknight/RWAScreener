@@ -15,6 +15,8 @@ type EmberMarket = {
   suspect?: boolean;
   progress?: number;
   quoteReserve?: number;
+  /** USD price of the quote mint (for reserve→USD). */
+  quoteUsd?: number;
   priceUsd?: number;
   change24h?: number;
   marketCapUsd?: number;
@@ -37,6 +39,18 @@ function emberHeaders(): HeadersInit {
 function numOrNull(v: unknown): number | null {
   if (typeof v !== "number" || !Number.isFinite(v)) return null;
   return v;
+}
+
+/** Quote-side USD in pool: quoteReserve (human) × quoteUsd. Honest liq proxy. */
+function liquidityFromMarket(m: EmberMarket): number | null {
+  const reserve = numOrNull(m.quoteReserve);
+  const quoteUsd = numOrNull(m.quoteUsd);
+  if (reserve == null || quoteUsd == null || reserve < 0 || quoteUsd < 0) {
+    return null;
+  }
+  const liq = reserve * quoteUsd;
+  if (!Number.isFinite(liq) || liq <= 0) return null;
+  return liq;
 }
 
 function absoluteIcon(image: string | undefined | null): string | null {
@@ -78,7 +92,10 @@ async function loadEmberCurveTokens(): Promise<TokenRow[]> {
   }
   const data = (await res.json()) as { markets?: EmberMarket[] };
   const markets = Array.isArray(data.markets) ? data.markets : [];
-  if (markets.length === 0) return [];
+  // Empty body is failure (do not treat as real coins:0 for homepage).
+  if (markets.length === 0) {
+    throw new Error("Ember /api/solana/markets → empty markets");
+  }
 
   const rows: TokenRow[] = [];
   const seen = new Set<string>();
@@ -102,7 +119,7 @@ async function loadEmberCurveTokens(): Promise<TokenRow[]> {
       mcapUsd: mcap,
       fdvUsd: mcap,
       volume24hUsd: numOrNull(m.volume24hUsd),
-      liquidityUsd: null,
+      liquidityUsd: liquidityFromMarket(m),
       holders: numOrNull(m.holders),
       holdersDelta24h: null,
       ageHours: ageHoursFrom(m.createdAt),
