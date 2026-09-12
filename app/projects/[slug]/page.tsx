@@ -112,11 +112,7 @@ export default async function ProjectPage({ params }: Props) {
               >
                 Visit Website ↗
               </a>
-            ) : (
-              <span className="aarna-visit muted">
-                {live ? "Visit Website" : "Not live yet"}
-              </span>
-            )}
+            ) : null}
           </div>
 
           <div className="aarna-hero-body">
