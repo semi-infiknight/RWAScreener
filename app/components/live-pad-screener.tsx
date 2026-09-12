@@ -8,6 +8,7 @@ import { TokenScreener } from "./token-screener";
 const LIVE_PAD_API: Record<string, string> = {
   ethics: "/api/pads/ethics",
   embercurve: "/api/pads/embercurve",
+  bags: "/api/pads/bags",
 };
 
 function mergeById(prev: TokenRow[], next: TokenRow[]): TokenRow[] {
