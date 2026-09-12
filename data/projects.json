@@ -10,6 +10,93 @@
   ],
   "projects": [
     {
+      "id": "embercurve",
+      "displayName": "Ember Curve",
+      "slug": "embercurve",
+      "website": "https://embercurve.fun/",
+      "x": "https://x.com/embercurve",
+      "docs": null,
+      "summary": "Ember Curve \u2014 Solana launchpad for bonding-curve coins paired with SOL, USDC, tokenized stocks (xStocks), or selected memes; trade tax routing and graduation into Meteora liquidity.",
+      "built": [
+        "Bonding-curve launches paired with SOL / USDC / tokenized stocks / selected memes",
+        "On-chain trade-tax routing (holders, burns, lottery, team)",
+        "Graduation into Meteora liquidity after the curve"
+      ],
+      "status": "live",
+      "verified": [
+        "public_site",
+        "x_handle",
+        "stock_quote_marketing"
+      ],
+      "contact": "unknown",
+      "dbc": {
+        "integrated": true,
+        "evidence": "Public site markets stock-paired bonding-curve launches on Solana; LBank listing describes launches on Meteora. fee_claimer / config keys not yet mapped on-chain.",
+        "configKeys": [],
+        "feeClaimers": []
+      },
+      "sources": [
+        {
+          "label": "Site",
+          "url": "https://embercurve.fun/"
+        },
+        {
+          "label": "X",
+          "url": "https://x.com/embercurve"
+        }
+      ],
+      "notes": "Live pad feed from embercurve.fun/api/solana/markets (Ethics-style). Indexer attribution still separate.",
+      "screenerLive": true,
+      "icon": "/avatars/embercurve.jpg",
+      "github": null,
+      "devX": null,
+      "devGithub": null,
+      "sortOrder": 1
+    },
+    {
+      "id": "lfgown",
+      "displayName": "LFOwn",
+      "slug": "lfgown",
+      "website": "https://letsfuckingown.fun/",
+      "x": "https://x.com/LFOWNDOTFUN",
+      "docs": null,
+      "summary": "LFOwn (letsfuckingown.fun) \u2014 memecoin launchpad paired with MetaDAO ownership coins (redeemable treasury), not SOL or a tokenized stock. Bonding is LFOwn's own curve vs that MetaDAO quote; graduation migrates to Meteora DAMM v2 (not Meteora DBC).",
+      "built": [
+        "Memecoin launches paired against MetaDAO ownership coins (quoteMint ends in meta)",
+        "Bonding / on-curve: LFOwn curve vs MetaDAO ownership-coin quote (not Meteora DBC)",
+        "Graduation: isMigrated \u2192 Meteora DAMM v2 pool"
+      ],
+      "status": "live",
+      "verified": [
+        "public_site",
+        "api_launches"
+      ],
+      "contact": "unknown",
+      "dbc": {
+        "integrated": false,
+        "evidence": "Not Meteora DBC. Live /api/launches: bonding = LFOwn curve vs MetaDAO ownership-coin quote; isMigrated:true graduates to Meteora DAMM v2.",
+        "configKeys": [],
+        "feeClaimers": []
+      },
+      "sources": [
+        {
+          "label": "Site",
+          "url": "https://letsfuckingown.fun/"
+        },
+        {
+          "label": "X",
+          "url": "https://x.com/LFOWNDOTFUN"
+        }
+      ],
+      "notes": "Screener: GET /api/launches (~39). Status bonding/on-curve vs graduated (DAMM v2). Duplicate symbols kept (distinct baseMints). Sort by raised USD proxy.",
+      "icon": "/avatars/lfgown.jpg",
+      "screenerLive": true,
+      "github": null,
+      "devX": null,
+      "devGithub": null,
+      "sortOrder": 2
+    },
+    {
       "id": "stardotfun",
       "displayName": "StonkOptions",
       "slug": "stardotfun",
@@ -63,49 +150,8 @@
       "icon": "/avatars/stardotfun.jpg",
       "github": null,
       "devX": null,
-      "devGithub": null
-    },
-    {
-      "id": "ethics",
-      "displayName": "Ethics",
-      "slug": "ethics",
-      "website": "https://ethics.ltd",
-      "x": "https://x.com/ethicslaunch",
-      "docs": null,
-      "summary": "Ethics Launch \u2014 market-backed token launches with locked liquidity; pairs with SOL, stables, and RWAs; site markets Instant DAMMv2 launches.",
-      "built": [
-        "Market-backed launches (SOL / stables / RWAs)",
-        "Locked liquidity + fee earn or airdrop to holders",
-        "v2 Instant DAMMv2 launch UX on ethics.ltd"
-      ],
-      "status": "live",
-      "verified": [
-        "public_site",
-        "api_launches"
-      ],
-      "contact": "unknown",
-      "dbc": {
-        "integrated": true,
-        "evidence": "Live launches via ethics.ltd /api/launches (dbc + dammv2 + clmm paths); board/enrich supply mcap/volume. fee_claimer map still pending on-chain indexer.",
-        "configKeys": [],
-        "feeClaimers": []
-      },
-      "sources": [
-        {
-          "label": "Site",
-          "url": "https://ethics.ltd"
-        },
-        {
-          "label": "X",
-          "url": "https://x.com/ethicslaunch"
-        }
-      ],
-      "notes": "Confirm whether DBC is live vs DAMM-only.",
-      "icon": "/avatars/ethics.jpg",
-      "screenerLive": true,
-      "github": null,
-      "devX": null,
-      "devGithub": null
+      "devGithub": null,
+      "sortOrder": 3
     },
     {
       "id": "bags",
@@ -151,7 +197,8 @@
       "screenerLive": true,
       "github": "https://github.com/bagsfm",
       "devX": null,
-      "devGithub": null
+      "devGithub": null,
+      "sortOrder": 4
     },
     {
       "id": "perpspad",
@@ -198,7 +245,8 @@
       "screenerLive": true,
       "github": null,
       "devX": null,
-      "devGithub": null
+      "devGithub": null,
+      "sortOrder": 5
     },
     {
       "id": "clawpump",
@@ -244,20 +292,21 @@
       "screenerLive": true,
       "github": "https://github.com/Clawpump",
       "devX": null,
-      "devGithub": null
+      "devGithub": null,
+      "sortOrder": 6
     },
     {
-      "id": "lfgown",
-      "displayName": "LFOwn",
-      "slug": "lfgown",
-      "website": "https://letsfuckingown.fun/",
-      "x": "https://x.com/LFOWNDOTFUN",
+      "id": "ethics",
+      "displayName": "Ethics",
+      "slug": "ethics",
+      "website": "https://ethics.ltd",
+      "x": "https://x.com/ethicslaunch",
       "docs": null,
-      "summary": "LFOwn (letsfuckingown.fun) \u2014 memecoin launchpad paired with MetaDAO ownership coins (redeemable treasury), not SOL or a tokenized stock. Bonding is LFOwn's own curve vs that MetaDAO quote; graduation migrates to Meteora DAMM v2 (not Meteora DBC).",
+      "summary": "Ethics Launch \u2014 market-backed token launches with locked liquidity; pairs with SOL, stables, and RWAs; site markets Instant DAMMv2 launches.",
       "built": [
-        "Memecoin launches paired against MetaDAO ownership coins (quoteMint ends in meta)",
-        "Bonding / on-curve: LFOwn curve vs MetaDAO ownership-coin quote (not Meteora DBC)",
-        "Graduation: isMigrated \u2192 Meteora DAMM v2 pool"
+        "Market-backed launches (SOL / stables / RWAs)",
+        "Locked liquidity + fee earn or airdrop to holders",
+        "v2 Instant DAMMv2 launch UX on ethics.ltd"
       ],
       "status": "live",
       "verified": [
@@ -266,70 +315,28 @@
       ],
       "contact": "unknown",
       "dbc": {
-        "integrated": false,
-        "evidence": "Not Meteora DBC. Live /api/launches: bonding = LFOwn curve vs MetaDAO ownership-coin quote; isMigrated:true graduates to Meteora DAMM v2.",
-        "configKeys": [],
-        "feeClaimers": []
-      },
-      "sources": [
-        {
-          "label": "Site",
-          "url": "https://letsfuckingown.fun/"
-        },
-        {
-          "label": "X",
-          "url": "https://x.com/LFOWNDOTFUN"
-        }
-      ],
-      "notes": "Screener: GET /api/launches (~39). Status bonding/on-curve vs graduated (DAMM v2). Duplicate symbols kept (distinct baseMints). Sort by raised USD proxy.",
-      "icon": "/avatars/lfgown.jpg",
-      "screenerLive": true,
-      "github": null,
-      "devX": null,
-      "devGithub": null
-    },
-    {
-      "id": "embercurve",
-      "displayName": "Ember Curve",
-      "slug": "embercurve",
-      "website": "https://embercurve.fun/",
-      "x": "https://x.com/embercurve",
-      "docs": null,
-      "summary": "Ember Curve \u2014 Solana launchpad for bonding-curve coins paired with SOL, USDC, tokenized stocks (xStocks), or selected memes; trade tax routing and graduation into Meteora liquidity.",
-      "built": [
-        "Bonding-curve launches paired with SOL / USDC / tokenized stocks / selected memes",
-        "On-chain trade-tax routing (holders, burns, lottery, team)",
-        "Graduation into Meteora liquidity after the curve"
-      ],
-      "status": "live",
-      "verified": [
-        "public_site",
-        "x_handle",
-        "stock_quote_marketing"
-      ],
-      "contact": "unknown",
-      "dbc": {
         "integrated": true,
-        "evidence": "Public site markets stock-paired bonding-curve launches on Solana; LBank listing describes launches on Meteora. fee_claimer / config keys not yet mapped on-chain.",
+        "evidence": "Live launches via ethics.ltd /api/launches (dbc + dammv2 + clmm paths); board/enrich supply mcap/volume. fee_claimer map still pending on-chain indexer.",
         "configKeys": [],
         "feeClaimers": []
       },
       "sources": [
         {
           "label": "Site",
-          "url": "https://embercurve.fun/"
+          "url": "https://ethics.ltd"
         },
         {
           "label": "X",
-          "url": "https://x.com/embercurve"
+          "url": "https://x.com/ethicslaunch"
         }
       ],
-      "notes": "Live pad feed from embercurve.fun/api/solana/markets (Ethics-style). Indexer attribution still separate.",
+      "notes": "Confirm whether DBC is live vs DAMM-only.",
+      "icon": "/avatars/ethics.jpg",
       "screenerLive": true,
-      "icon": "/avatars/embercurve.jpg",
       "github": null,
       "devX": null,
-      "devGithub": null
+      "devGithub": null,
+      "sortOrder": 7
     }
   ]
 }

@@ -4,7 +4,11 @@ export type Project = (typeof seed.projects)[number];
 
 export const disclaimer = seed.disclaimer;
 export const updatedAt = seed.updatedAt;
-export const projects = seed.projects as Project[];
+export const projects = [...(seed.projects as Project[])].sort((a, b) => {
+  const ao = typeof a.sortOrder === "number" ? a.sortOrder : Number.MAX_SAFE_INTEGER;
+  const bo = typeof b.sortOrder === "number" ? b.sortOrder : Number.MAX_SAFE_INTEGER;
+  return ao - bo;
+});
 
 export function getProject(slug: string): Project | undefined {
   return projects.find((p) => p.slug === slug || p.id === slug);
