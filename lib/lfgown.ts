@@ -141,17 +141,47 @@ function ageHoursFromSlot(
   return Math.max(0, Math.round(hours));
 }
 
-/** Raised USD from pad payload — NOT token mcap. quoteReserve is 6-decimal quote units. */
-function raisedUsdFromLaunch(l: LfgownLaunch): number | null {
+/** Quote amount raised in human units (quoteReserve is 6-decimal). */
+function quoteRaisedFromLaunch(l: LfgownLaunch): number | null {
   const reserveRaw = l.quoteReserve;
-  const price = numOrNull(l.quoteUsdPrice);
-  if (price == null || price < 0) return null;
   if (typeof reserveRaw !== "string" && typeof reserveRaw !== "number") return null;
   const reserve = Number(reserveRaw);
   if (!Number.isFinite(reserve) || reserve < 0) return null;
-  const raised = (reserve / 1e6) * price;
+  const amount = reserve / 1e6;
+  if (!Number.isFinite(amount) || amount < 0) return null;
+  return amount;
+}
+
+/** Raised USD from pad payload — NOT token mcap. */
+function raisedUsdFromLaunch(l: LfgownLaunch): number | null {
+  const amount = quoteRaisedFromLaunch(l);
+  const price = numOrNull(l.quoteUsdPrice);
+  if (amount == null || price == null || price < 0) return null;
+  const raised = amount * price;
   if (!Number.isFinite(raised) || raised < 0) return null;
   return raised;
+}
+
+/**
+ * Bonding progress % matching LFOwn site.
+ * threshold is quote human units (same as quoteReserve/1e6); graduated → 100.
+ */
+function progressPctFromLaunch(l: LfgownLaunch): number | null {
+  if (l.isMigrated === true) return 100;
+  const threshold = numOrNull(l.threshold);
+  if (threshold == null || threshold <= 0) return null;
+  const raisedQuote = quoteRaisedFromLaunch(l);
+  if (raisedQuote == null) return null;
+  const pct = Math.min(100, (raisedQuote / threshold) * 100);
+  if (!Number.isFinite(pct) || pct < 0) return null;
+  return pct;
+}
+
+/** rangePos is 0–1 for RangeBar — reuse as bonding progress position. */
+function rangePosFromLaunch(l: LfgownLaunch): number | null {
+  const pct = progressPctFromLaunch(l);
+  if (pct == null) return null;
+  return Math.min(1, Math.max(0, pct / 100));
 }
 
 /**
@@ -170,8 +200,14 @@ function mapLaunch(
 ): TokenRow | null {
   const mint = typeof l.baseMint === "string" ? l.baseMint.trim() : "";
   if (!mint) return null;
-  // Real derived raised USD only — never invent token mcap/price/vol.
+  // Real derived raised USD + progress only — never invent token mcap/price/vol.
   const raisedUsd = raisedUsdFromLaunch(l);
+  const threshold = numOrNull(l.threshold);
+  const quoteUsd = numOrNull(l.quoteUsdPrice);
+  const targetUsd =
+    threshold != null && threshold > 0 && quoteUsd != null && quoteUsd >= 0
+      ? threshold * quoteUsd
+      : null;
   return {
     id: `lfgown-${mint}`,
     launchpadId: "lfgown",
@@ -189,9 +225,10 @@ function mapLaunch(
     holders: null,
     holdersDelta24h: null,
     ageHours: ageHoursFromSlot(l.activationPoint, currentSlot),
-    rangeLowUsd: null,
-    rangeHighUsd: null,
-    rangePos: null,
+    // Raised vs threshold target USD (honest curve goal markers; RangeBar uses rangePos).
+    rangeLowUsd: raisedUsd,
+    rangeHighUsd: targetUsd,
+    rangePos: rangePosFromLaunch(l),
     spark24h: null,
     draft: false,
   };
@@ -208,6 +245,8 @@ export type FetchLfgownOptions = {
  * Bonding = on-curve vs MetaDAO ownership-coin quote — not Meteora DBC.
  * Graduated (isMigrated) = Meteora DAMM v2.
  * mcapUsd/fdvUsd = raised USD proxy (quoteReserve/1e6 * quoteUsdPrice), not token mcap.
+ * rangePos = bonding progress 0–1 (isMigrated→1 else min(1, quoteRaised/threshold)).
+ * rangeLowUsd/rangeHighUsd = raised USD / (threshold * quoteUsdPrice) markers.
  * Sorted highest raised-USD first. Icons from launch.uri metadata `image`.
  * Age from activationPoint (Solana slot) vs current slot — null if RPC unavailable.
  * No invented price/vol.
@@ -280,14 +319,24 @@ export async function enrichLfgownToken(
     );
     if (!launch) return null;
     const icon = await fetchMetadataImage(launch.uri);
+    const raisedUsd = raisedUsdFromLaunch(launch);
+    const threshold = numOrNull(launch.threshold);
+    const quoteUsd = numOrNull(launch.quoteUsdPrice);
+    const targetUsd =
+      threshold != null && threshold > 0 && quoteUsd != null && quoteUsd >= 0
+        ? threshold * quoteUsd
+        : null;
     return {
       id: `lfgown-${trimmed}`,
       mint: trimmed,
       icon,
       ageHours: ageHoursFromSlot(launch.activationPoint, currentSlot),
       status: statusFromLaunch(launch),
-      mcapUsd: raisedUsdFromLaunch(launch),
-      fdvUsd: raisedUsdFromLaunch(launch),
+      mcapUsd: raisedUsd,
+      fdvUsd: raisedUsd,
+      rangeLowUsd: raisedUsd,
+      rangeHighUsd: targetUsd,
+      rangePos: rangePosFromLaunch(launch),
     };
   } catch {
     return null;

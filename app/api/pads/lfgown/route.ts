@@ -10,7 +10,7 @@ export const revalidate = 0;
 /**
  * LFOwn live pad — not Meteora DBC.
  * Bonding/on-curve vs MetaDAO quote; graduated = DAMM v2 (isMigrated).
- * ?phase=fast — list identity + status + raised-USD proxy + age (no uri icon fetches)
+ * ?phase=fast — identity + status + raised-USD (fdv) + progress (rangePos) + age (no uri icons)
  * ?mint=… — single-token icon enrich from launch.uri metadata
  * ?phase=full — list + concurrent uri→image icons
  */
