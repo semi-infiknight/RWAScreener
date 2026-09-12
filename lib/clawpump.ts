@@ -55,7 +55,7 @@ function ageHoursFromIso(createdAt: string | null | undefined): number | null {
   if (!Number.isFinite(ms)) return null;
   const hours = (Date.now() - ms) / 3_600_000;
   if (!Number.isFinite(hours) || hours < 0) return null;
-  return Math.max(0, Math.round(hours));
+  return Math.max(0, hours);
 }
 
 function mapToken(t: ClawToken): TokenRow | null {

@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  formatAge,
   formatUsd,
   type TokenRow,
 } from "../../lib/tokens";
@@ -62,17 +61,6 @@ export function computePadMetrics(tokens: TokenRow[]): PadMetric[] {
       key: "liq",
       label: "Liquidity",
       value: formatUsd(liqs.reduce((a, b) => a + b, 0)),
-    });
-  }
-
-  const ages = tokens
-    .map((t) => t.ageHours)
-    .filter((n): n is number => typeof n === "number" && Number.isFinite(n));
-  if (ages.length > 0) {
-    out.push({
-      key: "newest",
-      label: "Newest",
-      value: formatAge(Math.min(...ages)),
     });
   }
 

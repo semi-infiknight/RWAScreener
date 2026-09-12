@@ -62,7 +62,13 @@ export function formatCompact(n: number | null | undefined): string {
 
 export function formatAge(hours: number | null | undefined): string {
   if (hours == null || Number.isNaN(hours)) return "—";
-  if (hours < 24) return `${hours}h`;
+  if (hours < 0) return "—";
+  // Sub-hour: minutes (pad feeds store fractional ageHours).
+  if (hours < 1) {
+    const mins = Math.max(0, Math.round(hours * 60));
+    return `${mins}m`;
+  }
+  if (hours < 24) return `${Math.round(hours)}h`;
   const d = Math.floor(hours / 24);
   if (d < 7) return `${d}d`;
   if (d < 30) return `${Math.floor(d / 7)}w`;

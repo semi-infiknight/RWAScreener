@@ -79,7 +79,7 @@ function ageHoursFrom(createdAt: number | undefined): number | null {
   const ms = createdAt > 1e12 ? createdAt : createdAt * 1000;
   const hours = (Date.now() - ms) / 3_600_000;
   if (!Number.isFinite(hours) || hours < 0) return null;
-  return Math.max(0, Math.round(hours));
+  return Math.max(0, hours);
 }
 
 function numOrNull(v: unknown): number | null {
