@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   formatAge,
   formatCompact,
@@ -22,6 +22,75 @@ type SortKey =
   | "liquidityUsd"
   | "ageHours"
   | "holders";
+
+
+const IPFS_GATEWAYS = [
+  "https://cloudflare-ipfs.com/ipfs/",
+  "https://gateway.pinata.cloud/ipfs/",
+  "https://ipfs.io/ipfs/",
+] as const;
+
+function ipfsCid(url: string): string | null {
+  if (url.startsWith("ipfs://")) {
+    return url.slice("ipfs://".length).replace(/^ipfs\//, "") || null;
+  }
+  const m = url.match(/\/ipfs\/([^/?#]+)/i);
+  return m?.[1] ?? null;
+}
+
+function iconCandidates(icon: string | null | undefined): string[] {
+  if (!icon) return [];
+  const cid = ipfsCid(icon);
+  if (!cid) return [icon];
+  const out: string[] = [];
+  for (const g of IPFS_GATEWAYS) out.push(`${g}${cid}`);
+  if (!out.includes(icon)) out.push(icon);
+  return [...new Set(out)];
+}
+
+function TokenAvatar({
+  icon,
+  symbol,
+}: {
+  icon?: string | null;
+  symbol: string;
+}) {
+  const candidates = useMemo(() => iconCandidates(icon), [icon]);
+  const [idx, setIdx] = useState(0);
+  const [failed, setFailed] = useState(candidates.length === 0);
+  useEffect(() => {
+    setIdx(0);
+    setFailed(candidates.length === 0);
+  }, [candidates]);
+  const h = hue(symbol);
+  const src = !failed && candidates[idx] ? candidates[idx] : null;
+  return (
+    <span
+      className="token-avatar"
+      style={
+        src
+          ? undefined
+          : {
+              background: `linear-gradient(145deg, hsl(${h} 72% 48%), hsl(${(h + 36) % 360} 50% 26%))`,
+            }
+      }
+    >
+      {src ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={src}
+          alt=""
+          onError={() => {
+            if (idx + 1 < candidates.length) setIdx((i) => i + 1);
+            else setFailed(true);
+          }}
+        />
+      ) : (
+        initials(symbol)
+      )}
+    </span>
+  );
+}
 
 function initials(sym: string) {
   return sym.slice(0, 2).toUpperCase();
@@ -100,6 +169,17 @@ export function TokenScreener({
   const showNotLive = !live;
   const showLoadingTable = live && loading && tokens.length === 0;
   const showLiveEmpty = live && !loading && tokens.length === 0;
+  const metricColCount = (
+    Number(cols.price) +
+    Number(cols.fdv) +
+    Number(cols.volume) +
+    Number(cols.spark) +
+    Number(cols.range) +
+    Number(cols.liquidity) +
+    Number(cols.age) +
+    Number(cols.holders)
+  );
+  const slimTable = metricColCount <= 2;
 
   const rows = useMemo(() => {
     if (showNotLive || tokens.length === 0) return [];
@@ -136,7 +216,7 @@ export function TokenScreener({
                 {cols.price ? <th>Price / %Δ</th> : null}
                 {cols.fdv ? <th className="hide-md">FDV</th> : null}
                 {cols.volume ? <th>Vol</th> : null}
-                {cols.age ? <th className="hide-sm">Age</th> : null}
+                {cols.age ? <th className="vs-age">Age</th> : null}
               </tr>
             </thead>
             <tbody>
@@ -154,7 +234,7 @@ export function TokenScreener({
         feedPending ? null : null
       ) : (
         <div className="vs-table-wrap">
-          <table className="vs-table">
+          <table className="vs-table" data-slim={slimTable ? "true" : undefined}>
             <thead>
               <tr>
                 <th className="col-name">Name</th>
@@ -191,7 +271,7 @@ export function TokenScreener({
                   </th>
                 ) : null}
                 {cols.age ? (
-                  <th className="hide-sm">
+                  <th className="vs-age">
                     <button type="button" className="sort-btn" onClick={() => toggleSort("ageHours")}>
                       Age{mark("ageHours")}
                     </button>
@@ -210,27 +290,10 @@ export function TokenScreener({
               {rows.map((t) => {
                 const ch = t.change24hPct;
                 const up = ch == null ? true : ch >= 0;
-                const h = hue(t.symbol);
                 return (
                   <tr key={t.id} className="vs-row">
                     <td className="col-name">
-                      <span
-                        className="token-avatar"
-                        style={
-                          t.icon
-                            ? undefined
-                            : {
-                                background: `linear-gradient(145deg, hsl(${h} 72% 48%), hsl(${(h + 36) % 360} 50% 26%))`,
-                              }
-                        }
-                      >
-                        {t.icon ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={t.icon} alt="" />
-                        ) : (
-                          initials(t.symbol)
-                        )}
-                      </span>
+                      <TokenAvatar icon={t.icon} symbol={t.symbol} />
                       <span className="token-meta">
                         <span className="token-title">
                           <span className="token-name">{t.name}</span>
@@ -277,7 +340,7 @@ export function TokenScreener({
                       <td className="num hide-md">{formatUsd(t.liquidityUsd)}</td>
                     ) : null}
                     {cols.age ? (
-                      <td className="num hide-sm">{formatAge(t.ageHours)}</td>
+                      <td className="num vs-age">{formatAge(t.ageHours)}</td>
                     ) : null}
                     {cols.holders ? (
                       <td className="hide-md">

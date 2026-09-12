@@ -69,12 +69,31 @@ function createdAtMs(createdAt: string | number | undefined): number {
   return Number.isFinite(ms) ? ms : 0;
 }
 
-/** DAMM v2 direct = live pool. PRE_GRAD / PRE_LAUNCH / MIGRATING stay bonding if they appear. */
+/** Explicit Bags launch status → screener status. */
 function mapStatus(status: string | undefined): TokenRow["status"] {
+  if (status === "MIGRATED") return "graduated";
   if (status === "PRE_GRAD" || status === "PRE_LAUNCH" || status === "MIGRATING") {
     return "bonding";
   }
+  // DAMM_V2_DIRECT rows are live pools; treat unknown as graduated.
   return "graduated";
+}
+
+/** Prefer reliable gateways — ipfs.io often fails in-browser. */
+function rewriteIpfsIcon(url: string | null | undefined): string | null {
+  if (!url || typeof url !== "string") return null;
+  const trimmed = url.trim();
+  if (!trimmed) return null;
+  let cid: string | null = null;
+  if (trimmed.startsWith("ipfs://")) {
+    cid = trimmed.slice("ipfs://".length).replace(/^ipfs\//, "");
+  } else {
+    const m = trimmed.match(/\/ipfs\/([^/?#]+)/i);
+    if (m) cid = m[1];
+  }
+  if (!cid) return trimmed;
+  // Cloudflare first; client onError can fall back further.
+  return `https://cloudflare-ipfs.com/ipfs/${cid}`;
 }
 
 async function mapPool<T, R>(
@@ -180,7 +199,7 @@ export async function fetchBagsTokens(): Promise<TokenRow[]> {
       symbol: String(l.symbol || "").trim() || mint.slice(0, 6),
       name: String(l.name || "").trim() || l.symbol || mint.slice(0, 8),
       mint,
-      icon: typeof l.image === "string" && l.image ? l.image : null,
+      icon: rewriteIpfsIcon(typeof l.image === "string" ? l.image : null),
       status: mapStatus(l.status),
       priceUsd: null,
       change24hPct: null,

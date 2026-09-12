@@ -682,6 +682,9 @@ button, input { font: inherit; color: inherit; }
   width: 100%;
   border-collapse: collapse;
   min-width: 920px;
+}
+.vs-table[data-slim="true"] {
+  min-width: 420px;
   font-size: 0.88rem;
 }
 .vs-table th {
@@ -751,6 +754,12 @@ td.col-name { display: flex; }
 }
 .stack { display: flex; flex-direction: column; gap: 0.1rem; }
 .num { font-variant-numeric: tabular-nums; color: #e4e4e7; }
+.vs-age {
+  white-space: nowrap;
+  min-width: 3.75rem;
+  overflow: visible;
+  text-overflow: clip;
+}
 .pct { font-size: 0.78rem; font-variant-numeric: tabular-nums; }
 
 .pct.muted,
