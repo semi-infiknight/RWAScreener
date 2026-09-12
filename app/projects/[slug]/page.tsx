@@ -4,12 +4,10 @@ import type { Metadata } from "next";
 import {
   allSlugs,
   dbcLabel,
-  disclaimer,
   domainOf,
   getProject,
   isScreenerLive,
   projects,
-  updatedAt,
 } from "../../../lib/projects";
 import { tokensForLaunchpad } from "../../../lib/tokens";
 import { LivePadScreener } from "../../components/live-pad-screener";
@@ -211,10 +209,6 @@ export default async function ProjectPage({ params }: Props) {
           live={live}
           ecosystemName={p.ecosystem?.name}
         />
-
-        <p className="disclaimer">
-          {disclaimer} Updated {updatedAt}. Domain: {domainOf(p.website)}.
-        </p>
       </main>
     </div>
   );

@@ -7,7 +7,6 @@ import {
   formatPct,
   formatUsd,
   metricOrNaN,
-  tokensDisclaimer,
   type TokenRow,
 } from "../../lib/tokens";
 import {
@@ -16,7 +15,6 @@ import {
   type ScreenerColumns,
 } from "../../lib/screener-columns";
 
-type TabId = "trending" | "top" | "gainers" | "new";
 type SortKey =
   | "fdvUsd"
   | "volume24hUsd"
@@ -24,13 +22,6 @@ type SortKey =
   | "liquidityUsd"
   | "ageHours"
   | "holders";
-
-const TABS: { id: TabId; label: string }[] = [
-  { id: "trending", label: "Trending" },
-  { id: "top", label: "Top" },
-  { id: "gainers", label: "Gainers" },
-  { id: "new", label: "New" },
-];
 
 function initials(sym: string) {
   return sym.slice(0, 2).toUpperCase();
@@ -43,9 +34,7 @@ function hue(sym: string) {
 }
 
 function Sparkline({ values, up }: { values: number[] | null; up: boolean }) {
-  if (!values || values.length < 2) {
-    return <span className="num muted">—</span>;
-  }
+  if (!values || values.length < 2) return null;
   const w = 88;
   const h = 28;
   const min = Math.min(...values);
@@ -74,9 +63,7 @@ function Sparkline({ values, up }: { values: number[] | null; up: boolean }) {
 }
 
 function RangeBar({ pos }: { pos: number | null }) {
-  if (pos == null || Number.isNaN(pos)) {
-    return <span className="num muted">—</span>;
-  }
+  if (pos == null || Number.isNaN(pos)) return null;
   const p = Math.min(1, Math.max(0, pos));
   return (
     <div className="range" aria-hidden>
@@ -94,148 +81,53 @@ export function TokenScreener({
   live = true,
   loading = false,
   feedPending = false,
-  ecosystemName,
   columns: columnsProp,
 }: {
   launchpadId?: string;
   launchpadName: string;
   tokens: TokenRow[];
   live?: boolean;
-  /** Live feed still fetching — never show "Not live yet". */
   loading?: boolean;
-  /** API route exists but pad feed not reverse-engineered yet. */
   feedPending?: boolean;
   ecosystemName?: string;
-  /** Override; defaults from launchpadId via screener-columns. */
   columns?: ScreenerColumns;
 }) {
   const cols = columnsProp ?? screenerColumnsFor(launchpadId || "");
   const initialSort = defaultSortFor(cols);
-  const [tab, setTab] = useState<TabId>("trending");
-  const [q, setQ] = useState("");
   const [sort, setSort] = useState<SortKey>(initialSort.key);
   const [asc, setAsc] = useState(initialSort.asc);
 
-  /** Only StonkOptions (screenerLive=false) gets the not-live empty state. */
   const showNotLive = !live;
   const showLoadingTable = live && loading && tokens.length === 0;
   const showLiveEmpty = live && !loading && tokens.length === 0;
-  const showEmpty = showNotLive;
 
   const rows = useMemo(() => {
     if (showNotLive || tokens.length === 0) return [];
-    const query = q.trim().toLowerCase();
-    let list = tokens.filter((t) => {
-      if (!query) return true;
-      return (
-        t.symbol.toLowerCase().includes(query) ||
-        t.name.toLowerCase().includes(query) ||
-        (t.mint?.toLowerCase().includes(query) ?? false)
-      );
-    });
-
-    if (tab === "gainers") {
-      list = [...list].sort(
-        (a, b) => metricOrNaN(b.change24hPct) - metricOrNaN(a.change24hPct),
-      );
-    } else if (tab === "new") {
-      // Missing age → bottom (treat as very old when ascending by ageHours)
-      list = [...list].sort((a, b) => {
-        const ah = a.ageHours == null ? Number.POSITIVE_INFINITY : a.ageHours;
-        const bh = b.ageHours == null ? Number.POSITIVE_INFINITY : b.ageHours;
-        return ah - bh;
-      });
-    } else if (tab === "top") {
-      list = [...list].sort(
-        (a, b) => metricOrNaN(b.fdvUsd) - metricOrNaN(a.fdvUsd),
-      );
-    } else {
-      list = [...list].sort((a, b) => {
-        const score = (t: TokenRow) => {
-          const vol = metricOrNaN(t.volume24hUsd);
-          const ch = t.change24hPct == null ? 0 : Math.abs(t.change24hPct);
-          if (vol === Number.NEGATIVE_INFINITY) return Number.NEGATIVE_INFINITY;
-          return vol * (1 + ch / 100);
-        };
-        return score(b) - score(a);
-      });
-    }
-
-    list = [...list].sort((a, b) => {
+    const list = [...tokens];
+    list.sort((a, b) => {
       const av = metricOrNaN(a[sort] as number | null);
       const bv = metricOrNaN(b[sort] as number | null);
-      const d = av - bv;
-      return asc ? d : -d;
+      return asc ? av - bv : bv - av;
     });
-
     return list;
-  }, [tokens, q, tab, sort, asc, showEmpty]);
+  }, [tokens, sort, asc, showNotLive]);
 
-  const toggleSort = (key: SortKey) => {
+  function toggleSort(key: SortKey) {
     if (sort === key) setAsc(!asc);
     else {
       setSort(key);
       setAsc(false);
     }
-  };
+  }
 
-  const mark = (key: SortKey) => (sort === key ? (asc ? " ↑" : " ↓") : "");
+  function mark(key: SortKey) {
+    if (sort !== key) return "";
+    return asc ? " ↑" : " ↓";
+  }
 
   return (
-    <section className="vs" aria-label={`${launchpadName} token screener`}>
-      <div className="vs-toolbar">
-        <div className="vs-tabs" role="tablist" aria-label="Screener views">
-          {TABS.map((t) => (
-            <button
-              key={t.id}
-              type="button"
-              role="tab"
-              className="vs-tab"
-              data-active={tab === t.id}
-              aria-selected={tab === t.id}
-              disabled={showNotLive}
-              onClick={() => setTab(t.id)}
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
-        <div className="vs-tools">
-          <span className="vs-chip" data-active="true">
-            24H
-          </span>
-          <label className="vs-search">
-            <span className="sr-only">Search tokens</span>
-            <input
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder="Search"
-              disabled={showNotLive}
-            />
-          </label>
-        </div>
-      </div>
-
-      {showNotLive ? (
-        <div className="vs-empty-state">
-          <div className="vs-empty-badge">Not live yet</div>
-          <h3>{launchpadName} launches coming soon</h3>
-          <p>
-            {ecosystemName ? (
-              <>
-                Part of the <strong>{ecosystemName}</strong> ecosystem.{" "}
-              </>
-            ) : null}
-            Token launches are not live yet — this screener stays empty until
-            they are. No placeholder tokens by design.
-          </p>
-          <div className="vs-empty-tags">
-            <span className="tag">integrating</span>
-            <span className="tag">DBC integrating</span>
-            {ecosystemName ? <span className="tag">{ecosystemName}</span> : null}
-          </div>
-        </div>
-      ) : showLoadingTable ? (
+    <section className="vs-screener" aria-label={`${launchpadName} tokens`}>
+      {showNotLive ? null : showLoadingTable ? (
         <div className="vs-table-wrap">
           <table className="vs-table vs-table-loading">
             <thead>
@@ -259,19 +151,7 @@ export function TokenScreener({
           </table>
         </div>
       ) : showLiveEmpty ? (
-        <div className="vs-empty-state">
-          <div className="vs-empty-badge">{feedPending ? "Wiring" : "Live"}</div>
-          <h3>
-            {feedPending
-              ? `${launchpadName} feed coming online`
-              : "No launches returned"}
-          </h3>
-          <p>
-            {feedPending
-              ? "This pad is live in the ecosystem list. Token rows will appear here once its public API is wired — no placeholder data."
-              : `The live feed for ${launchpadName} is up, but it returned no rows right now. Try refreshing.`}
-          </p>
-        </div>
+        feedPending ? null : null
       ) : (
         <div className="vs-table-wrap">
           <table className="vs-table">
@@ -288,7 +168,11 @@ export function TokenScreener({
                 ) : null}
                 {cols.volume ? (
                   <th>
-                    <button type="button" className="sort-btn" onClick={() => toggleSort("volume24hUsd")}>
+                    <button
+                      type="button"
+                      className="sort-btn"
+                      onClick={() => toggleSort("volume24hUsd")}
+                    >
                       Vol{mark("volume24hUsd")}
                     </button>
                   </th>
@@ -297,7 +181,11 @@ export function TokenScreener({
                 {cols.range ? <th className="hide-lg">24h Range</th> : null}
                 {cols.liquidity ? (
                   <th className="hide-md">
-                    <button type="button" className="sort-btn" onClick={() => toggleSort("liquidityUsd")}>
+                    <button
+                      type="button"
+                      className="sort-btn"
+                      onClick={() => toggleSort("liquidityUsd")}
+                    >
                       Liq{mark("liquidityUsd")}
                     </button>
                   </th>
@@ -316,7 +204,6 @@ export function TokenScreener({
                     </button>
                   </th>
                 ) : null}
-                {cols.buy ? <th className="col-buy">Buy</th> : null}
               </tr>
             </thead>
             <tbody>
@@ -353,11 +240,6 @@ export function TokenScreener({
                           <span className="token-status" data-status={t.status}>
                             {t.status}
                           </span>
-                          {t.draft ? (
-                            <span className="token-status" data-status="bonding">
-                              draft
-                            </span>
-                          ) : null}
                         </span>
                       </span>
                     </td>
@@ -399,26 +281,7 @@ export function TokenScreener({
                     ) : null}
                     {cols.holders ? (
                       <td className="hide-md">
-                        <div className="stack">
-                          <span className="num">{formatCompact(t.holders)}</span>
-                          {t.holdersDelta24h == null ? null : (
-                            <span
-                              className={
-                                t.holdersDelta24h >= 0 ? "pct up" : "pct down"
-                              }
-                            >
-                              {t.holdersDelta24h >= 0 ? "+" : ""}
-                              {t.holdersDelta24h}
-                            </span>
-                          )}
-                        </div>
-                      </td>
-                    ) : null}
-                    {cols.buy ? (
-                      <td className="col-buy">
-                        <button type="button" className="buy-btn" aria-label={`Buy ${t.symbol}`} disabled>
-                          ⚡
-                        </button>
+                        <span className="num">{formatCompact(t.holders)}</span>
                       </td>
                     ) : null}
                   </tr>
@@ -428,11 +291,6 @@ export function TokenScreener({
           </table>
         </div>
       )}
-
-      <p className="vs-note">
-        {launchpadName}
-        {ecosystemName ? ` · ${ecosystemName} ecosystem` : ""} · {tokensDisclaimer}
-      </p>
     </section>
   );
 }

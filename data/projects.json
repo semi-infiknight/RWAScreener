@@ -1,7 +1,7 @@
 {
   "version": 1,
   "updatedAt": "2026-09-12",
-  "disclaimer": "Status labels describe what we know about a DBC integration and our relationship with builders. They are not endorsements of a project or token.",
+  "disclaimer": "",
   "statuses": [
     "live",
     "integrating",

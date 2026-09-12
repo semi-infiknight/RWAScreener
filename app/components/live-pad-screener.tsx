@@ -8,21 +8,18 @@ function padApi(launchpadId: string): string {
   return `/api/pads/${launchpadId}`;
 }
 
-function patchToken(prev: TokenRow[], patch: Partial<TokenRow> & { id?: string; mint?: string }): TokenRow[] {
-  const key = patch.id || (patch.mint ? undefined : undefined);
+function patchToken(
+  prev: TokenRow[],
+  patch: Partial<TokenRow> & { id?: string; mint?: string },
+): TokenRow[] {
   return prev.map((t) => {
     const match =
-      (patch.id && t.id === patch.id) ||
-      (patch.mint && t.mint === patch.mint);
+      (patch.id && t.id === patch.id) || (patch.mint && t.mint === patch.mint);
     if (!match) return t;
     return { ...t, ...patch };
   });
 }
 
-/**
- * Universal live-pad screener: never blocks SSR.
- * Fast list first, then enrich ONE mint at a time (paint after each).
- */
 export function LivePadScreener({
   launchpadId,
   launchpadName,
@@ -39,10 +36,7 @@ export function LivePadScreener({
   const api = live ? padApi(launchpadId) : null;
   const [tokens, setTokens] = useState<TokenRow[]>(live ? [] : initialTokens);
   const [loading, setLoading] = useState(Boolean(api));
-  const [enriching, setEnriching] = useState(false);
-  const [enrichLabel, setEnrichLabel] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!api) return;
@@ -50,17 +44,11 @@ export function LivePadScreener({
 
     async function load() {
       setLoading(true);
-      setError(null);
       setPending(false);
-      setEnrichLabel(null);
       try {
         const fastRes = await fetch(`${api}?phase=fast`);
         const fastBody = await fastRes.json().catch(() => ({}));
-        if (!fastRes.ok) {
-          throw new Error(
-            (fastBody as { error?: string })?.error || `HTTP ${fastRes.status}`,
-          );
-        }
+        if (!fastRes.ok) throw new Error("fetch failed");
         if (cancelled) return;
         const fastTokens: TokenRow[] = Array.isArray(fastBody.tokens)
           ? fastBody.tokens
@@ -69,27 +57,16 @@ export function LivePadScreener({
         setTokens(fastTokens);
         setLoading(false);
 
-        if (fastBody.pending || fastTokens.length === 0) {
-          setEnriching(false);
-          return;
-        }
+        if (fastBody.pending || fastTokens.length === 0) return;
 
-        // Sequential one-by-one enrich (supports ?mint=). Skip if pad returns 404.
-        setEnriching(true);
         const queue = fastTokens.filter((t) => t.mint);
         for (let i = 0; i < queue.length; i++) {
           if (cancelled) break;
           const row = queue[i];
           const mint = row.mint!;
-          setEnrichLabel(
-            `${row.symbol || mint.slice(0, 6)} (${i + 1}/${queue.length})`,
-          );
           try {
-            const res = await fetch(
-              `${api}?mint=${encodeURIComponent(mint)}`,
-            );
+            const res = await fetch(`${api}?mint=${encodeURIComponent(mint)}`);
             if (res.status === 404) {
-              // Pad does not support per-mint enrich — stop sequential loop once.
               if (i === 0) break;
               continue;
             }
@@ -98,20 +75,13 @@ export function LivePadScreener({
             if (cancelled) break;
             setTokens((prev) => patchToken(prev, body.token));
           } catch {
-            // skip this mint, continue
+            // skip
           }
         }
-        if (!cancelled) {
-          setEnriching(false);
-          setEnrichLabel(null);
-        }
-      } catch (err: unknown) {
+      } catch {
         if (cancelled) return;
-        setError(err instanceof Error ? err.message : "Failed to load tokens");
         setTokens([]);
         setLoading(false);
-        setEnriching(false);
-        setEnrichLabel(null);
       }
     }
 
@@ -123,17 +93,6 @@ export function LivePadScreener({
 
   return (
     <div className="live-pad-screener">
-      {loading ? (
-        <p className="live-pad-status">Loading live tokens…</p>
-      ) : null}
-      {enriching && enrichLabel ? (
-        <p className="live-pad-status">Updating {enrichLabel}…</p>
-      ) : null}
-      {error && !loading && tokens.length === 0 ? (
-        <p className="live-pad-status error">
-          Couldn’t load live feed ({error}).
-        </p>
-      ) : null}
       <TokenScreener
         launchpadId={launchpadId}
         launchpadName={launchpadName}

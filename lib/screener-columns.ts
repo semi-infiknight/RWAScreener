@@ -25,7 +25,7 @@ const ALL_OFF: ScreenerColumns = {
   liquidity: false,
   age: false,
   holders: false,
-  buy: true,
+  buy: false,
 };
 
 /** Ethics: launches + board/enrich + token-info (no spark/range/holders). */
@@ -36,7 +36,7 @@ const ETHICS: ScreenerColumns = {
   volume: true,
   liquidity: true,
   age: true,
-  buy: true,
+  buy: false,
 };
 
 /** Ember /cooking markets: price, mcap, vol, holders, age (no liq/spark/range). */
@@ -47,20 +47,20 @@ const EMBER: ScreenerColumns = {
   volume: true,
   holders: true,
   age: true,
-  buy: true,
+  buy: false,
 };
 
 /** Bags public launches: identity + icon + age only for now. */
 const BAGS: ScreenerColumns = {
   ...ALL_OFF,
   age: true,
-  buy: true,
+  buy: false,
 };
 
 /** Unwired pads — name only until their API is mapped. */
 const PENDING: ScreenerColumns = {
   ...ALL_OFF,
-  buy: true,
+  buy: false,
 };
 
 const BY_PAD: Record<string, ScreenerColumns> = {
