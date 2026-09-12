@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-09-13",
+  "updatedAt": "2026-09-12T16:13:55Z",
   "disclaimer": "",
   "statuses": [
     "live",
@@ -16,7 +16,7 @@
       "website": "https://embercurve.fun/",
       "x": "https://x.com/embercurve",
       "docs": null,
-      "summary": "Ember Curve — Solana launchpad for bonding-curve coins paired with SOL, USDC, tokenized stocks (xStocks), or selected memes; trade tax routing and graduation into Meteora liquidity.",
+      "summary": "Launch a Solana token on Meteora, paired with SOL, USDC or one of 163+ tokenized stocks. 5dvXTZ5qwgafnHtwu3Ls3QrWx1U4LQsFeCuJgkk4QEC6",
       "built": [
         "Bonding-curve launches paired with SOL / USDC / tokenized stocks / selected memes",
         "On-chain trade-tax routing (holders, burns, lottery, team)",
@@ -60,11 +60,11 @@
       "website": "https://letsfuckingown.fun/",
       "x": "https://x.com/LFOWNDOTFUN",
       "docs": null,
-      "summary": "LFOwn (letsfuckingown.fun) — memecoin launchpad with verified Meteora DBC, paired with MetaDAO ownership coins (redeemable treasury), not SOL or a tokenized stock. Bonding on-curve vs that MetaDAO quote; graduation migrates to Meteora DAMM v2.",
+      "summary": "Memecoin launchpad paired with MetaDAO ownership coins.",
       "built": [
         "Memecoin launches paired against MetaDAO ownership coins (quoteMint ends in meta)",
         "Bonding / on-curve: LFOwn curve vs MetaDAO ownership-coin quote",
-        "Graduation: isMigrated → Meteora DAMM v2 pool"
+        "Graduation: isMigrated \u2192 Meteora DAMM v2 pool"
       ],
       "status": "live",
       "verified": [
@@ -103,7 +103,7 @@
       "website": "https://star.fun",
       "x": "https://x.com/getstonkoptions",
       "docs": "https://star-fun.gitbook.io/star",
-      "summary": "StonkOptions is a star.fun ecosystem product — the launchpad surface integrating Meteora DBC. Token launches are not live yet; DBC integration is in progress.",
+      "summary": "The Internet's Benefits Department.",
       "built": [
         "Part of the star.fun ecosystem (startup fundraising / launch stack)",
         "DBC-oriented launchpad product under StonkOptions (@getstonkoptions)",
@@ -118,7 +118,7 @@
       "contact": "unknown",
       "dbc": {
         "integrated": null,
-        "evidence": "Integrating Meteora DBC — not live for launches yet; star.fun ecosystem context confirmed by owner.",
+        "evidence": "Integrating Meteora DBC \u2014 not live for launches yet; star.fun ecosystem context confirmed by owner.",
         "configKeys": [],
         "feeClaimers": []
       },
@@ -160,7 +160,7 @@
       "website": "https://bags.fm",
       "x": "https://x.com/BagsApp",
       "docs": "https://docs.bags.fm",
-      "summary": "Token launchpad with documented Meteora DBC creation/curve flow and DAMM v2 migration; Fee Share V1/V2 + public SDK/API.",
+      "summary": "Launch, Trade, Earn, and Discover the Next Big Thing.",
       "built": [
         "DBC token launches",
         "DAMM v2 post-migration pools",
@@ -207,11 +207,11 @@
       "website": "https://perpspad.fun",
       "x": "https://x.com/perpspadfun",
       "docs": "https://perpspad.fun/paper",
-      "summary": "Launchpad where coins trade on Meteora DBC (SOL quote), migrate to DAMM v2, and route fees into per-coin sub-wallets that back Phoenix perps; also stock-paired DLMM mode.",
+      "summary": "Launch coins on @Solana, backed by perps, stocks and RWA Join the community - http://t.me/perpspad CA - PerPsCe2SJ7Q25CN4R5TTX4fmBdmknE2hQmqCt96fHL",
       "built": [
         "DBC SOL-quoted bonding curve launches",
         "DAMM v2 graduation with locked LP",
-        "Per-coin treasury → Imperial/Phoenix leveraged perps",
+        "Per-coin treasury \u2192 Imperial/Phoenix leveraged perps",
         "Optional xStock / tokenized-stock DLMM pairing"
       ],
       "status": "live",
@@ -223,7 +223,7 @@
       "contact": "unknown",
       "dbc": {
         "integrated": true,
-        "evidence": "Whitepaper §2: trading against Meteora DBC quoted in SOL; migrates to DAMM v2",
+        "evidence": "Whitepaper \u00a72: trading against Meteora DBC quoted in SOL; migrates to DAMM v2",
         "configKeys": [],
         "feeClaimers": []
       },
@@ -255,7 +255,7 @@
       "website": "https://clawpump.tech",
       "x": "https://x.com/clawpumptech",
       "docs": "https://clawpump.tech/docs",
-      "summary": "Agentic finance runtime for launching/trading via agents. Public docs emphasize pump.fun / Metaplex Genesis / Pons; DBC as a launch path not documented yet.",
+      "summary": "ClawPump is the capital market for agents on @solana & @robinhoodcrypto chain. Backed by @pumpfun, @colosseum, & @incubator",
       "built": [
         "Agent wallets + MCP/CLI launch tooling",
         "Public launch paths: pump.fun, Metaplex Genesis, Pons",
@@ -302,7 +302,7 @@
       "website": "https://ethics.ltd",
       "x": "https://x.com/ethicslaunch",
       "docs": null,
-      "summary": "Ethics Launch — market-backed token launches with locked liquidity; pairs with SOL, stables, and RWAs; site markets Instant DAMMv2 launches.",
+      "summary": "Launch token with any pair on any chain (Solana, Robinhood, Base, BNB, HyperEVM, Arbitrum) $ETHICS",
       "built": [
         "Market-backed launches (SOL / stables / RWAs)",
         "Locked liquidity + fee earn or airdrop to holders",
@@ -345,7 +345,7 @@
       "website": "https://revshare.dev/",
       "x": "https://x.com/revshare_app",
       "docs": "https://app.revshare.ltd/docs",
-      "summary": "RevShare — multi-chain token launchpad with Solana Meteora Bonding Curve / DBC launches; fee/revenue sharing mechanics on app.revshare.ltd.",
+      "summary": "Create tokens that automatically earn creator fees from 1\u201310% of all volume and share them with your holders. Available on all chains.",
       "built": [
         "Solana Meteora DBC bonding-curve launches (among other chains/AMMs)",
         "Live token catalog via app.revshare.ltd /api/all-tokens",
