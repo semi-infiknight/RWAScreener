@@ -14,12 +14,12 @@ const STATUS_FILTERS = [
 ] as const;
 
 const AVATAR_COLORS = [
-  "#0052ff",
-  "#7c3aed",
-  "#0d9488",
-  "#db2777",
-  "#ea580c",
-  "#2563eb",
+  "#ff6a00",
+  "#ff8a1a",
+  "#ffb347",
+  "#e85d04",
+  "#f48c06",
+  "#dc2f02",
 ];
 
 function domainOf(website: string | null): string {
@@ -110,8 +110,7 @@ export function EcosystemExplorer({
         <HeroBars />
         <h1>Ecosystem</h1>
         <p>
-          Explore {projects.length} launchpads and builders around Meteora DBC —
-          what they built, what is live, and what we have verified.
+          DBC launchpads on Solana — what they built, what is live, what we verified.
         </p>
       </section>
 
