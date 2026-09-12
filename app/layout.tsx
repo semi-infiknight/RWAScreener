@@ -4,7 +4,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "RWAScreener — DBC ecosystem",
   description:
-    "Track which projects have integrated Meteora DBC, what they built, and what we have verified.",
+    "Explore launchpads and builders integrating Meteora DBC. Listings describe what we know — not endorsements.",
 };
 
 export default function RootLayout({
