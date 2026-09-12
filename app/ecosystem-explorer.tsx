@@ -47,12 +47,8 @@ function dbcTag(p: Project): string {
 
 export function EcosystemExplorer({
   projects,
-  disclaimer,
-  updatedAt,
 }: {
   projects: Project[];
-  disclaimer: string;
-  updatedAt: string;
 }) {
   const [status, setStatus] = useState<string>("all");
   const [query, setQuery] = useState("");
@@ -244,16 +240,13 @@ export function EcosystemExplorer({
         ) : null}
         </div>
 
-        <p className="disclaimer">
-          {disclaimer} This page lists third-party projects. RWAScreener does
-          not offer, recommend, endorse, or provide investment, tax, or legal
-          advice. Products are operated by independent parties under their own
-          terms. Updated {updatedAt}.
-        </p>
-
         <div className="footer-cta">
-          <a href="https://docs.meteora.ag/core-products/dbc/what-is-dbc">
-            Learn about DBC →
+          <a
+            href="https://docs.meteora.ag/core-products/dbc/what-is-dbc"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Build on Meteora DBC →
           </a>
         </div>
       </div>
