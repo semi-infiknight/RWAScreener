@@ -16,7 +16,7 @@
       "website": "https://star.fun",
       "x": "https://x.com/getstonkoptions",
       "docs": "https://star-fun.gitbook.io/star",
-      "summary": "StonkOptions is a star.fun ecosystem product \u2014 the launchpad surface integrating Meteora DBC. Token launches are not live yet; DBC integration is in progress.",
+      "summary": "StonkOptions is a star.fun ecosystem product — the launchpad surface integrating Meteora DBC. Token launches are not live yet; DBC integration is in progress.",
       "built": [
         "Part of the star.fun ecosystem (startup fundraising / launch stack)",
         "DBC-oriented launchpad product under StonkOptions (@getstonkoptions)",
@@ -31,7 +31,7 @@
       "contact": "unknown",
       "dbc": {
         "integrated": null,
-        "evidence": "Integrating Meteora DBC \u2014 not live for launches yet; star.fun ecosystem context confirmed by owner.",
+        "evidence": "Integrating Meteora DBC — not live for launches yet; star.fun ecosystem context confirmed by owner.",
         "configKeys": [],
         "feeClaimers": []
       },
@@ -69,7 +69,7 @@
       "website": "https://ethics.ltd",
       "x": "https://x.com/ethicslaunch",
       "docs": null,
-      "summary": "Ethics Launch \u2014 market-backed token launches with locked liquidity; pairs with SOL, stables, and RWAs; site markets Instant DAMMv2 launches.",
+      "summary": "Ethics Launch — market-backed token launches with locked liquidity; pairs with SOL, stables, and RWAs; site markets Instant DAMMv2 launches.",
       "built": [
         "Market-backed launches (SOL / stables / RWAs)",
         "Locked liquidity + fee earn or airdrop to holders",
@@ -152,7 +152,7 @@
       "built": [
         "DBC SOL-quoted bonding curve launches",
         "DAMM v2 graduation with locked LP",
-        "Per-coin treasury \u2192 Imperial/Phoenix leveraged perps",
+        "Per-coin treasury → Imperial/Phoenix leveraged perps",
         "Optional xStock / tokenized-stock DLMM pairing"
       ],
       "status": "live",
@@ -164,7 +164,7 @@
       "contact": "unknown",
       "dbc": {
         "integrated": true,
-        "evidence": "Whitepaper \u00a72: trading against Meteora DBC quoted in SOL; migrates to DAMM v2",
+        "evidence": "Whitepaper §2: trading against Meteora DBC quoted in SOL; migrates to DAMM v2",
         "configKeys": [],
         "feeClaimers": []
       },
@@ -233,7 +233,7 @@
       "website": "https://letsfuckingown.fun/",
       "x": "https://x.com/LFOWNDOTFUN",
       "docs": null,
-      "summary": "LFOwn (letsfuckingown.fun) \u2014 memecoin launchpad where the pair asset is a MetaDAO ownership coin (redeemable treasury), not SOL or a tokenized stock.",
+      "summary": "LFOwn (letsfuckingown.fun) — memecoin launchpad where the pair asset is a MetaDAO ownership coin (redeemable treasury), not SOL or a tokenized stock.",
       "built": [
         "Memecoin launches paired against MetaDAO ownership coins",
         "Futarchy-aware risk framing for ownership-coin quote assets",
@@ -262,6 +262,46 @@
       ],
       "notes": "Confirm whether launches use DBC configs or another Meteora primitive.",
       "icon": "/avatars/lfgown.jpg"
+    },
+    {
+      "id": "embercurve",
+      "displayName": "Ember Curve",
+      "slug": "embercurve",
+      "website": "https://embercurve.fun/",
+      "x": "https://x.com/embercurve",
+      "docs": null,
+      "summary": "Ember Curve — Solana launchpad for bonding-curve coins paired with SOL, USDC, tokenized stocks (xStocks), or selected memes; trade tax routing and graduation into Meteora liquidity.",
+      "built": [
+        "Bonding-curve launches paired with SOL / USDC / tokenized stocks / selected memes",
+        "On-chain trade-tax routing (holders, burns, lottery, team)",
+        "Graduation into Meteora liquidity after the curve"
+      ],
+      "status": "live",
+      "verified": [
+        "public_site",
+        "x_handle",
+        "stock_quote_marketing"
+      ],
+      "contact": "unknown",
+      "dbc": {
+        "integrated": true,
+        "evidence": "Public site markets stock-paired bonding-curve launches on Solana; LBank listing describes launches on Meteora. fee_claimer / config keys not yet mapped on-chain.",
+        "configKeys": [],
+        "feeClaimers": []
+      },
+      "sources": [
+        {
+          "label": "Site",
+          "url": "https://embercurve.fun/"
+        },
+        {
+          "label": "X",
+          "url": "https://x.com/embercurve"
+        }
+      ],
+      "notes": "Strong stock-as-quote product fit. Screener empty until quote→pool→fee_claimer attribution lands. Do not invent fee_claimer.",
+      "screenerLive": false,
+      "icon": "/avatars/embercurve.jpg"
     }
   ]
 }
