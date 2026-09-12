@@ -1,5 +1,5 @@
 /**
- * Short-TTL cache for pad live list feeds (Ethics, Ember, Bags, Perpspad, ClawPump, LFOwn, …).
+ * Short-TTL cache for pad live list feeds (Ethics, Ember, Bags, Perpspad, ClawPump, LFOwn, RevShare, …).
  *
  * - Redis when REDIS_URL or REDIS_PRIVATE_URL is set (Railway).
  * - In-memory Map fallback for local / when Redis is missing or down (fail open).

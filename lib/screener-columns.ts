@@ -86,6 +86,14 @@ const LFGOWN: ScreenerColumns = {
   buy: false,
 };
 
+/** RevShare /api/all-tokens (Solana Meteora DBC): mcap + age (no price/vol/holders). */
+const REVSHARE: ScreenerColumns = {
+  ...ALL_OFF,
+  fdv: true,
+  age: true,
+  buy: false,
+};
+
 /** Unwired pads — name only until their API is mapped. */
 const PENDING: ScreenerColumns = {
   ...ALL_OFF,
@@ -99,6 +107,7 @@ const BY_PAD: Record<string, ScreenerColumns> = {
   perpspad: PERPSPAD,
   clawpump: CLAWPUMP,
   lfgown: LFGOWN,
+  revshare: REVSHARE,
   stardotfun: PENDING,
 };
 

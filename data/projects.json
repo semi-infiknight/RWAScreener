@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-09-12",
+  "updatedAt": "2026-09-13",
   "disclaimer": "",
   "statuses": [
     "live",
@@ -16,7 +16,7 @@
       "website": "https://embercurve.fun/",
       "x": "https://x.com/embercurve",
       "docs": null,
-      "summary": "Ember Curve \u2014 Solana launchpad for bonding-curve coins paired with SOL, USDC, tokenized stocks (xStocks), or selected memes; trade tax routing and graduation into Meteora liquidity.",
+      "summary": "Ember Curve — Solana launchpad for bonding-curve coins paired with SOL, USDC, tokenized stocks (xStocks), or selected memes; trade tax routing and graduation into Meteora liquidity.",
       "built": [
         "Bonding-curve launches paired with SOL / USDC / tokenized stocks / selected memes",
         "On-chain trade-tax routing (holders, burns, lottery, team)",
@@ -60,11 +60,11 @@
       "website": "https://letsfuckingown.fun/",
       "x": "https://x.com/LFOWNDOTFUN",
       "docs": null,
-      "summary": "LFOwn (letsfuckingown.fun) \u2014 memecoin launchpad with verified Meteora DBC, paired with MetaDAO ownership coins (redeemable treasury), not SOL or a tokenized stock. Bonding on-curve vs that MetaDAO quote; graduation migrates to Meteora DAMM v2.",
+      "summary": "LFOwn (letsfuckingown.fun) — memecoin launchpad with verified Meteora DBC, paired with MetaDAO ownership coins (redeemable treasury), not SOL or a tokenized stock. Bonding on-curve vs that MetaDAO quote; graduation migrates to Meteora DAMM v2.",
       "built": [
         "Memecoin launches paired against MetaDAO ownership coins (quoteMint ends in meta)",
         "Bonding / on-curve: LFOwn curve vs MetaDAO ownership-coin quote",
-        "Graduation: isMigrated \u2192 Meteora DAMM v2 pool"
+        "Graduation: isMigrated → Meteora DAMM v2 pool"
       ],
       "status": "live",
       "verified": [
@@ -103,7 +103,7 @@
       "website": "https://star.fun",
       "x": "https://x.com/getstonkoptions",
       "docs": "https://star-fun.gitbook.io/star",
-      "summary": "StonkOptions is a star.fun ecosystem product \u2014 the launchpad surface integrating Meteora DBC. Token launches are not live yet; DBC integration is in progress.",
+      "summary": "StonkOptions is a star.fun ecosystem product — the launchpad surface integrating Meteora DBC. Token launches are not live yet; DBC integration is in progress.",
       "built": [
         "Part of the star.fun ecosystem (startup fundraising / launch stack)",
         "DBC-oriented launchpad product under StonkOptions (@getstonkoptions)",
@@ -118,7 +118,7 @@
       "contact": "unknown",
       "dbc": {
         "integrated": null,
-        "evidence": "Integrating Meteora DBC \u2014 not live for launches yet; star.fun ecosystem context confirmed by owner.",
+        "evidence": "Integrating Meteora DBC — not live for launches yet; star.fun ecosystem context confirmed by owner.",
         "configKeys": [],
         "feeClaimers": []
       },
@@ -211,7 +211,7 @@
       "built": [
         "DBC SOL-quoted bonding curve launches",
         "DAMM v2 graduation with locked LP",
-        "Per-coin treasury \u2192 Imperial/Phoenix leveraged perps",
+        "Per-coin treasury → Imperial/Phoenix leveraged perps",
         "Optional xStock / tokenized-stock DLMM pairing"
       ],
       "status": "live",
@@ -223,7 +223,7 @@
       "contact": "unknown",
       "dbc": {
         "integrated": true,
-        "evidence": "Whitepaper \u00a72: trading against Meteora DBC quoted in SOL; migrates to DAMM v2",
+        "evidence": "Whitepaper §2: trading against Meteora DBC quoted in SOL; migrates to DAMM v2",
         "configKeys": [],
         "feeClaimers": []
       },
@@ -302,7 +302,7 @@
       "website": "https://ethics.ltd",
       "x": "https://x.com/ethicslaunch",
       "docs": null,
-      "summary": "Ethics Launch \u2014 market-backed token launches with locked liquidity; pairs with SOL, stables, and RWAs; site markets Instant DAMMv2 launches.",
+      "summary": "Ethics Launch — market-backed token launches with locked liquidity; pairs with SOL, stables, and RWAs; site markets Instant DAMMv2 launches.",
       "built": [
         "Market-backed launches (SOL / stables / RWAs)",
         "Locked liquidity + fee earn or airdrop to holders",
@@ -337,6 +337,53 @@
       "devX": null,
       "devGithub": null,
       "sortOrder": 7
+    },
+    {
+      "id": "revshare",
+      "displayName": "RevShare",
+      "slug": "revshare",
+      "website": "https://revshare.dev/",
+      "x": "https://x.com/revshare_app",
+      "docs": "https://app.revshare.ltd/docs",
+      "summary": "RevShare — multi-chain token launchpad with Solana Meteora Bonding Curve / DBC launches; fee/revenue sharing mechanics on app.revshare.ltd.",
+      "built": [
+        "Solana Meteora DBC bonding-curve launches (among other chains/AMMs)",
+        "Live token catalog via app.revshare.ltd /api/all-tokens",
+        "Revenue / fee sharing launch UX"
+      ],
+      "status": "live",
+      "verified": [
+        "public_site",
+        "api_all_tokens"
+      ],
+      "contact": "unknown",
+      "dbc": {
+        "integrated": true,
+        "evidence": "app.revshare.ltd JS uses Meteora DBC getPoolByBaseMint for Solana rows whose bonding_config is a base58 config pubkey (not PUMPFUN / raydium-launchlab / *_V3/_V4). Live feed: GET /api/all-tokens?chain_id=0 filtered to those configs.",
+        "configKeys": [],
+        "feeClaimers": []
+      },
+      "sources": [
+        {
+          "label": "Site",
+          "url": "https://revshare.dev/"
+        },
+        {
+          "label": "App",
+          "url": "https://app.revshare.ltd/"
+        },
+        {
+          "label": "X",
+          "url": "https://x.com/revshare_app"
+        }
+      ],
+      "notes": "Screener: Solana (chain_id=0) + bonding_config base58 Meteora DBC only. Paginated /api/all-tokens (cursor). Non-Solana and named factories excluded.",
+      "icon": "/avatars/revshare.jpg",
+      "screenerLive": true,
+      "github": null,
+      "devX": null,
+      "devGithub": null,
+      "sortOrder": 8
     }
   ]
 }
