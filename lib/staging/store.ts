@@ -299,3 +299,100 @@ export async function getQuotes(): Promise<QuotesResult> {
     quotes: bundle.quotes,
   };
 }
+
+export async function getQuote(slug: string): Promise<StagingQuote | null> {
+  const key = decodeURIComponent(slug || "").trim();
+  if (!key) return null;
+  const { quotes } = await getQuotes();
+  const lower = key.toLowerCase();
+  return (
+    quotes.find((q) => q.mint === key) ||
+    quotes.find((q) => q.symbol.toLowerCase() === lower) ||
+    null
+  );
+}
+
+async function launchesForQuoteFromPg(
+  quoteMint: string,
+  limit: number,
+): Promise<LaunchesResult | null> {
+  if (!hasDatabaseUrl()) return null;
+  if (!isAllowedQuoteMint(quoteMint)) {
+    return { meta: emptyMeta(0, "postgres"), launches: [] };
+  }
+  try {
+    const labels = loadLaunchpadLabels();
+    const symbols = new Map(loadQuoteAllowlist().map((q) => [q.mint, q.symbol]));
+    const rows = await withClient(async (client) => {
+      const res = await client.query<{
+        address: string;
+        config: string;
+        base_mint: string;
+        quote_mint: string;
+        creator: string | null;
+        fee_claimer: string | null;
+        activation_at: Date | null;
+        created_at: Date;
+        status: string;
+        raw: { migration_progress?: number | null } | null;
+      }>(
+        `SELECT p.address, p.config, p.base_mint, p.quote_mint, p.creator,
+                c.fee_claimer, p.activation_at, p.created_at, p.status, p.raw
+         FROM pools p
+         JOIN configs c ON c.address = p.config
+         WHERE p.quote_mint = $1
+           AND p.created_at >= $2::timestamptz
+         ORDER BY p.created_at DESC
+         LIMIT $3`,
+        [quoteMint, DBC_021_CUTOFF_ISO, limit],
+      );
+      return res.rows;
+    });
+    if (rows === null) return null;
+    const launches: StagingLaunch[] = rows.map((r) => ({
+      address: r.address,
+      config: r.config,
+      base_mint: r.base_mint,
+      quote_mint: r.quote_mint,
+      quote_symbol: symbols.get(r.quote_mint) ?? null,
+      creator: r.creator,
+      fee_claimer: r.fee_claimer,
+      launchpad_label: r.fee_claimer
+        ? labels[r.fee_claimer]?.label ?? null
+        : null,
+      activation_at: r.activation_at ? r.activation_at.toISOString() : null,
+      created_at: r.created_at.toISOString(),
+      status: normalizeStagingStatus(r.status, r.raw),
+    }));
+    return {
+      meta: {
+        source: "postgres",
+        generated_at: new Date().toISOString(),
+        cutoff_iso: DBC_021_CUTOFF_ISO,
+        allowlist_count: loadQuoteAllowlist().length,
+        count: launches.length,
+      },
+      launches,
+    };
+  } catch (err) {
+    console.warn("[staging] postgres quote launches failed; falling back to file", err);
+    return null;
+  }
+}
+
+export async function getQuoteLaunches(
+  quoteMint: string,
+  limit = 500,
+): Promise<LaunchesResult> {
+  const cap = Math.min(Math.max(limit, 1), 2000);
+  const fromPg = await launchesForQuoteFromPg(quoteMint, cap);
+  if (fromPg) return fromPg;
+  const bundle = loadFileBundle();
+  const launches = bundle.launches
+    .filter((l) => l.quote_mint === quoteMint)
+    .slice(0, cap);
+  return {
+    meta: fileMeta(bundle, launches.length),
+    launches,
+  };
+}

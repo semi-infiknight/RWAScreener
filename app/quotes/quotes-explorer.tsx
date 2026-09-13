@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { HeroDark } from "../hero-dark";
 
@@ -271,7 +272,10 @@ export function QuotesExplorer() {
                             {rows.map((q, idx) => (
                               <tr key={q.mint} className="vs-row pad-row">
                                 <td className="col-name">
-                                  <span className="pad-name-link staging-name-static">
+                                  <Link
+                                    href={`/quotes/${encodeURIComponent(q.symbol)}`}
+                                    className="pad-name-link"
+                                  >
                                     <span
                                       className="avatar"
                                       style={
@@ -296,7 +300,7 @@ export function QuotesExplorer() {
                                       <div className="name">{q.symbol}</div>
                                       <div className="domain">{q.name}</div>
                                     </span>
-                                  </span>
+                                  </Link>
                                 </td>
                                 <td className="num">
                                   {q.pool_count.toLocaleString()}
