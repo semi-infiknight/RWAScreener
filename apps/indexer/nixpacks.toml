@@ -1,0 +1,10 @@
+# Alternative to Dockerfile when Railway uses Nixpacks for the worker service.
+# Set root directory to repo root; start command below.
+[phases.setup]
+nixPkgs = ["nodejs_22"]
+
+[phases.install]
+cmds = ["npm ci --omit=dev"]
+
+[start]
+cmd = "node apps/indexer/index.mjs serve"

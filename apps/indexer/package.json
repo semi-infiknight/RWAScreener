@@ -1,0 +1,16 @@
+{
+  "name": "@rwascreener/indexer",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "start": "node index.mjs serve",
+    "migrate": "node index.mjs migrate",
+    "backfill": "node index.mjs backfill",
+    "ingest": "node index.mjs ingest",
+    "worker": "node index.mjs default"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

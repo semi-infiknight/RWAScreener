@@ -8,7 +8,12 @@
     "start": "next start",
     "refresh:bags": "node scripts/refresh-bags-tokens.mjs",
     "backfill:dbc": "node scripts/dbc-backfill.mjs",
-    "summarize:fee-claimers": "node scripts/summarize-fee-claimers.mjs"
+    "summarize:fee-claimers": "node scripts/summarize-fee-claimers.mjs",
+    "indexer": "node apps/indexer/index.mjs",
+    "indexer:migrate": "node apps/indexer/index.mjs migrate",
+    "indexer:backfill": "node apps/indexer/index.mjs backfill",
+    "indexer:ingest": "node apps/indexer/index.mjs ingest",
+    "indexer:serve": "node apps/indexer/index.mjs serve"
   },
   "dependencies": {
     "@meteora-ag/dynamic-bonding-curve-sdk": "^1.5.12",
@@ -16,6 +21,7 @@
     "bs58": "^6.0.0",
     "framer-motion": "^13.2.0",
     "next": "^15.5.2",
+    "pg": "^8.23.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "redis": "^4.7.1",
@@ -24,6 +30,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.17.2",
+    "@types/pg": "^8.23.1",
     "@types/react": "^19.1.12",
     "@types/react-dom": "^19.1.9",
     "@types/three": "^0.186.0",
