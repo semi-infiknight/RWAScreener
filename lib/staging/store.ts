@@ -156,6 +156,7 @@ async function launchpadsFromPg(): Promise<LaunchpadsResult | null> {
         fee_claimer: fee,
         label: fee !== "unknown" ? labels[fee]?.label ?? null : null,
         website: fee !== "unknown" ? labels[fee]?.website ?? null : null,
+        x: fee !== "unknown" ? labels[fee]?.x ?? null : null,
         pool_count: Number(r.pool_count) || 0,
         config_count: Number(r.config_count) || 0,
         quote_mint_count: Number(r.quote_mint_count) || 0,

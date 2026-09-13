@@ -1496,6 +1496,16 @@ td.col-name { display: flex; }
   padding: 0.38rem 0.65rem;
   font-size: 0.72rem;
 }
+.staging-x-link {
+  margin-left: 0.55rem;
+  font-size: 0.72rem;
+  font-weight: 650;
+  color: #a1a1aa;
+  text-decoration: none;
+}
+.staging-x-link:hover {
+  color: var(--accent-2);
+}
 .pad-table .avatar {
   width: 36px;
   height: 36px;

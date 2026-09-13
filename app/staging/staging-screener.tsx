@@ -32,6 +32,7 @@ type Launchpad = {
   fee_claimer: string;
   label: string | null;
   website: string | null;
+  x: string | null;
   pool_count: number;
   config_count: number;
   quote_mint_count: number;
@@ -458,6 +459,17 @@ export function StagingScreener() {
                             ) : (
                               <span className="muted">—</span>
                             )}
+                            {lp.x ? (
+                              <a
+                                className="staging-x-link"
+                                href={lp.x}
+                                target="_blank"
+                                rel="noreferrer"
+                                aria-label={`${name} on X`}
+                              >
+                                X
+                              </a>
+                            ) : null}
                           </td>
                         </tr>
                       );

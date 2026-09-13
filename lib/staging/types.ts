@@ -31,6 +31,7 @@ export type StagingLaunchpad = {
   fee_claimer: string;
   label: string | null;
   website: string | null;
+  x: string | null;
   pool_count: number;
   config_count: number;
   quote_mint_count: number;

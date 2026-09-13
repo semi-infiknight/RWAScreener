@@ -67,6 +67,7 @@ export function isAllowedQuoteMint(mint: string | null | undefined): boolean {
 export type LaunchpadLabel = {
   label: string;
   website?: string | null;
+  x?: string | null;
   launchpadId?: string;
   notes?: string;
 };
@@ -89,6 +90,7 @@ export function loadLaunchpadLabels(): Record<string, LaunchpadLabel> {
           out[k] = {
             label: v.label,
             website: v.website ?? null,
+            x: (v as { x?: string | null }).x ?? null,
             launchpadId: v.launchpadId,
             notes:
               typeof (v as { evidence?: string }).evidence === "string"
@@ -97,6 +99,9 @@ export function loadLaunchpadLabels(): Record<string, LaunchpadLabel> {
           };
         } else if (v.website && !out[k].website) {
           out[k].website = v.website;
+        }
+        if ((v as { x?: string | null }).x && !out[k].x) {
+          out[k].x = (v as { x?: string | null }).x ?? null;
         }
       }
     } catch {

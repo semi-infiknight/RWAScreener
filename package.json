@@ -10,13 +10,15 @@
     "backfill:dbc": "node scripts/dbc-backfill.mjs",
     "refresh:dbc-status": "node scripts/dbc-refresh-status.mjs",
     "summarize:fee-claimers": "node scripts/summarize-fee-claimers.mjs",
+    "match:pad-claimers": "node scripts/match-pad-claimers.mjs",
     "indexer": "node apps/indexer/index.mjs",
     "indexer:migrate": "node apps/indexer/index.mjs migrate",
     "indexer:backfill": "node apps/indexer/index.mjs backfill",
     "indexer:ingest": "node apps/indexer/index.mjs ingest",
     "indexer:serve": "node apps/indexer/index.mjs serve",
     "discover:badges": "node packages/dbc/discover-badges.mjs",
-    "enrich:quote-logos": "node packages/dbc/enrich-quote-logos.mjs"
+    "enrich:quote-logos": "node packages/dbc/enrich-quote-logos.mjs",
+    "test": "node --test scripts/claimer-overlap.test.mjs"
   },
   "dependencies": {
     "@meteora-ag/dynamic-bonding-curve-sdk": "^1.5.12",

@@ -201,6 +201,7 @@ export function loadFileBundle(): FileBundle {
       label: a.fee_claimer !== "unknown" ? labels[a.fee_claimer]?.label ?? null : null,
       website:
         a.fee_claimer !== "unknown" ? labels[a.fee_claimer]?.website ?? null : null,
+      x: a.fee_claimer !== "unknown" ? labels[a.fee_claimer]?.x ?? null : null,
       pool_count: a.pool_count,
       config_count: a.configs.size,
       quote_mint_count: a.quotes.size,
