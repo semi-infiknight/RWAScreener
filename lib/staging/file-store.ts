@@ -36,7 +36,7 @@ type BackfillFile = {
   generated_at?: string;
   pools?: BackfillPool[];
   configs?: BackfillConfig[];
-  fee_claimer_labels?: Record<string, { label?: string; website?: string }>;
+  fee_claimer_labels?: Record<string, string | { label?: string; website?: string | null }>;
 };
 
 function readBackfill(): BackfillFile | null {
@@ -69,9 +69,19 @@ function mergeLabels(
   }
   if (fromFile?.fee_claimer_labels) {
     for (const [k, v] of Object.entries(fromFile.fee_claimer_labels)) {
-      if (!v?.label) continue;
-      if (!out[k]) out[k] = { label: v.label, website: v.website ?? null };
-      else if (v.website && !out[k].website) out[k].website = v.website;
+      const label =
+        typeof v === "string"
+          ? v
+          : v && typeof v === "object" && typeof (v as { label?: string }).label === "string"
+            ? (v as { label: string }).label
+            : null;
+      if (!label) continue;
+      const website =
+        v && typeof v === "object"
+          ? ((v as { website?: string | null }).website ?? null)
+          : null;
+      if (!out[k]) out[k] = { label, website };
+      else if (website && !out[k].website) out[k].website = website;
     }
   }
   return out;
