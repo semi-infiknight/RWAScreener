@@ -10,13 +10,22 @@ import { loadQuoteMints } from "./quote-mints.mjs";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const MIGRATION = path.resolve(__dirname, "../db/migrations/001_init.sql");
 
+/** Noise quotes never allowed as stock-quote SoT. */
+const BLOCKED = new Set([
+  "So11111111111111111111111111111111111111112",
+  "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+  "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB",
+]);
+
 function databaseUrl() {
   return (process.env.DATABASE_URL || "").trim();
 }
 
 /**
  * Idempotent upsert of quote_mints → configs → pools from a backfillOnce result.
- * @returns {{ skipped: true, reason: string } | { skipped: false, quoteMints: number, configs: number, pools: number }}
+ * Does not write launchpad_labels (no invented fee_claimer labels).
+ *
+ * @returns {{ skipped: true, reason: string } | { skipped: false, quoteMints: number, configs: number, pools: number, skippedBadQuote: number, skippedNoCreatedAt: number }}
  */
 export async function upsertBackfillResult(result, opts = {}) {
   const url = opts.databaseUrl ?? databaseUrl();
@@ -39,13 +48,21 @@ export async function upsertBackfillResult(result, opts = {}) {
     const sql = fs.readFileSync(MIGRATION, "utf8");
     await client.query(sql);
 
-    const allowlist = loadQuoteMints(opts.seedPath);
-    const configs = result?.configs || [];
-    const pools = result?.pools || [];
+    const allowlist = loadQuoteMints(opts.seedPath).filter(
+      (r) => r.mint && !BLOCKED.has(r.mint),
+    );
+    const allow = new Set(allowlist.map((r) => r.mint));
+    const configs = Array.isArray(result?.configs) ? result.configs : [];
+    const pools = Array.isArray(result?.pools) ? result.pools : [];
+
+    let quoteMintCount = 0;
+    let configCount = 0;
+    let poolCount = 0;
+    let skippedBadQuote = 0;
+    let skippedNoCreatedAt = 0;
 
     await client.query("BEGIN");
 
-    let quoteMintCount = 0;
     for (const row of allowlist) {
       await client.query(
         `INSERT INTO quote_mints (mint, symbol, name, badge_verified_at, meta)
@@ -57,7 +74,7 @@ export async function upsertBackfillResult(result, opts = {}) {
            meta = COALESCE(EXCLUDED.meta, quote_mints.meta)`,
         [
           row.mint,
-          row.symbol || row.mint.slice(0, 8),
+          row.symbol || "",
           row.name || null,
           row.badge_verified_at || null,
           JSON.stringify(row.meta || {}),
@@ -66,9 +83,12 @@ export async function upsertBackfillResult(result, opts = {}) {
       quoteMintCount += 1;
     }
 
-    let configCount = 0;
     for (const c of configs) {
       if (!c?.address || !c?.quote_mint) continue;
+      if (!allow.has(c.quote_mint) || BLOCKED.has(c.quote_mint)) {
+        skippedBadQuote += 1;
+        continue;
+      }
       const firstSeen = c.first_seen_at || new Date().toISOString();
       await client.query(
         `INSERT INTO configs (address, quote_mint, fee_claimer, raw, first_seen_at, updated_at)
@@ -82,18 +102,24 @@ export async function upsertBackfillResult(result, opts = {}) {
         [
           c.address,
           c.quote_mint,
-          c.fee_claimer || null,
-          JSON.stringify(c.raw || {}),
+          c.fee_claimer ?? null,
+          JSON.stringify(c.raw ?? {}),
           firstSeen,
         ],
       );
       configCount += 1;
     }
 
-    let poolCount = 0;
     for (const p of pools) {
       if (!p?.address || !p?.config || !p?.base_mint || !p?.quote_mint) continue;
-      const createdAt = p.created_at || new Date().toISOString();
+      if (!allow.has(p.quote_mint) || BLOCKED.has(p.quote_mint)) {
+        skippedBadQuote += 1;
+        continue;
+      }
+      if (!p.created_at) {
+        skippedNoCreatedAt += 1;
+        continue;
+      }
       await client.query(
         `INSERT INTO pools (
            address, config, base_mint, quote_mint, creator,
@@ -108,7 +134,7 @@ export async function upsertBackfillResult(result, opts = {}) {
            quote_mint = EXCLUDED.quote_mint,
            creator = COALESCE(EXCLUDED.creator, pools.creator),
            activation_at = COALESCE(EXCLUDED.activation_at, pools.activation_at),
-           created_at = COALESCE(EXCLUDED.created_at, pools.created_at),
+           created_at = EXCLUDED.created_at,
            status = COALESCE(EXCLUDED.status, pools.status),
            raw = COALESCE(EXCLUDED.raw, pools.raw),
            indexed_at = now()`,
@@ -117,11 +143,11 @@ export async function upsertBackfillResult(result, opts = {}) {
           p.config,
           p.base_mint,
           p.quote_mint,
-          p.creator || null,
-          p.activation_at || null,
-          createdAt,
+          p.creator ?? null,
+          p.activation_at ?? null,
+          p.created_at,
           p.status || "curve",
-          JSON.stringify(p.raw || {}),
+          JSON.stringify(p.raw ?? {}),
         ],
       );
       poolCount += 1;
@@ -130,9 +156,16 @@ export async function upsertBackfillResult(result, opts = {}) {
     // Cursor only — never invent launchpad_labels.
     await client.query(
       `INSERT INTO ingest_cursor (name, value, updated_at)
-       VALUES ('dbc_backfill_last_ok', $1, now())
+       VALUES ('dbc_backfill_last', $1, now())
        ON CONFLICT (name) DO UPDATE SET value = EXCLUDED.value, updated_at = now()`,
-      [new Date().toISOString()],
+      [
+        JSON.stringify({
+          at: new Date().toISOString(),
+          poolCount,
+          configCount,
+          reason: result?.reason || null,
+        }),
+      ],
     );
 
     await client.query("COMMIT");
@@ -141,6 +174,8 @@ export async function upsertBackfillResult(result, opts = {}) {
       quoteMints: quoteMintCount,
       configs: configCount,
       pools: poolCount,
+      skippedBadQuote,
+      skippedNoCreatedAt,
     };
   } catch (e) {
     try {
