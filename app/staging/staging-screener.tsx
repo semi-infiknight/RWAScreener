@@ -96,6 +96,8 @@ function fmtTime(iso: string | null | undefined): string {
 const CATEGORY_LABELS: Record<string, string> = {
   xstocks: "xStocks",
   ondo: "Ondo",
+  backpack: "Backpack",
+  commodities: "Commodities",
   other: "Other",
 };
 
