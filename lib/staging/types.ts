@@ -5,6 +5,8 @@ export type QuoteMintRow = {
   symbol: string;
   name: string;
   badge_verified_at: string | null;
+  /** Optional seed category slug (e.g. xstocks, ondo). */
+  category?: string | null;
   meta: Record<string, unknown>;
 };
 
@@ -40,6 +42,8 @@ export type StagingQuote = {
   symbol: string;
   name: string;
   badge_verified_at: string | null;
+  /** Grouping key for Quotes UI (xstocks, ondo, other, …). */
+  category: string;
   pool_count: number;
   last_launch_at: string | null;
 };

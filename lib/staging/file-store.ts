@@ -7,6 +7,7 @@ import {
 } from "./allowlist";
 import { dataPath } from "./paths";
 import { normalizeStagingStatus } from "./status";
+import { resolveQuoteCategory } from "./category";
 import type {
   StagingLaunch,
   StagingLaunchpad,
@@ -113,6 +114,7 @@ export function loadFileBundle(): FileBundle {
         symbol: q.symbol,
         name: q.name,
         badge_verified_at: q.badge_verified_at,
+        category: resolveQuoteCategory(q),
         pool_count: 0,
         last_launch_at: null,
       })),
@@ -225,6 +227,7 @@ export function loadFileBundle(): FileBundle {
         symbol: q.symbol,
         name: q.name,
         badge_verified_at: q.badge_verified_at,
+        category: resolveQuoteCategory(q),
         pool_count: u?.count ?? 0,
         last_launch_at: u?.last ?? null,
       };

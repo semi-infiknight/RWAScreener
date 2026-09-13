@@ -11,3 +11,9 @@ export type {
 
 export { normalizeStagingStatus, statusFromMigrationProgress } from "./status";
 export type { StagingPoolStatus } from "./status";
+
+export {
+  categoryKeyFromRaw,
+  categoryLabel,
+  resolveQuoteCategory,
+} from "./category";

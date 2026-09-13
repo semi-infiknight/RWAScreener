@@ -8,6 +8,7 @@ import {
 import { hasDatabaseUrl, withClient } from "./db";
 import { fileMeta, loadFileBundle } from "./file-store";
 import { normalizeStagingStatus } from "./status";
+import { resolveQuoteCategory } from "./category";
 import type {
   StagingLaunch,
   StagingLaunchpad,
@@ -222,6 +223,7 @@ async function quotesFromPg(): Promise<QuotesResult | null> {
           symbol: q.symbol,
           name: q.name,
           badge_verified_at: q.badge_verified_at,
+          category: resolveQuoteCategory(q),
           pool_count: u?.count ?? 0,
           last_launch_at: u?.last ?? null,
         };

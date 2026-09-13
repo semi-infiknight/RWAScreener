@@ -43,6 +43,7 @@ type Quote = {
   mint: string;
   symbol: string;
   name: string;
+  category?: string | null;
   pool_count: number;
   last_launch_at: string | null;
 };
@@ -92,6 +93,35 @@ function fmtTime(iso: string | null | undefined): string {
   }
 }
 
+const CATEGORY_LABELS: Record<string, string> = {
+  xstocks: "xStocks",
+  ondo: "Ondo",
+  other: "Other",
+};
+
+function quoteCategoryKey(q: Quote): string {
+  const raw = (q.category || "").trim().toLowerCase();
+  if (raw) return raw;
+  return "other";
+}
+
+function quoteCategoryLabel(key: string): string {
+  const k = (key || "other").toLowerCase();
+  if (CATEGORY_LABELS[k]) return CATEGORY_LABELS[k];
+  return k
+    .split(/[-_\s]+/)
+    .filter(Boolean)
+    .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
+    .join(" ");
+}
+
+/** Prefer xStocks first, then alpha by label. */
+function categorySortKey(key: string): string {
+  if (key === "xstocks") return "0";
+  if (key === "other") return "zz";
+  return `1-${quoteCategoryLabel(key).toLowerCase()}`;
+}
+
 export function StagingScreener() {
   const [tab, setTab] = useState<Tab>("launchpads");
   const [query, setQuery] = useState("");
@@ -101,6 +131,10 @@ export function StagingScreener() {
   const [launches, setLaunches] = useState<Launch[]>([]);
   const [launchpads, setLaunchpads] = useState<Launchpad[]>([]);
   const [quotes, setQuotes] = useState<Quote[]>([]);
+  /** Explicit open/closed overrides; unset keys use defaults (xstocks open). */
+  const [openCategories, setOpenCategories] = useState<Record<string, boolean>>(
+    {},
+  );
 
   const load = useCallback(async (active: Tab) => {
     setLoading(true);
@@ -183,6 +217,49 @@ export function StagingScreener() {
     });
   }, [launchpads, query]);
 
+  const filteredQuotes = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return quotes;
+    return quotes.filter((row) => {
+      const cat = quoteCategoryKey(row);
+      const label = quoteCategoryLabel(cat).toLowerCase();
+      return (
+        row.symbol.toLowerCase().includes(q) ||
+        row.name.toLowerCase().includes(q) ||
+        row.mint.toLowerCase().includes(q) ||
+        cat.includes(q) ||
+        label.includes(q)
+      );
+    });
+  }, [quotes, query]);
+
+  const quoteCategories = useMemo(() => {
+    const map = new Map<string, Quote[]>();
+    for (const row of filteredQuotes) {
+      const key = quoteCategoryKey(row);
+      const list = map.get(key);
+      if (list) list.push(row);
+      else map.set(key, [row]);
+    }
+    return [...map.entries()].sort(
+      (a, b) =>
+        categorySortKey(a[0]).localeCompare(categorySortKey(b[0])) ||
+        quoteCategoryLabel(a[0]).localeCompare(quoteCategoryLabel(b[0])),
+    );
+  }, [filteredQuotes]);
+
+  function isCategoryOpen(key: string): boolean {
+    if (key in openCategories) return openCategories[key]!;
+    return key === "xstocks";
+  }
+
+  function toggleCategory(key: string) {
+    setOpenCategories((prev) => {
+      const currentlyOpen = key in prev ? Boolean(prev[key]) : key === "xstocks";
+      return { ...prev, [key]: !currentlyOpen };
+    });
+  }
+
   return (
     <div className="page">
       <section className="hero">
@@ -233,7 +310,10 @@ export function StagingScreener() {
                 className={
                   tab === id ? "staging-tab staging-tab-active" : "staging-tab"
                 }
-                onClick={() => setTab(id)}
+                onClick={() => {
+                  setTab(id);
+                  setQuery("");
+                }}
               >
                 {label}
               </button>
@@ -268,15 +348,21 @@ export function StagingScreener() {
           ) : null}
         </div>
 
-        {tab === "launchpads" ? (
+        {tab === "launchpads" || tab === "quotes" ? (
           <label className="search-list">
-            <span className="sr-only">Search launchpads</span>
+            <span className="sr-only">
+              {tab === "quotes" ? "Search quotes" : "Search launchpads"}
+            </span>
             <input
               type="search"
-              placeholder="Search launchpads…"
+              placeholder={
+                tab === "quotes" ? "Search quotes…" : "Search launchpads…"
+              }
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              aria-label="Search launchpads"
+              aria-label={
+                tab === "quotes" ? "Search quotes" : "Search launchpads"
+              }
             />
             {query ? (
               <button
@@ -434,32 +520,71 @@ export function StagingScreener() {
             )
           ) : quotes.length === 0 ? (
             <div className="empty">Allowlist empty.</div>
+          ) : quoteCategories.length === 0 ? (
+            <div className="empty">No quotes match.</div>
           ) : (
-            <div className="pad-table-wrap">
-              <table className="pad-table vs-table" aria-label="Quotes">
-                <thead>
-                  <tr>
-                    <th>Symbol</th>
-                    <th className="hide-sm">Name</th>
-                    <th>Pools</th>
-                    <th className="hide-md">Last launch</th>
-                    <th className="hide-lg">Mint</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {quotes.map((q) => (
-                    <tr key={q.mint} className="vs-row pad-row">
-                      <td>
-                        <div className="name">{q.symbol}</div>
-                      </td>
-                      <td className="hide-sm">{q.name}</td>
-                      <td className="num">{q.pool_count}</td>
-                      <td className="hide-md">{fmtTime(q.last_launch_at)}</td>
-                      <td className="hide-lg mono">{shortPk(q.mint, 6)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="staging-quote-categories">
+              {quoteCategories.map(([catKey, rows]) => {
+                const open = isCategoryOpen(catKey);
+                const label = quoteCategoryLabel(catKey);
+                return (
+                  <section
+                    key={catKey}
+                    className="staging-quote-category"
+                    data-category={catKey}
+                  >
+                    <button
+                      type="button"
+                      className="staging-quote-cat-toggle"
+                      aria-expanded={open}
+                      onClick={() => toggleCategory(catKey)}
+                    >
+                      <span className="staging-quote-cat-chevron" aria-hidden>
+                        {open ? "▾" : "▸"}
+                      </span>
+                      <span className="staging-quote-cat-label">{label}</span>
+                      <span className="staging-quote-cat-count">
+                        {rows.length}
+                      </span>
+                    </button>
+                    {open ? (
+                      <div className="pad-table-wrap">
+                        <table
+                          className="pad-table vs-table"
+                          aria-label={`${label} quotes`}
+                        >
+                          <thead>
+                            <tr>
+                              <th>Symbol</th>
+                              <th className="hide-sm">Name</th>
+                              <th>Pools</th>
+                              <th className="hide-md">Last launch</th>
+                              <th className="hide-lg">Mint</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {rows.map((q) => (
+                              <tr key={q.mint} className="vs-row pad-row">
+                                <td>
+                                  <div className="name">{q.symbol}</div>
+                                </td>
+                                <td className="hide-sm">{q.name}</td>
+                                <td className="num">{q.pool_count}</td>
+                                <td className="hide-md">
+                                  {fmtTime(q.last_launch_at)}
+                                </td>
+                                <td className="hide-lg mono">
+                                  {shortPk(q.mint, 6)}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    ) : null}
+                  </section>
+                );
+              })}
             </div>
           )}
         </div>

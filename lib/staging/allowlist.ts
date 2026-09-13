@@ -21,13 +21,17 @@ export function loadQuoteAllowlist(): QuoteMintRow[] {
           r.mint.length > 0 &&
           !BLOCKED_QUOTE_MINTS.has(r.mint),
       )
-      .map((r) => ({
-        mint: r.mint,
-        symbol: r.symbol ?? "",
-        name: r.name ?? "",
-        badge_verified_at: r.badge_verified_at ?? null,
-        meta: r.meta && typeof r.meta === "object" ? r.meta : {},
-      }));
+      .map((r) => {
+        const row = r as QuoteMintRow & { category?: string | null };
+        return {
+          mint: row.mint,
+          symbol: row.symbol ?? "",
+          name: row.name ?? "",
+          badge_verified_at: row.badge_verified_at ?? null,
+          category: typeof row.category === "string" ? row.category : null,
+          meta: row.meta && typeof row.meta === "object" ? row.meta : {},
+        };
+      });
   } catch {
     cached = [];
   }
