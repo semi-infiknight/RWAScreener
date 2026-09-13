@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { HeroDark } from "../hero-dark";
 
-type Tab = "launches" | "launchpads" | "quotes";
+type Tab = "launchpads" | "launches" | "quotes";
 
 type Meta = {
   source: string;
@@ -45,10 +45,34 @@ type Quote = {
   last_launch_at: string | null;
 };
 
+const AVATAR_COLORS = [
+  "#ff6a00",
+  "#ff8a1a",
+  "#ffb347",
+  "#e85d04",
+  "#f48c06",
+  "#dc2f02",
+];
+
 function shortPk(pk: string | null | undefined, n = 4): string {
   if (!pk) return "—";
   if (pk.length <= n * 2 + 1) return pk;
   return `${pk.slice(0, n)}…${pk.slice(-n)}`;
+}
+
+function initials(name: string): string {
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[1][0]).toUpperCase();
+}
+
+function domainOf(website: string | null): string {
+  if (!website) return "—";
+  try {
+    return new URL(website).hostname.replace(/^www\./, "");
+  } catch {
+    return website;
+  }
 }
 
 function fmtTime(iso: string | null | undefined): string {
@@ -67,7 +91,8 @@ function fmtTime(iso: string | null | undefined): string {
 }
 
 export function StagingScreener() {
-  const [tab, setTab] = useState<Tab>("launches");
+  const [tab, setTab] = useState<Tab>("launchpads");
+  const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [meta, setMeta] = useState<Meta | null>(null);
@@ -109,13 +134,30 @@ export function StagingScreener() {
     void load(tab);
   }, [tab, load]);
 
+  const filteredLaunchpads = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return launchpads;
+    return launchpads.filter((lp) => {
+      const label = (lp.label || "").toLowerCase();
+      const fee = lp.fee_claimer.toLowerCase();
+      const site = (lp.website || "").toLowerCase();
+      const samples = (lp.sample_quote_symbols || []).join(" ").toLowerCase();
+      return (
+        label.includes(q) ||
+        fee.includes(q) ||
+        site.includes(q) ||
+        samples.includes(q)
+      );
+    });
+  }, [launchpads, query]);
+
   return (
     <div className="page">
       <section className="hero">
         <HeroDark />
         <div className="hero-lockup">
-          <div className="staging-badge" aria-label="Staging">
-            STAGING · on-chain DBC indexer
+          <div className="staging-badge staging-badge-lg" aria-label="Staging">
+            Staging
           </div>
           <h1 className="hero-title">
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -146,8 +188,8 @@ export function StagingScreener() {
           <div className="staging-tabs" role="tablist">
             {(
               [
-                ["launches", "Launches"],
                 ["launchpads", "Launchpads"],
+                ["launches", "Launches"],
                 ["quotes", "Quotes"],
               ] as const
             ).map(([id, label]) => (
@@ -178,10 +220,116 @@ export function StagingScreener() {
           ) : null}
         </div>
 
+        {tab === "launchpads" ? (
+          <label className="search-list">
+            <span className="sr-only">Search launchpads</span>
+            <input
+              type="search"
+              placeholder="Search launchpads…"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              aria-label="Search launchpads"
+            />
+            {query ? (
+              <button
+                type="button"
+                className="ext"
+                aria-label="Clear search"
+                onClick={() => setQuery("")}
+              >
+                ×
+              </button>
+            ) : null}
+          </label>
+        ) : null}
+
         <div className="panel">
           {error ? <div className="empty">Error: {error}</div> : null}
           {loading ? (
             <div className="empty">Loading…</div>
+          ) : tab === "launchpads" ? (
+            filteredLaunchpads.length === 0 ? (
+              <div className="empty">
+                {launchpads.length === 0
+                  ? "No launchpads indexed yet. Empty is honest."
+                  : "No launchpads match."}
+              </div>
+            ) : (
+              <div className="pad-table-wrap">
+                <table
+                  className="pad-table vs-table"
+                  aria-label="Staging launchpad metrics"
+                >
+                  <thead>
+                    <tr>
+                      <th className="col-name">Name</th>
+                      <th>Pools</th>
+                      <th className="hide-sm">Configs</th>
+                      <th className="hide-sm">Quotes</th>
+                      <th className="hide-md">Last</th>
+                      <th className="hide-lg">Sample</th>
+                      <th className="col-action">App</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredLaunchpads.map((lp, idx) => {
+                      const name = lp.label || shortPk(lp.fee_claimer, 6);
+                      return (
+                        <tr key={lp.fee_claimer} className="vs-row pad-row">
+                          <td className="col-name">
+                            <span className="pad-name-link staging-name-static">
+                              <span
+                                className="avatar"
+                                style={{
+                                  background:
+                                    AVATAR_COLORS[idx % AVATAR_COLORS.length],
+                                }}
+                              >
+                                {initials(name)}
+                              </span>
+                              <span className="identity">
+                                <div className="name">{name}</div>
+                                <div className="domain">
+                                  {lp.website
+                                    ? domainOf(lp.website)
+                                    : shortPk(lp.fee_claimer, 8)}
+                                </div>
+                              </span>
+                            </span>
+                          </td>
+                          <td className="num">{lp.pool_count.toLocaleString()}</td>
+                          <td className="num hide-sm">
+                            {lp.config_count.toLocaleString()}
+                          </td>
+                          <td className="num hide-sm">
+                            {lp.quote_mint_count.toLocaleString()}
+                          </td>
+                          <td className="hide-md">{fmtTime(lp.last_seen_at)}</td>
+                          <td className="hide-lg">
+                            {(lp.sample_quote_symbols || []).join(", ") || "—"}
+                          </td>
+                          <td className="col-action">
+                            {lp.website ? (
+                              <a
+                                className="go-to-app go-to-app-table"
+                                href={lp.website}
+                                target="_blank"
+                                rel="noreferrer"
+                                aria-label={`Go to ${name} app`}
+                              >
+                                GO TO APP ↗
+                              </a>
+                            ) : (
+                              <span className="muted">—</span>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )
           ) : tab === "launches" ? (
             launches.length === 0 ? (
               <div className="empty">
@@ -218,46 +366,6 @@ export function StagingScreener() {
                           {shortPk(l.address, 6)}
                         </td>
                         <td className="hide-md">{l.status}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )
-          ) : tab === "launchpads" ? (
-            launchpads.length === 0 ? (
-              <div className="empty">No launchpads yet.</div>
-            ) : (
-              <div className="pad-table-wrap">
-                <table className="pad-table vs-table" aria-label="Launchpads">
-                  <thead>
-                    <tr>
-                      <th className="col-name">Launchpad</th>
-                      <th>Pools</th>
-                      <th className="hide-sm">Configs</th>
-                      <th className="hide-sm">Quotes</th>
-                      <th className="hide-md">Last</th>
-                      <th className="hide-lg">Sample</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {launchpads.map((lp) => (
-                      <tr key={lp.fee_claimer} className="vs-row pad-row">
-                        <td className="col-name">
-                          <div className="name">
-                            {lp.label || shortPk(lp.fee_claimer, 6)}
-                          </div>
-                          <div className="domain mono">
-                            {shortPk(lp.fee_claimer, 8)}
-                          </div>
-                        </td>
-                        <td className="num">{lp.pool_count}</td>
-                        <td className="num hide-sm">{lp.config_count}</td>
-                        <td className="num hide-sm">{lp.quote_mint_count}</td>
-                        <td className="hide-md">{fmtTime(lp.last_seen_at)}</td>
-                        <td className="hide-lg">
-                          {(lp.sample_quote_symbols || []).join(", ") || "—"}
-                        </td>
                       </tr>
                     ))}
                   </tbody>
