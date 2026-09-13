@@ -12,6 +12,8 @@ type Meta = {
   cutoff_iso: string;
   allowlist_count: number;
   count: number;
+  /** True pool/group total when list is capped (e.g. launches limit=200 of 448). */
+  total?: number | null;
 };
 
 type Launch = {
@@ -113,12 +115,42 @@ export function StagingScreener() {
       const res = await fetch(path, { cache: "no-store" });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const body = await res.json();
+
+      let total: number | null =
+        typeof body.total === "number" && Number.isFinite(body.total)
+          ? body.total
+          : null;
+
+      // Launches list is capped at 200 — pull true pool total from launchpads rollup.
+      if (active === "launches" && total == null) {
+        const lpRes = await fetch("/api/staging/launchpads", { cache: "no-store" });
+        if (lpRes.ok) {
+          const lpBody = await lpRes.json();
+          const pads = Array.isArray(lpBody.launchpads) ? lpBody.launchpads : [];
+          total = pads.reduce(
+            (sum: number, lp: { pool_count?: number }) =>
+              sum + (typeof lp.pool_count === "number" ? lp.pool_count : 0),
+            0,
+          );
+        }
+      }
+
+      if (active === "launchpads") {
+        const pads = Array.isArray(body.launchpads) ? body.launchpads : [];
+        total = pads.reduce(
+          (sum: number, lp: { pool_count?: number }) =>
+            sum + (typeof lp.pool_count === "number" ? lp.pool_count : 0),
+          0,
+        );
+      }
+
       setMeta({
         source: body.source,
         generated_at: body.generated_at,
         cutoff_iso: body.cutoff_iso,
         allowlist_count: body.allowlist_count,
         count: body.count,
+        total,
       });
       if (active === "launches") setLaunches(body.launches ?? []);
       if (active === "launchpads") setLaunchpads(body.launchpads ?? []);
@@ -213,7 +245,23 @@ export function StagingScreener() {
                 source <strong>{meta.source}</strong>
               </span>
               <span>
-                rows <strong>{meta.count}</strong>
+                {meta.total != null && meta.total > meta.count ? (
+                  <>
+                    showing <strong>{meta.count}</strong> of{" "}
+                    <strong>{meta.total}</strong>
+                    {tab === "launches" ? " pools" : tab === "launchpads" ? " pools" : ""}
+                  </>
+                ) : (
+                  <>
+                    rows <strong>{meta.count}</strong>
+                    {tab === "launchpads" && meta.total != null ? (
+                      <>
+                        {" "}
+                        · <strong>{meta.total}</strong> pools
+                      </>
+                    ) : null}
+                  </>
+                )}
               </span>
               <span>allowlist {meta.allowlist_count}</span>
             </div>
