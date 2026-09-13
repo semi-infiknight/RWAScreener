@@ -19,7 +19,8 @@ export type StagingLaunch = {
   launchpad_label: string | null;
   activation_at: string | null;
   created_at: string;
-  status: string;
+  /** graduated = CreatedPool only; bonding / migrating otherwise */
+  status: "graduated" | "bonding" | "migrating";
 };
 
 export type StagingLaunchpad = {

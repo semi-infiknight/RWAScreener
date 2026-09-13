@@ -7,6 +7,7 @@ import {
 } from "./allowlist";
 import { hasDatabaseUrl, withClient } from "./db";
 import { fileMeta, loadFileBundle } from "./file-store";
+import { normalizeStagingStatus } from "./status";
 import type {
   StagingLaunch,
   StagingLaunchpad,
@@ -59,9 +60,10 @@ async function launchesFromPg(limit: number): Promise<LaunchesResult | null> {
         activation_at: Date | null;
         created_at: Date;
         status: string;
+        raw: { migration_progress?: number | null } | null;
       }>(
         `SELECT p.address, p.config, p.base_mint, p.quote_mint, p.creator,
-                c.fee_claimer, p.activation_at, p.created_at, p.status
+                c.fee_claimer, p.activation_at, p.created_at, p.status, p.raw
          FROM pools p
          JOIN configs c ON c.address = p.config
          WHERE p.quote_mint = ANY($1::text[])
@@ -88,7 +90,7 @@ async function launchesFromPg(limit: number): Promise<LaunchesResult | null> {
           : null,
         activation_at: r.activation_at ? r.activation_at.toISOString() : null,
         created_at: r.created_at.toISOString(),
-        status: r.status || "curve",
+        status: normalizeStagingStatus(r.status, r.raw),
       }));
     return {
       meta: {

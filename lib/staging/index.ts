@@ -8,3 +8,6 @@ export type {
   StagingListMeta,
   StagingSource,
 } from "./types";
+
+export { normalizeStagingStatus, statusFromMigrationProgress } from "./status";
+export type { StagingPoolStatus } from "./status";

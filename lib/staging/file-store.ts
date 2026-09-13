@@ -6,6 +6,7 @@ import {
   loadQuoteAllowlist,
 } from "./allowlist";
 import { dataPath } from "./paths";
+import { normalizeStagingStatus } from "./status";
 import type {
   StagingLaunch,
   StagingLaunchpad,
@@ -23,6 +24,7 @@ type BackfillPool = {
   activation_at?: string | null;
   created_at: string;
   status?: string;
+  raw?: { migration_progress?: number | null; is_migrated?: number | null };
 };
 
 type BackfillConfig = {
@@ -145,7 +147,7 @@ export function loadFileBundle(): FileBundle {
         launchpad_label: fee ? labels[fee]?.label ?? null : null,
         activation_at: p.activation_at ?? null,
         created_at: p.created_at,
-        status: p.status ?? "curve",
+        status: normalizeStagingStatus(p.status, p.raw),
       };
     })
     .sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at));

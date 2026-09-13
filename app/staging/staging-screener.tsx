@@ -25,7 +25,7 @@ type Launch = {
   fee_claimer: string | null;
   launchpad_label: string | null;
   created_at: string;
-  status: string;
+  status: "graduated" | "bonding" | "migrating";
 };
 
 type Launchpad = {
@@ -413,7 +413,19 @@ export function StagingScreener() {
                         <td className="hide-sm mono">
                           {shortPk(l.address, 6)}
                         </td>
-                        <td className="hide-md">{l.status}</td>
+                        <td className="hide-md">
+                          <span
+                            className={
+                              l.status === "graduated"
+                                ? "staging-status staging-status-grad"
+                                : l.status === "migrating"
+                                  ? "staging-status staging-status-migrating"
+                                  : "staging-status staging-status-bonding"
+                            }
+                          >
+                            {l.status}
+                          </span>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
