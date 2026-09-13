@@ -206,44 +206,48 @@ export function QuotesExplorer() {
                   >
                     <button
                       type="button"
-                      className="staging-quote-cat-toggle pad-cat-toggle"
+                      className="staging-quote-cat-toggle pad-cat-toggle quote-cat-pad-row"
                       aria-expanded={open}
                       onClick={() => toggleCategory(catKey)}
                     >
-                      <span className="staging-quote-cat-chevron" aria-hidden>
-                        {open ? "▾" : "▸"}
-                      </span>
-                      <span
-                        className="avatar"
-                        style={
-                          categoryLogo(rows)
-                            ? undefined
-                            : {
-                                background:
-                                  AVATAR_COLORS[
-                                    Math.abs(
-                                      catKey
-                                        .split("")
-                                        .reduce((a, c) => a + c.charCodeAt(0), 0),
-                                    ) % AVATAR_COLORS.length
-                                  ],
-                              }
-                        }
-                      >
-                        {categoryLogo(rows) ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={categoryLogo(rows)!} alt="" />
-                        ) : (
-                          initials(label)
-                        )}
-                      </span>
-                      <span className="identity staging-quote-cat-identity">
-                        <span className="name staging-quote-cat-label">
-                          {label}
+                      <span className="pad-name-link staging-name-static quote-cat-identity">
+                        <span
+                          className="avatar"
+                          style={
+                            categoryLogo(rows)
+                              ? undefined
+                              : {
+                                  background:
+                                    AVATAR_COLORS[
+                                      Math.abs(
+                                        catKey
+                                          .split("")
+                                          .reduce(
+                                            (a, c) => a + c.charCodeAt(0),
+                                            0,
+                                          ),
+                                      ) % AVATAR_COLORS.length
+                                    ],
+                                }
+                          }
+                        >
+                          {categoryLogo(rows) ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={categoryLogo(rows)!} alt="" />
+                          ) : (
+                            initials(label)
+                          )}
+                        </span>
+                        <span className="identity">
+                          <div className="name">{label}</div>
+                          <div className="domain">
+                            {rows.length.toLocaleString()} quote
+                            {rows.length === 1 ? "" : "s"}
+                          </div>
                         </span>
                       </span>
-                      <span className="staging-quote-cat-count">
-                        {rows.length}
+                      <span className="staging-quote-cat-chevron" aria-hidden>
+                        {open ? "▾" : "▸"}
                       </span>
                     </button>
                     {open ? (
@@ -254,15 +258,14 @@ export function QuotesExplorer() {
                         >
                           <thead>
                             <tr>
-                              <th>Symbol</th>
-                              <th className="hide-sm">Name</th>
+                              <th className="col-name">Name</th>
                               <th>Coins</th>
                             </tr>
                           </thead>
                           <tbody>
                             {rows.map((q, idx) => (
                               <tr key={q.mint} className="vs-row pad-row">
-                                <td>
+                                <td className="col-name">
                                   <span className="pad-name-link staging-name-static">
                                     <span
                                       className="avatar"
@@ -286,11 +289,13 @@ export function QuotesExplorer() {
                                     </span>
                                     <span className="identity">
                                       <div className="name">{q.symbol}</div>
+                                      <div className="domain">{q.name}</div>
                                     </span>
                                   </span>
                                 </td>
-                                <td className="hide-sm">{q.name}</td>
-                                <td className="num">{q.pool_count}</td>
+                                <td className="num">
+                                  {q.pool_count.toLocaleString()}
+                                </td>
                               </tr>
                             ))}
                           </tbody>
