@@ -5,6 +5,13 @@ import { fileURLToPath } from "node:url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DEFAULT_SEED = path.resolve(__dirname, "../../data/quote-mints.json");
 
+/** Never allow as quote — even if present in a data artifact (match lib/staging/constants). */
+const BLOCKED_QUOTE_MINTS = new Set([
+  "So11111111111111111111111111111111111111112", // wrapped SOL
+  "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", // USDC
+  "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB", // USDT
+]);
+
 /**
  * Load the committed quote-mint allowlist (SPEC §5.1).
  * Source of truth for which DBC quote mints may appear in the screener.
@@ -16,7 +23,7 @@ export function loadQuoteMints(seedPath = DEFAULT_SEED) {
   const seen = new Set();
   for (const row of rows) {
     const mint = typeof row?.mint === "string" ? row.mint.trim() : "";
-    if (!mint || seen.has(mint)) continue;
+    if (!mint || seen.has(mint) || BLOCKED_QUOTE_MINTS.has(mint)) continue;
     seen.add(mint);
     allowlist.push({
       mint,
