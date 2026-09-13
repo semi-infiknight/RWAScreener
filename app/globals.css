@@ -1709,6 +1709,23 @@ td.col-name { display: flex; }
   font-weight: 700;
   text-align: center;
 }
+
+.quote-cat-pad-row {
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 0.9rem;
+}
+.quote-cat-pad-row .quote-cat-identity {
+  flex: 1 1 auto;
+  min-width: 0;
+  pointer-events: none;
+}
+.quote-cat-pad-row .staging-quote-cat-chevron {
+  margin-left: auto;
+}
+.quote-cat-pad-row:hover {
+  background: rgba(255, 106, 0, 0.08);
+}
 .staging-quote-category .pad-table-wrap {
   border-top: 1px solid var(--border);
 }
