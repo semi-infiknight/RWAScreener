@@ -8,6 +8,7 @@
     "start": "next start",
     "refresh:bags": "node scripts/refresh-bags-tokens.mjs",
     "backfill:dbc": "node scripts/dbc-backfill.mjs",
+    "refresh:dbc-status": "node scripts/dbc-refresh-status.mjs",
     "summarize:fee-claimers": "node scripts/summarize-fee-claimers.mjs",
     "indexer": "node apps/indexer/index.mjs",
     "indexer:migrate": "node apps/indexer/index.mjs migrate",
