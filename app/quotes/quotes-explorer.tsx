@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { HeroDark } from "../hero-dark";
 
@@ -178,42 +177,26 @@ export function QuotesExplorer() {
       </section>
 
       <div className="shell">
-        <div className="staging-toolbar">
-          <Link href="/" className="staging-back">
-            ← Ecosystem home
-          </Link>
-          {meta ? (
-            <div className="staging-meta">
-              <span>
-                quotes <strong>{meta.count}</strong>
-              </span>
-              <span>allowlist {meta.allowlist_count}</span>
-            </div>
-          ) : null}
-        </div>
-
-        <label className="search-list">
-          <span className="sr-only">Search quotes</span>
-          <input
-            type="search"
-            placeholder="Search quotes…"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            aria-label="Search quotes"
-          />
-          {query ? (
-            <button
-              type="button"
-              className="ext"
-              aria-label="Clear search"
-              onClick={() => setQuery("")}
-            >
-              ×
-            </button>
-          ) : null}
-        </label>
-
         <div className="panel">
+          <label className="search search-list">
+            <SearchIcon />
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search"
+              aria-label="Search quotes"
+            />
+            {query ? (
+              <button
+                type="button"
+                className="ext"
+                aria-label="Clear search"
+                onClick={() => setQuery("")}
+              >
+                ×
+              </button>
+            ) : null}
+          </label>
           {error ? <div className="empty">Error: {error}</div> : null}
           {loading ? (
             <div className="empty">Loading…</div>
@@ -287,7 +270,29 @@ export function QuotesExplorer() {
             </div>
           )}
         </div>
+
+        <div className="footer-cta">
+          <a href="/" className="footer-cta-secondary">
+            Screener
+          </a>
+          <a
+            href="https://docs.meteora.ag/core-products/dbc/what-is-dbc"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Build on Meteora DBC →
+          </a>
+        </div>
       </div>
     </div>
+  );
+}
+
+function SearchIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" />
+      <path d="M20 20l-3.5-3.5" stroke="currentColor" strokeWidth="2" />
+    </svg>
   );
 }
