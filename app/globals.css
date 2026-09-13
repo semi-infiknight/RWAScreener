@@ -1678,7 +1678,7 @@ td.col-name { display: flex; }
   font-size: 0.68rem;
 }
 .quote-cat-issuer img {
-  object-fit: contain;
+  object-fit: cover;
 }
 .staging-quote-cat-identity {
   flex: 1 1 auto;

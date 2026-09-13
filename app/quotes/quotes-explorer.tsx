@@ -39,7 +39,7 @@ const CATEGORY_LABELS: Record<string, string> = {
 
 /** Issuer marks — not the first token in the bucket. */
 const CATEGORY_ISSUER_LOGOS: Record<string, string> = {
-  xstocks: "/issuers/xstocks.svg",
+  xstocks: "/issuers/xstocks.jpg",
   backpack: "/issuers/backpack-securities.png",
   ondo: "/issuers/ondo.svg",
 };
