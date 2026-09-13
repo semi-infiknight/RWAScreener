@@ -11,12 +11,27 @@
       "launchpadId": "ethics",
       "website": "https://ethics.ltd",
       "evidence": "ethics.ltd/api/launches DBC stock-quote launches (FARM/hoodx, FAIR/spyx, BIT/coinx) match all 3 backfill pools for this fee_claimer by mint+poolAddress (observed 2026-09-12)."
+    },
+    "4wYGg1KxUroz6Aitgmca64c5wqZW5q1cULCTRJ8dxhyL": {
+      "label": "OTC Desks",
+      "launchpadId": "otcdesks",
+      "website": "https://otcdesks.cash/",
+      "x": "https://x.com/otc_labs",
+      "evidence": "otcdesks.cash/api/coins?q=<mint>: 11/12 staging pools for fee_claimer 4wYGg1KxUroz6Aitgmca64c5wqZW5q1cULCTRJ8dxhyL match OTC rows with venue=meteora and meteoraConfig==pool config (mint+config) (observed 2026-09-13). 1/12 mint not returned by OTC q= lookup \u2014 left as partial coverage, not blocking."
+    },
+    "5x2DYtWmhT4SV2jkpTa561DVdkX8mrUi9y5AxkCCjaxN": {
+      "label": "RevShare",
+      "launchpadId": "revshare",
+      "website": "https://revshare.dev/",
+      "x": "https://x.com/revshare_app",
+      "evidence": "app.revshare.ltd/api/all-tokens: 2/4 staging pools for fee_claimer 5x2DYtWmhT4SV2jkpTa561DVdkX8mrUi9y5AxkCCjaxN match RevShare Solana rows by base_mint with bonding_config==staging config exactly (McStonk/MCDx, NVIDIDENDS/NVDAx) (observed 2026-09-13). Remaining 2 staging mints not in scanned all-tokens window \u2014 pubkey kept unlabeled for those pools only; claimer labeled on strength of dual config matches."
     }
   },
   "notes": [
-    "Label a claimer only after pad API / docs / on-chain evidence ties it to stock-quote DBC PoolConfig.fee_claimer (quote_mint ∈ data/quote-mints.json, created_at ≥ DBC_021_CUTOFF_ISO).",
-    "Bags docs publish program IDs / Fee Share programs only — not DBC PoolConfig fee_claimers. Bags pools catalog had 0 overlaps with this stock-quote backfill; leave Bags unlabeled.",
+    "Label a claimer only after pad API / docs / on-chain evidence ties it to stock-quote DBC PoolConfig.fee_claimer (quote_mint \u2208 data/quote-mints.json, created_at \u2265 DBC_021_CUTOFF_ISO).",
+    "Bags docs publish program IDs / Fee Share programs only \u2014 not DBC PoolConfig fee_claimers. Bags pools catalog had 0 overlaps with this stock-quote backfill; leave Bags unlabeled.",
     "Unknown claimers stay as pubkey. Do not invent Bags / Perpspad / ClawPump / LFOwn / StonkOptions pubkeys from names alone.",
-    "Aggregation report (gitignored): data/fee-claimer-attribution.json + .md from scripts/summarize-fee-claimers.mjs / local attribution pass."
+    "Aggregation report (gitignored): data/fee-claimer-attribution.json + .md from scripts/summarize-fee-claimers.mjs / local attribution pass.",
+    "2026-09-13: labeled OTC Desks (4wYGg1\u2026) and RevShare (5x2DYt\u2026) from pad API mint+config overlap. Top unlabeled Fgi5M4W2\u2026 (18) and CuRAzi9u\u2026 (13) still unknown after Bags/LFOwn/Perpspad/ClawPump/Ethics/Ember/star.fun checks."
   ]
 }
