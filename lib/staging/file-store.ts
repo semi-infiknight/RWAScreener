@@ -64,11 +64,12 @@ function buildSymbolMap(): Map<string, string> {
 
 function mergeLabels(
   fromFile: BackfillFile | null,
-): Record<string, { label: string; website: string | null }> {
-  const out: Record<string, { label: string; website: string | null }> = {};
+): Record<string, { label: string; website: string | null; x: string | null }> {
+  const out: Record<string, { label: string; website: string | null; x: string | null }> =
+    {};
   const seeded = loadLaunchpadLabels();
   for (const [k, v] of Object.entries(seeded)) {
-    out[k] = { label: v.label, website: v.website ?? null };
+    out[k] = { label: v.label, website: v.website ?? null, x: v.x ?? null };
   }
   if (fromFile?.fee_claimer_labels) {
     for (const [k, v] of Object.entries(fromFile.fee_claimer_labels)) {
@@ -83,8 +84,15 @@ function mergeLabels(
         v && typeof v === "object"
           ? ((v as { website?: string | null }).website ?? null)
           : null;
-      if (!out[k]) out[k] = { label, website };
-      else if (website && !out[k].website) out[k].website = website;
+      const x =
+        v && typeof v === "object"
+          ? ((v as { x?: string | null }).x ?? null)
+          : null;
+      if (!out[k]) out[k] = { label, website, x };
+      else {
+        if (website && !out[k].website) out[k].website = website;
+        if (x && !out[k].x) out[k].x = x;
+      }
     }
   }
   return out;
