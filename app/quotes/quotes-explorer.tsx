@@ -3,14 +3,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { HeroDark } from "../hero-dark";
 
-type Meta = {
-  source: string;
-  generated_at: string | null;
-  cutoff_iso: string;
-  allowlist_count: number;
-  count: number;
-};
-
 type Quote = {
   mint: string;
   symbol: string;
@@ -76,7 +68,6 @@ export function QuotesExplorer() {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [meta, setMeta] = useState<Meta | null>(null);
   const [quotes, setQuotes] = useState<Quote[]>([]);
   /** Explicit open/closed overrides; unset keys use defaults (xstocks open). */
   const [openCategories, setOpenCategories] = useState<Record<string, boolean>>(
@@ -90,13 +81,6 @@ export function QuotesExplorer() {
       const res = await fetch("/api/quotes", { cache: "no-store" });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const body = await res.json();
-      setMeta({
-        source: body.source,
-        generated_at: body.generated_at,
-        cutoff_iso: body.cutoff_iso,
-        allowlist_count: body.allowlist_count,
-        count: body.count,
-      });
       setQuotes(body.quotes ?? []);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load");
