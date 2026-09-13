@@ -64,7 +64,7 @@ export function QuotesExplorer() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [quotes, setQuotes] = useState<Quote[]>([]);
-  /** Explicit open/closed overrides; unset keys use defaults (xstocks open). */
+  /** Explicit open/closed; default all collapsed. */
   const [openCategories, setOpenCategories] = useState<Record<string, boolean>>(
     {},
   );
@@ -120,16 +120,26 @@ export function QuotesExplorer() {
   }, [filteredQuotes]);
 
   function isCategoryOpen(key: string): boolean {
-    if (key in openCategories) return openCategories[key]!;
-    return key === "xstocks";
+    return Boolean(openCategories[key]);
   }
 
   function toggleCategory(key: string) {
-    setOpenCategories((prev) => {
-      const currentlyOpen =
-        key in prev ? Boolean(prev[key]) : key === "xstocks";
-      return { ...prev, [key]: !currentlyOpen };
-    });
+    setOpenCategories((prev) => ({
+      ...prev,
+      [key]: !Boolean(prev[key]),
+    }));
+  }
+
+  function categoryLogo(rows: Quote[]): string | null {
+    const prefer = ["AAPLx", "TSLAx", "NVDAx", "SPYx", "AAPL", "TSLA", "NVDA"];
+    for (const sym of prefer) {
+      const hit = rows.find(
+        (r) => r.symbol === sym && typeof r.logo === "string" && r.logo,
+      );
+      if (hit?.logo) return hit.logo;
+    }
+    const any = rows.find((r) => typeof r.logo === "string" && r.logo);
+    return any?.logo ?? null;
   }
 
   return (
@@ -196,14 +206,42 @@ export function QuotesExplorer() {
                   >
                     <button
                       type="button"
-                      className="staging-quote-cat-toggle"
+                      className="staging-quote-cat-toggle pad-cat-toggle"
                       aria-expanded={open}
                       onClick={() => toggleCategory(catKey)}
                     >
                       <span className="staging-quote-cat-chevron" aria-hidden>
                         {open ? "▾" : "▸"}
                       </span>
-                      <span className="staging-quote-cat-label">{label}</span>
+                      <span
+                        className="avatar"
+                        style={
+                          categoryLogo(rows)
+                            ? undefined
+                            : {
+                                background:
+                                  AVATAR_COLORS[
+                                    Math.abs(
+                                      catKey
+                                        .split("")
+                                        .reduce((a, c) => a + c.charCodeAt(0), 0),
+                                    ) % AVATAR_COLORS.length
+                                  ],
+                              }
+                        }
+                      >
+                        {categoryLogo(rows) ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={categoryLogo(rows)!} alt="" />
+                        ) : (
+                          initials(label)
+                        )}
+                      </span>
+                      <span className="identity staging-quote-cat-identity">
+                        <span className="name staging-quote-cat-label">
+                          {label}
+                        </span>
+                      </span>
                       <span className="staging-quote-cat-count">
                         {rows.length}
                       </span>
