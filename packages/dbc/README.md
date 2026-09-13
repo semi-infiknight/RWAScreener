@@ -35,3 +35,15 @@ Staging `pools.status`:
 Read from VirtualPool / TransferHookPool account bytes already fetched in `getProgramAccounts`
 (`is_migrated` @ 305, `migration_progress` @ 308). **Fail closed** — never mark graduated from
 age, mcap, or PostBonding/LockedVesting. SoT: Meteora DBC `MigrationProgress::CreatedPool`.
+
+## TokenBadge discover
+
+Expand `data/quote-mints.json` from **on-chain** DBC `TokenBadge` accounts (Helius gPA + DAS). No Bags/pad APIs.
+
+```bash
+npm run discover:badges
+```
+
+Sets `badge_verified_at`, `meta.token_badge`, `meta.mint_authority`, `meta.category`
+(`xstocks` | `ondo` | `backpack` | `commodities` | `etfs` | `other`). Fail closed without `HELIUS_API_KEY`.
+

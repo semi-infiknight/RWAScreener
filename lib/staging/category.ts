@@ -3,6 +3,9 @@
 const KNOWN_LABELS: Record<string, string> = {
   xstocks: "xStocks",
   ondo: "Ondo",
+  commodities: "Commodities",
+  etfs: "ETFs",
+  backpack: "Backpack",
   other: "Other",
 };
 
@@ -13,6 +16,9 @@ export function categoryKeyFromRaw(raw: string | null | undefined): string {
   if (!lower) return "other";
   if (/x\s*-?\s*stocks?/.test(lower) || lower.includes("xstocks")) return "xstocks";
   if (/\bondo\b/.test(lower)) return "ondo";
+  if (/commodit/.test(lower)) return "commodities";
+  if (/\betfs?\b/.test(lower)) return "etfs";
+  if (/backpack/.test(lower)) return "backpack";
 
   const slug = lower
     .replace(/^backed\s*[\/|]\s*/i, "")

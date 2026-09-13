@@ -13,8 +13,25 @@ const BLOCKED_QUOTE_MINTS = new Set([
 ]);
 
 /**
+ * Normalize meta so `category` is always preserved (string) when present on row or meta.
+ */
+function normalizeMeta(row) {
+  const meta =
+    row?.meta && typeof row.meta === "object" && !Array.isArray(row.meta)
+      ? { ...row.meta }
+      : {};
+  const category =
+    (typeof meta.category === "string" && meta.category) ||
+    (typeof row?.category === "string" && row.category) ||
+    null;
+  if (category) meta.category = category;
+  return meta;
+}
+
+/**
  * Load the committed quote-mint allowlist (SPEC §5.1).
  * Source of truth for which DBC quote mints may appear in the screener.
+ * Preserves `meta.category` for staging / upsert.
  */
 export function loadQuoteMints(seedPath = DEFAULT_SEED) {
   const raw = JSON.parse(fs.readFileSync(seedPath, "utf8"));
@@ -25,12 +42,15 @@ export function loadQuoteMints(seedPath = DEFAULT_SEED) {
     const mint = typeof row?.mint === "string" ? row.mint.trim() : "";
     if (!mint || seen.has(mint) || BLOCKED_QUOTE_MINTS.has(mint)) continue;
     seen.add(mint);
+    const meta = normalizeMeta(row);
     allowlist.push({
       mint,
       symbol: row.symbol ?? "",
       name: row.name ?? "",
       badge_verified_at: row.badge_verified_at ?? null,
-      meta: row.meta && typeof row.meta === "object" ? row.meta : {},
+      meta,
+      /** Convenience mirror of meta.category (undefined if unset). */
+      category: typeof meta.category === "string" ? meta.category : undefined,
     });
   }
   return allowlist;
@@ -39,3 +59,5 @@ export function loadQuoteMints(seedPath = DEFAULT_SEED) {
 export function quoteMintSet(seedPath = DEFAULT_SEED) {
   return new Set(loadQuoteMints(seedPath).map((r) => r.mint));
 }
+
+export { BLOCKED_QUOTE_MINTS };

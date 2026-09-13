@@ -23,13 +23,20 @@ export function loadQuoteAllowlist(): QuoteMintRow[] {
       )
       .map((r) => {
         const row = r as QuoteMintRow & { category?: string | null };
+        const meta =
+          row.meta && typeof row.meta === "object" ? { ...row.meta } : {};
+        const categoryFromMeta =
+          typeof meta.category === "string" ? meta.category : null;
+        const category =
+          typeof row.category === "string" ? row.category : categoryFromMeta;
+        if (category && !meta.category) meta.category = category;
         return {
           mint: row.mint,
           symbol: row.symbol ?? "",
           name: row.name ?? "",
           badge_verified_at: row.badge_verified_at ?? null,
-          category: typeof row.category === "string" ? row.category : null,
-          meta: row.meta && typeof row.meta === "object" ? row.meta : {},
+          category,
+          meta,
         };
       });
   } catch {

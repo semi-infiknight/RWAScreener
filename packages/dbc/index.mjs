@@ -9,3 +9,12 @@ export {
   MigrationProgress,
 } from "./status.mjs";
 export { refreshPoolStatuses } from "./refresh-status.mjs";
+export {
+  discoverBadges,
+  fetchAllTokenBadges,
+  enrichMintsDas,
+  assignCategories,
+  BACKED_XSTOCKS_MINT_AUTHORITY,
+  XSTOCKS_LIVE_MINT_AUTHORITY,
+  ONDO_MINT_AUTHORITY,
+} from "./discover-badges.mjs";
