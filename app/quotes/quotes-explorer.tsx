@@ -202,7 +202,6 @@ export function QuotesExplorer() {
                 const open = isCategoryOpen(catKey);
                 const label = quoteCategoryLabel(catKey);
                 const issuerLogo = categoryIssuerLogo(catKey, rows);
-                const n = rows.length;
                 return (
                   <section
                     key={catKey}
@@ -245,14 +244,6 @@ export function QuotesExplorer() {
                         </span>
                         <span className="identity">
                           <div className="name">{label}</div>
-                        </span>
-                      </span>
-                      <span className="quote-cat-assets">
-                        <span className="quote-cat-assets-n">
-                          {n.toLocaleString()}
-                        </span>
-                        <span className="quote-cat-assets-k">
-                          {n === 1 ? "asset" : "assets"}
                         </span>
                       </span>
                     </button>
