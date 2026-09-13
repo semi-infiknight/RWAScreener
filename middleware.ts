@@ -11,9 +11,16 @@ const STAGING_HOSTS = new Set([
  */
 export function middleware(req: NextRequest) {
   const host = (req.headers.get("host") || "").split(":")[0].toLowerCase();
-  if (!STAGING_HOSTS.has(host)) return NextResponse.next();
-
   const { pathname } = req.nextUrl;
+
+  // Common typo: /qoutes → /quotes (and nested coin pages).
+  if (pathname === "/qoutes" || pathname.startsWith("/qoutes/")) {
+    const url = req.nextUrl.clone();
+    url.pathname = pathname.replace(/^\/qoutes/, "/quotes");
+    return NextResponse.redirect(url, 308);
+  }
+
+  if (!STAGING_HOSTS.has(host)) return NextResponse.next();
 
   // Keep staging API + static assets as-is.
   if (
