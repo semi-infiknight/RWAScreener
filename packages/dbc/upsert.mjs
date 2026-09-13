@@ -6,6 +6,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { loadQuoteMints } from "./quote-mints.mjs";
+import { statusFromMigrationProgress } from "./status.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const MIGRATION = path.resolve(__dirname, "../db/migrations/001_init.sql");
@@ -16,6 +17,15 @@ const BLOCKED = new Set([
   "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
   "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB",
 ]);
+
+
+/** Fail-closed status: graduated only when migration_progress===CreatedPool(3). */
+function normalizePoolStatus(p) {
+  const prog = p?.raw?.migration_progress;
+  if (typeof prog === "number") return statusFromMigrationProgress(prog);
+  if (p?.status === "graduated") return "graduated";
+  return "curve";
+}
 
 function databaseUrl() {
   return (process.env.DATABASE_URL || "").trim();
@@ -146,7 +156,7 @@ export async function upsertBackfillResult(result, opts = {}) {
           p.creator ?? null,
           p.activation_at ?? null,
           p.created_at,
-          p.status || "curve",
+          normalizePoolStatus(p),
           JSON.stringify(p.raw ?? {}),
         ],
       );

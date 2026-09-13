@@ -22,3 +22,16 @@ npm run backfill:dbc
 ```
 
 SoT: **quote mint → pool → config/fee_claimer**. Bags `tokens.json` is temporary UI fill, not this path.
+
+## Pool status (CreatedPool only)
+
+Staging `pools.status`:
+
+| On-chain `migration_progress` | Status |
+| --- | --- |
+| `3` CreatedPool (DAMM pool created) | `graduated` |
+| `0` PreBondingCurve / `1` PostBondingCurve / `2` LockedVesting / unread | `curve` |
+
+Read from VirtualPool / TransferHookPool account bytes already fetched in `getProgramAccounts`
+(`is_migrated` @ 305, `migration_progress` @ 308). **Fail closed** — never mark graduated from
+age, mcap, or PostBonding/LockedVesting. SoT: Meteora DBC `MigrationProgress::CreatedPool`.

@@ -8,6 +8,17 @@ const BLOCKED = new Set([
   "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB",
 ]);
 
+
+/** Fail-closed: graduated only when raw.migration_progress === 3 (CreatedPool). */
+function normalizePoolStatus(p) {
+  const prog = p?.raw?.migration_progress;
+  if (typeof prog === "number") {
+    return prog === 3 ? "graduated" : "curve";
+  }
+  if (p?.status === "graduated") return "graduated";
+  return "curve";
+}
+
 function loadQuoteSeed(seedPath) {
   const file = seedPath || path.join(ROOT, "data", "quote-mints.json");
   const raw = JSON.parse(fs.readFileSync(file, "utf8"));
@@ -167,7 +178,7 @@ export async function ingestBackfillResult(pool, result, opts = {}) {
           p.creator ?? null,
           p.activation_at ?? null,
           p.created_at,
-          p.status || "curve",
+          normalizePoolStatus(p),
           JSON.stringify(p.raw ?? {}),
         ],
       );

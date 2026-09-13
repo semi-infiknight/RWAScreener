@@ -8,6 +8,7 @@ import { loadQuoteMints, quoteMintSet } from "./quote-mints.mjs";
 import { loadDotEnv, ROOT } from "./env.mjs";
 import { heliusRpc, mapPool, sleep } from "./helius.mjs";
 import { upsertBackfillResult } from "./upsert.mjs";
+import { poolStatusFromAccountData } from "./status.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -30,6 +31,9 @@ const TRANSFER_HOOK_POOL_DISC = Buffer.from([237, 219, 184, 23, 42, 189, 169, 35
 const POOL_CONFIG_FIELD_OFFSET = 72;
 /** PoolState.activation_point offset. */
 const POOL_ACTIVATION_OFFSET = 296;
+/** PoolState.is_migrated / migration_progress (CreatedPool=3 → graduated). */
+const POOL_IS_MIGRATED_OFFSET = 305;
+const POOL_MIGRATION_PROGRESS_OFFSET = 308;
 /** PoolConfig.activation_type offset. */
 const CONFIG_ACTIVATION_TYPE_OFFSET = 234;
 /** PoolConfig.fee_claimer offset. */
@@ -186,6 +190,7 @@ async function poolsForConfig(apiKey, programId, configAddress) {
     // Re-fetch without dataSlice — above used no slice when dataSlice omitted.
     for (const row of rows || []) {
       const data = Buffer.from(row.account.data[0], "base64");
+      const mig = poolStatusFromAccountData(data);
       out.push({
         address: row.pubkey,
         config: configAddress,
@@ -193,6 +198,10 @@ async function poolsForConfig(apiKey, programId, configAddress) {
         base_mint: readPk(data, 136),
         activation_point: readU64LE(data, POOL_ACTIVATION_OFFSET),
         kind: disc.equals(VIRTUAL_POOL_DISC) ? "virtualPool" : "transferHookPool",
+        // Status SoT: migration_progress CreatedPool(3) only — fail closed to curve.
+        status: mig.status,
+        migration_progress: mig.migration_progress,
+        is_migrated: mig.is_migrated,
       });
     }
   }
@@ -267,6 +276,8 @@ function createdAtIso(init, activationType, activationPoint) {
  * 2. Helius getProgramAccounts — VirtualPool / TransferHookPool by config
  * 3. getSignaturesForAddress(pool) → getTransaction(oldest) → parse InitializeVirtualPool*
  * 4. Keep only quote_mint ∈ seed and created_at ≥ cutoff (blockTime / slot)
+ * 5. Status from VirtualPool.migration_progress: CreatedPool(3)→graduated, else curve
+ *    (not PostBondingCurve / LockedVesting; never age/mcap guesswork)
  *
  * Fail closed (ok:false / non-zero exit) when HELIUS_API_KEY is missing — never invents pools.
  * Optional DATABASE_URL upsert; skip cleanly when unset. Never invents fee_claimer labels.
@@ -304,6 +315,8 @@ export async function backfillOnce(opts = {}) {
       skippedBeforeCutoff: 0,
       skippedBadQuote: 0,
       skippedNoInitialize: 0,
+      graduated: 0,
+      curve: 0,
     },
   };
 
@@ -415,7 +428,8 @@ export async function backfillOnce(opts = {}) {
           ? new Date(cand.activation_point * 1000).toISOString()
           : null,
       created_at,
-      status: "curve",
+      // CreatedPool only (migration_progress===3). PostBonding/LockedVesting stay curve.
+      status: cand.status === "graduated" ? "graduated" : "curve",
       raw: {
         kind: cand.kind,
         slot: init.slot,
@@ -423,6 +437,8 @@ export async function backfillOnce(opts = {}) {
         initialize_signature: init.signature,
         activation_point: cand.activation_point,
         activation_type: cand.activation_type,
+        migration_progress: cand.migration_progress,
+        is_migrated: cand.is_migrated,
         source: "helius_initialize_tx",
       },
     });
@@ -433,6 +449,8 @@ export async function backfillOnce(opts = {}) {
   const configsOut = [...configsOutMap.values()].sort((a, b) =>
     a.address.localeCompare(b.address),
   );
+  empty.stats.graduated = poolsOut.filter((p) => p.status === "graduated").length;
+  empty.stats.curve = poolsOut.filter((p) => p.status !== "graduated").length;
 
   const result = {
     ok: true,
