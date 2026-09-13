@@ -542,6 +542,9 @@ export function EcosystemExplorer({
         </div>
 
         <div className="footer-cta">
+          <Link href="/quotes" className="footer-cta-secondary">
+            Quotes
+          </Link>
           <a
             href="https://docs.meteora.ag/core-products/dbc/what-is-dbc"
             target="_blank"
