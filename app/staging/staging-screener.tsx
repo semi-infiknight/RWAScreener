@@ -545,8 +545,13 @@ export function StagingScreener() {
                         {open ? "▾" : "▸"}
                       </span>
                       <span className="staging-quote-cat-label">{label}</span>
-                      <span className="staging-quote-cat-count">
-                        {rows.length}
+                      <span className="quote-cat-assets">
+                        <span className="quote-cat-assets-n">
+                          {rows.length.toLocaleString()}
+                        </span>
+                        <span className="quote-cat-assets-k">
+                          {rows.length === 1 ? "asset" : "assets"}
+                        </span>
                       </span>
                     </button>
                     {open ? (

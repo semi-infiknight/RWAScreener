@@ -137,8 +137,11 @@ export function QuotesExplorer() {
     }));
   }
 
-  function categoryIssuerLogo(key: string): string | null {
-    return CATEGORY_ISSUER_LOGOS[key] ?? null;
+  function categoryIssuerLogo(key: string, rows: Quote[]): string | null {
+    const issuer = CATEGORY_ISSUER_LOGOS[key];
+    if (issuer) return issuer;
+    const hit = rows.find((r) => typeof r.logo === "string" && r.logo);
+    return hit?.logo ?? null;
   }
 
   return (
@@ -197,7 +200,8 @@ export function QuotesExplorer() {
               {quoteCategories.map(([catKey, rows]) => {
                 const open = isCategoryOpen(catKey);
                 const label = quoteCategoryLabel(catKey);
-                const issuerLogo = categoryIssuerLogo(catKey);
+                const issuerLogo = categoryIssuerLogo(catKey, rows);
+                const n = rows.length;
                 return (
                   <section
                     key={catKey}
@@ -240,14 +244,15 @@ export function QuotesExplorer() {
                         </span>
                         <span className="identity">
                           <div className="name">{label}</div>
-                          <div className="domain">
-                            {rows.length.toLocaleString()} quote
-                            {rows.length === 1 ? "" : "s"}
-                          </div>
                         </span>
                       </span>
-                      <span className="staging-quote-cat-chevron" aria-hidden>
-                        {open ? "▾" : "▸"}
+                      <span className="quote-cat-assets">
+                        <span className="quote-cat-assets-n">
+                          {n.toLocaleString()}
+                        </span>
+                        <span className="quote-cat-assets-k">
+                          {n === 1 ? "asset" : "assets"}
+                        </span>
                       </span>
                     </button>
                     {open ? (
