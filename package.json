@@ -15,7 +15,8 @@
     "indexer:backfill": "node apps/indexer/index.mjs backfill",
     "indexer:ingest": "node apps/indexer/index.mjs ingest",
     "indexer:serve": "node apps/indexer/index.mjs serve",
-    "discover:badges": "node packages/dbc/discover-badges.mjs"
+    "discover:badges": "node packages/dbc/discover-badges.mjs",
+    "enrich:quote-logos": "node packages/dbc/enrich-quote-logos.mjs"
   },
   "dependencies": {
     "@meteora-ag/dynamic-bonding-curve-sdk": "^1.5.12",

@@ -34,6 +34,13 @@ export function loadQuoteAllowlist(): QuoteMintRow[] {
           mint: row.mint,
           symbol: row.symbol ?? "",
           name: row.name ?? "",
+          logo: (() => {
+            if (typeof row.logo === "string" && row.logo.trim()) return row.logo.trim();
+            const img = meta && typeof (meta as { image?: unknown }).image === "string"
+              ? (meta as { image: string }).image.trim()
+              : "";
+            return img || null;
+          })(),
           badge_verified_at: row.badge_verified_at ?? null,
           category,
           meta,

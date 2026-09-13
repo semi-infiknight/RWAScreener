@@ -43,10 +43,16 @@ export function loadQuoteMints(seedPath = DEFAULT_SEED) {
     if (!mint || seen.has(mint) || BLOCKED_QUOTE_MINTS.has(mint)) continue;
     seen.add(mint);
     const meta = normalizeMeta(row);
+    const logo =
+      (typeof row.logo === "string" && row.logo.trim()) ||
+      (typeof meta.image === "string" && meta.image.trim()) ||
+      null;
+    if (logo && !meta.image) meta.image = logo;
     allowlist.push({
       mint,
       symbol: row.symbol ?? "",
       name: row.name ?? "",
+      logo,
       badge_verified_at: row.badge_verified_at ?? null,
       meta,
       /** Convenience mirror of meta.category (undefined if unset). */

@@ -13,6 +13,7 @@ export {
   discoverBadges,
   fetchAllTokenBadges,
   enrichMintsDas,
+  pickLogo,
   assignCategories,
   BACKED_XSTOCKS_MINT_AUTHORITY,
   XSTOCKS_LIVE_MINT_AUTHORITY,

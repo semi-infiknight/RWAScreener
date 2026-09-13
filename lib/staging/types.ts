@@ -4,6 +4,8 @@ export type QuoteMintRow = {
   mint: string;
   symbol: string;
   name: string;
+  /** DAS / metadata image URL when known. */
+  logo?: string | null;
   badge_verified_at: string | null;
   /** Optional seed category slug (e.g. xstocks, ondo). */
   category?: string | null;
@@ -41,6 +43,7 @@ export type StagingQuote = {
   mint: string;
   symbol: string;
   name: string;
+  logo?: string | null;
   badge_verified_at: string | null;
   /** Grouping key for Quotes UI (xstocks, ondo, other, …). */
   category: string;

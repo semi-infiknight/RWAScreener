@@ -7,30 +7,25 @@ type Quote = {
   mint: string;
   symbol: string;
   name: string;
+  logo?: string | null;
   category?: string | null;
   pool_count: number;
-  last_launch_at: string | null;
 };
 
-function shortPk(pk: string | null | undefined, n = 4): string {
-  if (!pk) return "—";
-  if (pk.length <= n * 2 + 1) return pk;
-  return `${pk.slice(0, n)}…${pk.slice(-n)}`;
-}
+const AVATAR_COLORS = [
+  "#ff6a00",
+  "#ff8a1a",
+  "#ffb347",
+  "#e85d04",
+  "#f48c06",
+  "#dc2f02",
+];
 
-function fmtTime(iso: string | null | undefined): string {
-  if (!iso) return "—";
-  try {
-    return new Date(iso).toLocaleString("en-MY", {
-      timeZone: "Asia/Kuala_Lumpur",
-      month: "short",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  } catch {
-    return iso;
-  }
+function initials(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "?";
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[1][0]).toUpperCase();
 }
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -223,25 +218,41 @@ export function QuotesExplorer() {
                             <tr>
                               <th>Symbol</th>
                               <th className="hide-sm">Name</th>
-                              <th>Pools</th>
-                              <th className="hide-md">Last launch</th>
-                              <th className="hide-lg">Mint</th>
+                              <th>Coins</th>
                             </tr>
                           </thead>
                           <tbody>
-                            {rows.map((q) => (
+                            {rows.map((q, idx) => (
                               <tr key={q.mint} className="vs-row pad-row">
                                 <td>
-                                  <div className="name">{q.symbol}</div>
+                                  <span className="pad-name-link staging-name-static">
+                                    <span
+                                      className="avatar"
+                                      style={
+                                        q.logo
+                                          ? undefined
+                                          : {
+                                              background:
+                                                AVATAR_COLORS[
+                                                  idx % AVATAR_COLORS.length
+                                                ],
+                                            }
+                                      }
+                                    >
+                                      {q.logo ? (
+                                        // eslint-disable-next-line @next/next/no-img-element
+                                        <img src={q.logo} alt="" />
+                                      ) : (
+                                        initials(q.symbol || q.name)
+                                      )}
+                                    </span>
+                                    <span className="identity">
+                                      <div className="name">{q.symbol}</div>
+                                    </span>
+                                  </span>
                                 </td>
                                 <td className="hide-sm">{q.name}</td>
                                 <td className="num">{q.pool_count}</td>
-                                <td className="hide-md">
-                                  {fmtTime(q.last_launch_at)}
-                                </td>
-                                <td className="hide-lg mono">
-                                  {shortPk(q.mint, 6)}
-                                </td>
                               </tr>
                             ))}
                           </tbody>

@@ -222,6 +222,7 @@ async function quotesFromPg(): Promise<QuotesResult | null> {
           mint: q.mint,
           symbol: q.symbol,
           name: q.name,
+          logo: q.logo ?? null,
           badge_verified_at: q.badge_verified_at,
           category: resolveQuoteCategory(q),
           pool_count: u?.count ?? 0,

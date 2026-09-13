@@ -122,6 +122,71 @@ export async function enrichMintsDas(apiKey, mints, { batchSize = 100, concurren
   return byMint;
 }
 
+
+
+/** Prefer HTTPS CDN URLs from DAS content.links / files / metadata. */
+export function pickLogo(asset) {
+  if (!asset || typeof asset !== "object") return null;
+  const candidates = [];
+  const links = asset.content?.links || {};
+  if (typeof links.image === "string" && links.image.trim()) {
+    candidates.push(links.image.trim());
+  }
+  const files = asset.content?.files;
+  if (Array.isArray(files)) {
+    for (const f of files) {
+      if (typeof f?.cdn_uri === "string" && f.cdn_uri.trim()) {
+        candidates.push(f.cdn_uri.trim());
+      }
+      if (typeof f?.uri === "string" && f.uri.trim()) {
+        const mime = String(f.mime || f.type || "");
+        if (
+          !mime ||
+          mime.startsWith("image/") ||
+          /\.(png|jpe?g|gif|webp|svg)(\?|$)/i.test(f.uri)
+        ) {
+          candidates.push(f.uri.trim());
+        }
+      }
+    }
+  }
+  const metaImg = asset.content?.metadata?.image;
+  if (typeof metaImg === "string" && metaImg.trim()) {
+    candidates.push(metaImg.trim());
+  }
+
+  function normalize(u) {
+    if (typeof u !== "string") return null;
+    const s = u.trim();
+    if (!s) return null;
+    if (s.startsWith("ipfs://")) {
+      return `https://ipfs.io/ipfs/${s.slice("ipfs://".length)}`;
+    }
+    return s;
+  }
+  function score(u) {
+    if (!u) return -1;
+    let s = 0;
+    if (u.startsWith("https://")) s += 10;
+    else if (u.startsWith("http://")) s += 5;
+    else return -1;
+    if (/cdn|cloudfront|arweave|helius|nftstorage|pinata|imgix/i.test(u)) s += 3;
+    return s;
+  }
+
+  let best = null;
+  let bestScore = -1;
+  for (const c of candidates) {
+    const n = normalize(c);
+    const sc = score(n);
+    if (sc > bestScore) {
+      bestScore = sc;
+      best = n;
+    }
+  }
+  return best;
+}
+
 function pickSymbolName(asset) {
   const meta = asset?.content?.metadata || {};
   const tokenInfo = asset?.token_info || {};
@@ -317,14 +382,18 @@ export async function discoverBadges(opts = {}) {
     let symbol = "";
     let name = "";
     let mintAuthority = null;
+    let logo = null;
     if (asset) {
       ({ symbol, name } = pickSymbolName(asset));
       mintAuthority = pickMintAuthority(asset);
+      logo = pickLogo(asset);
     } else {
       missingDas += 1;
     }
     if (!symbol && seed?.symbol) symbol = seed.symbol;
     if (!name && seed?.name) name = seed.name;
+    if (!logo && seed?.logo) logo = seed.logo;
+    if (!logo && seed?.meta?.image) logo = seed.meta.image;
     if (!mintAuthority && seed?.meta?.mint_authority) {
       mintAuthority = seed.meta.mint_authority;
     }
@@ -335,6 +404,9 @@ export async function discoverBadges(opts = {}) {
       token_badge: badge,
       source: "on-chain TokenBadge gPA",
     };
+    if (typeof logo === "string" && logo.trim()) {
+      meta.image = logo.trim();
+    }
 
     const isXstocksAuth =
       mintAuthority === BACKED_XSTOCKS_MINT_AUTHORITY ||
@@ -344,6 +416,7 @@ export async function discoverBadges(opts = {}) {
       mint,
       symbol: symbol || mint.slice(0, 6),
       name: name || symbol || mint.slice(0, 8),
+      logo: typeof logo === "string" && logo.trim() ? logo.trim() : null,
       badge_verified_at: nowIso,
       meta,
       // Authority-only seed hint. Name heuristics + cluster fill the rest.
@@ -379,10 +452,11 @@ export async function discoverBadges(opts = {}) {
   );
 
   const payload = {
-    quote_mints: rows.map(({ mint, symbol, name, badge_verified_at, meta }) => ({
+    quote_mints: rows.map(({ mint, symbol, name, logo, badge_verified_at, meta }) => ({
       mint,
       symbol,
       name,
+      logo: logo || null,
       badge_verified_at,
       category: meta.category || "other",
       meta,
