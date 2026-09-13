@@ -7,6 +7,7 @@ import { DBC_021_CUTOFF_ISO, DBC_PROGRAM_ID } from "./constants.mjs";
 import { loadQuoteMints, quoteMintSet } from "./quote-mints.mjs";
 import { loadDotEnv, ROOT } from "./env.mjs";
 import { heliusRpc, mapPool, sleep } from "./helius.mjs";
+import { upsertBackfillResult } from "./upsert.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -267,7 +268,8 @@ function createdAtIso(init, activationType, activationPoint) {
  * 3. getSignaturesForAddress(pool) → getTransaction(oldest) → parse InitializeVirtualPool*
  * 4. Keep only quote_mint ∈ seed and created_at ≥ cutoff (blockTime / slot)
  *
- * Fail closed when HELIUS_API_KEY is missing — never invents pools.
+ * Fail closed (ok:false / non-zero exit) when HELIUS_API_KEY is missing — never invents pools.
+ * Optional DATABASE_URL upsert; skip cleanly when unset. Never invents fee_claimer labels.
  */
 export async function backfillOnce(opts = {}) {
   loadDotEnv(opts.root || ROOT);
@@ -306,8 +308,13 @@ export async function backfillOnce(opts = {}) {
   };
 
   if (!heliusApiKey) {
+    // Fail closed: non-zero exit via ok:false — never silent empty success.
+    console.error(
+      "error: HELIUS_API_KEY is required for npm run backfill:dbc (fail closed; no pools invented)",
+    );
     return {
       ...empty,
+      ok: false,
       skipped: true,
       reason: "HELIUS_API_KEY missing — fail closed, no pools invented",
     };
@@ -462,6 +469,26 @@ export async function backfillOnce(opts = {}) {
       result.artifactPath = artifactPath;
     } catch (e) {
       result.artifactError = String(e?.message || e);
+    }
+  }
+
+  // Optional Postgres upsert (SPEC §5.2). Skip cleanly without DATABASE_URL.
+  const doUpsert = opts.upsertDb !== false;
+  if (doUpsert) {
+    try {
+      result.db = await upsertBackfillResult(result, {
+        seedPath: opts.seedPath,
+        databaseUrl: opts.databaseUrl,
+      });
+    } catch (e) {
+      result.db = {
+        skipped: false,
+        ok: false,
+        error: String(e?.message || e),
+      };
+      // DB present but upsert failed → fail the run (key required; DB optional skip only when unset).
+      result.ok = false;
+      result.reason = `Helius walk ok but DB upsert failed: ${result.db.error}`;
     }
   }
 

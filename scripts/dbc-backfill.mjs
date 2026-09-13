@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 /**
  * DBC initialize-tx backfill (SPEC §5.2).
- * Loads HELIUS_API_KEY from .env / .env.local — fail closed if missing.
- * Never invents pools; never prints the API key.
+ * Loads HELIUS_API_KEY from .env / .env.local — fail closed (exit 1) if missing.
+ * Refreshes data/dbc-backfill-result.json; optional DATABASE_URL upsert.
+ * Never invents pools or fee_claimer labels; never prints the API key.
  */
 import { backfillOnce, loadDotEnv } from "../packages/dbc/index.mjs";
 
@@ -21,6 +22,7 @@ const summary = {
   poolCount: result.pools?.length ?? 0,
   stats: result.stats,
   artifactPath: result.artifactPath,
+  db: result.db,
   samplePools: (result.pools || []).slice(0, 5).map((p) => ({
     address: p.address,
     quote_mint: p.quote_mint,
