@@ -31,9 +31,16 @@ function initials(name: string): string {
 const CATEGORY_LABELS: Record<string, string> = {
   xstocks: "xStocks",
   ondo: "Ondo",
-  backpack: "Backpack",
+  backpack: "Backpack Securities",
   commodities: "Commodities",
   other: "Other",
+};
+
+/** Issuer marks — not the first token in the bucket. */
+const CATEGORY_ISSUER_LOGOS: Record<string, string> = {
+  xstocks: "/issuers/xstocks.svg",
+  backpack: "/issuers/backpack-securities.png",
+  ondo: "/issuers/ondo.svg",
 };
 
 function quoteCategoryKey(q: Quote): string {
@@ -130,16 +137,8 @@ export function QuotesExplorer() {
     }));
   }
 
-  function categoryLogo(rows: Quote[]): string | null {
-    const prefer = ["AAPLx", "TSLAx", "NVDAx", "SPYx", "AAPL", "TSLA", "NVDA"];
-    for (const sym of prefer) {
-      const hit = rows.find(
-        (r) => r.symbol === sym && typeof r.logo === "string" && r.logo,
-      );
-      if (hit?.logo) return hit.logo;
-    }
-    const any = rows.find((r) => typeof r.logo === "string" && r.logo);
-    return any?.logo ?? null;
+  function categoryIssuerLogo(key: string): string | null {
+    return CATEGORY_ISSUER_LOGOS[key] ?? null;
   }
 
   return (
@@ -198,6 +197,7 @@ export function QuotesExplorer() {
               {quoteCategories.map(([catKey, rows]) => {
                 const open = isCategoryOpen(catKey);
                 const label = quoteCategoryLabel(catKey);
+                const issuerLogo = categoryIssuerLogo(catKey);
                 return (
                   <section
                     key={catKey}
@@ -212,9 +212,9 @@ export function QuotesExplorer() {
                     >
                       <span className="pad-name-link staging-name-static quote-cat-identity">
                         <span
-                          className="avatar"
+                          className="avatar quote-cat-issuer"
                           style={
-                            categoryLogo(rows)
+                            issuerLogo
                               ? undefined
                               : {
                                   background:
@@ -231,9 +231,9 @@ export function QuotesExplorer() {
                                 }
                           }
                         >
-                          {categoryLogo(rows) ? (
+                          {issuerLogo ? (
                             // eslint-disable-next-line @next/next/no-img-element
-                            <img src={categoryLogo(rows)!} alt="" />
+                            <img src={issuerLogo} alt="" />
                           ) : (
                             initials(label)
                           )}
