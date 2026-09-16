@@ -12,7 +12,7 @@
       "launchpadId": "ethics",
       "website": "https://ethics.ltd",
       "x": "https://x.com/ethicslaunch",
-      "evidence": "ethics.ltd/api/launches DBC stock-quote launches (FARM/hoodx, FAIR/spyx, BIT/coinx) match all 3 backfill pools for this fee_claimer by mint+poolAddress (observed 2026-09-12)."
+      "evidence": "ethics.ltd/api/launches DBC stock-quote launches (FARM/hoodx, FAIR/spyx, BIT/coinx) match all 3 backfill pools for this fee_claimer by mint+poolAddress (observed 2026-09-12). Also DBC PartnerMetadata PDA 8Hv5UuWBzh1SjYewCaXTjQFyLXMw9ffoCgHZp5mg5eJs: fee_claimer@8 == 2gymU5YgYvfxmjTThCvVZV695Mw22Eq4YpZzF1vRJfKc; on-chain name=Ethics Launch, website=https://www.ethics.ltd (public RPC 2026-09-16)."
     },
     "4wYGg1KxUroz6Aitgmca64c5wqZW5q1cULCTRJ8dxhyL": {
       "label": "OTC Desks",
@@ -43,6 +43,7 @@
     "Aggregation report (gitignored): data/fee-claimer-attribution.json + .md from scripts/summarize-fee-claimers.mjs / local attribution pass.",
     "2026-09-13: labeled OTC Desks (4wYGg1\u2026) and RevShare (5x2DYt\u2026) from pad API mint+config overlap. Top unlabeled Fgi5M4W2\u2026 (18) and CuRAzi9u\u2026 (13) still unknown after Bags/LFOwn/Perpspad/ClawPump/Ethics/Ember/star.fun checks.",
     "PartnerMetadata disc [68,68,130,19,16,209,98,156] on DBC program; fee_claimer@offset 8. Only PURPS/RevShare/Ethics have PartnerMetadata among staging claimers as of 2026-09-13 (OTC Desks labeled via API mint+config, no PartnerMetadata).",
-    "2026-09-14: live staging 80 claimers. Pad APIs re-checked (Ember/Ethics/RevShare/OTC/LFOwn/ClawPump meteora_dbc). New mint+config/pool hits only on already-labeled Ember/Ethics/RevShare. ClawPump meteora_dbc mint-only hit Fo6sbUoT (2/2 pools) — no pad pool/config field, left unlabeled. CuRAzi9u (13) still unlabeled. PartnerMetadata gPA: no unlabeled staging claimer named. Bags /damm-v2/launches 429 this pass. Ember/Ethics rows gained x handles from projects.json (same pad identity, not a new claimer)."
+    "2026-09-14: live staging 80 claimers. Pad APIs re-checked (Ember/Ethics/RevShare/OTC/LFOwn/ClawPump meteora_dbc). New mint+config/pool hits only on already-labeled Ember/Ethics/RevShare. ClawPump meteora_dbc mint-only hit Fo6sbUoT (2/2 pools) — no pad pool/config field, left unlabeled. CuRAzi9u (13) still unlabeled. PartnerMetadata gPA: no unlabeled staging claimer named. Bags /damm-v2/launches 429 this pass. Ember/Ethics rows gained x handles from projects.json (same pad identity, not a new claimer).",
+    "2026-09-16: PartnerMetadata gPA 576 accounts. Unlabeled staging claimers still 0 named (CuRAzi9u remains pubkey). Ethics now has PartnerMetadata (8Hv5Uu…). Ember Curve / OTC Desks still none. Desk ranks unlabeled in staging UI; labels still only from PartnerMetadata or mint+config."
   ]
 }

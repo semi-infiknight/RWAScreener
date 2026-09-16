@@ -1,4 +1,10 @@
 export { DBC_021_CUTOFF_ISO, DBC_PROGRAM_ID } from "./constants.mjs";
+export {
+  PARTNER_METADATA_DISC,
+  PARTNER_METADATA_DISC_B58,
+  decodePartnerMetadata,
+  partnerMetadataIsComplete,
+} from "./partner-metadata.mjs";
 export { loadQuoteMints, quoteMintSet } from "./quote-mints.mjs";
 export { backfillOnce, extractInitializeFromTx } from "./backfill.mjs";
 export { loadDotEnv } from "./env.mjs";

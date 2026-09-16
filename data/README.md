@@ -53,7 +53,11 @@ Source of truth for the **quote screener** is **quote → pool → config**, not
 
 ## Launchpad labels (`launchpad-labels.json`)
 
-`fee_claimer → label` map. Only proven pad mappings (pad API / docs / on-chain pool+config overlap). Unknown claimers stay as pubkey — do not invent Bags / Perpspad / other pubkeys.
+`fee_claimer → label` map. Only proven mappings: **PartnerMetadata** (name+website, claimer match) or pad API mint+config / pool overlap. Unknown claimers stay as pubkey — do not invent Bags / Perpspad / other pubkeys from names alone.
+
+Observed PartnerMetadata for labeled claimers: `data/partner-metadata.json` (evidence only, not a second SoT).
+
+Staging desk ranks unlabeled claimers (`/staging`, Unlabeled filter). Scan: `npm run scan:partner-metadata` (fail closed without `HELIUS_API_KEY` or `--rpc`).
 
 Observed (2026-09-12, from Helius stock-quote backfill):
 - `GZjYfGyUNQfDChcQ66Gc3ZMcQqPEisyRYe1nPyQhP9bp` → Ember Curve (`embercurve.fun/api/solana/markets`)

@@ -9,6 +9,7 @@ import { hasDatabaseUrl, withClient } from "./db";
 import { fileMeta, loadFileBundle } from "./file-store";
 import { normalizeStagingStatus } from "./status";
 import { resolveQuoteCategory } from "./category";
+import { decorateLaunchpad, launchpadDeskStats } from "./decorate-launchpads";
 import type {
   StagingLaunch,
   StagingLaunchpad,
@@ -152,7 +153,7 @@ async function launchpadsFromPg(): Promise<LaunchpadsResult | null> {
         .map((m) => symbols.get(m))
         .filter((s): s is string => Boolean(s))
         .slice(0, 8);
-      return {
+      return decorateLaunchpad({
         fee_claimer: fee,
         label: fee !== "unknown" ? labels[fee]?.label ?? null : null,
         website: fee !== "unknown" ? labels[fee]?.website ?? null : null,
@@ -163,7 +164,7 @@ async function launchpadsFromPg(): Promise<LaunchpadsResult | null> {
         first_seen_at: r.first_seen_at ? r.first_seen_at.toISOString() : null,
         last_seen_at: r.last_seen_at ? r.last_seen_at.toISOString() : null,
         sample_quote_symbols: sample,
-      };
+      });
     });
     return {
       meta: {
@@ -172,6 +173,7 @@ async function launchpadsFromPg(): Promise<LaunchpadsResult | null> {
         cutoff_iso: DBC_021_CUTOFF_ISO,
         allowlist_count: allow.length,
         count: launchpads.length,
+        ...launchpadDeskStats(launchpads),
       },
       launchpads,
     };

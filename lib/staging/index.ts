@@ -7,6 +7,7 @@ export type {
   StagingQuote,
   StagingListMeta,
   StagingSource,
+  StagingPartnerMetadata,
 } from "./types";
 
 export { normalizeStagingStatus, statusFromMigrationProgress } from "./status";

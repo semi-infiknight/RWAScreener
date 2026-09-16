@@ -27,11 +27,23 @@ export type StagingLaunch = {
   status: "graduated" | "bonding" | "migrating";
 };
 
+export type StagingPartnerMetadata = {
+  pda: string;
+  name: string;
+  website: string;
+  logo?: string | null;
+};
+
 export type StagingLaunchpad = {
   fee_claimer: string;
   label: string | null;
   website: string | null;
   x: string | null;
+  /** Proven seed label (launchpad-labels.json). */
+  labeled: boolean;
+  launchpadId: string | null;
+  /** On-chain PartnerMetadata — evidence, not an auto-name for unlabeled rows. */
+  partner_metadata: StagingPartnerMetadata | null;
   pool_count: number;
   config_count: number;
   quote_mint_count: number;
@@ -58,4 +70,7 @@ export type StagingListMeta = {
   cutoff_iso: string;
   allowlist_count: number;
   count: number;
+  labeled_count?: number;
+  unlabeled_count?: number;
+  unlabeled_pool_count?: number;
 };

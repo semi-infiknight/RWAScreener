@@ -128,6 +128,9 @@ export function EcosystemExplorer({
     const fromSession = stale?.value ?? {};
     return { ...fromSession, ...initialMetrics };
   });
+  const [quotePools, setQuotePools] = useState<Record<string, number> | null>(
+    null,
+  );
   const [sort, setSort] = useState<SortKey>("sortOrder");
   const [asc, setAsc] = useState(true);
   /** False until a column header is clicked — default = curated sortOrder. */
@@ -224,6 +227,37 @@ export function EcosystemExplorer({
       ac.abort();
     };
   }, [projects, initialMetrics]);
+
+  useEffect(() => {
+    const ac = new AbortController();
+    (async () => {
+      try {
+        const res = await fetch("/api/staging/launchpads", {
+          cache: "no-store",
+          signal: ac.signal,
+        });
+        if (!res.ok) {
+          setQuotePools({});
+          return;
+        }
+        const body = await res.json();
+        const pads = Array.isArray(body.launchpads) ? body.launchpads : [];
+        const map: Record<string, number> = {};
+        for (const lp of pads) {
+          const id =
+            typeof lp?.launchpadId === "string" ? lp.launchpadId.trim() : "";
+          if (!id || !lp?.labeled) continue;
+          const n = typeof lp.pool_count === "number" ? lp.pool_count : 0;
+          map[id] = (map[id] ?? 0) + n;
+        }
+        setQuotePools(map);
+      } catch (err) {
+        if (err instanceof DOMException && err.name === "AbortError") return;
+        setQuotePools({});
+      }
+    })();
+    return () => ac.abort();
+  }, []);
 
   const metricsPending = useMemo(() => {
     return projects.some((p) => isScreenerLive(p) && metrics[p.id] === undefined);
@@ -396,6 +430,9 @@ export function EcosystemExplorer({
                         Graduated{mark("graduated")}
                       </button>
                     </th>
+                    <th className="hide-md" title="Post-cutoff stock-quote DBC pools from the on-chain indexer. Not an endorsement.">
+                      Quote pools
+                    </th>
                     <th>
                       <button
                         type="button"
@@ -485,6 +522,18 @@ export function EcosystemExplorer({
                           aria-busy={rowLoading || undefined}
                         >
                           {fmtCount(m?.graduated, rowLoading, live)}
+                        </td>
+                        <td
+                          className="num hide-md"
+                          title="On-chain stock-quote DBC pools after cutoff. Not an endorsement."
+                        >
+                          {quotePools == null ? (
+                            <CellLoader />
+                          ) : quotePools[p.id] != null ? (
+                            quotePools[p.id].toLocaleString()
+                          ) : (
+                            "—"
+                          )}
                         </td>
                         <td className="num" aria-busy={rowLoading || undefined}>
                           {fmtUsdCell(m?.mcapUsd, rowLoading, live)}

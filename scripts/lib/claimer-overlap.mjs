@@ -86,3 +86,41 @@ export const FORBIDDEN_INVENTED_IDS = [
   "stardotfun",
   "stonkoptions",
 ];
+
+function slugFromName(name) {
+  return String(name || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "")
+    .slice(0, 32);
+}
+
+/**
+ * Propose labels from complete PartnerMetadata. Never overwrites an existing
+ * claimer. Mint-only invention of Bags/Perpspad/… ids is still forbidden —
+ * PartnerMetadata with name+website is on-chain proof (allowed).
+ *
+ * @param {Record<string, { label?: string }>} existingLabels
+ * @param {Array<{ fee_claimer: string, pda?: string, name: string, website: string, logo?: string|null }>} rows
+ */
+export function buildPartnerMetadataPatch(existingLabels, rows) {
+  const patch = {};
+  for (const row of rows || []) {
+    const fc = pk(row?.fee_claimer);
+    const name = typeof row?.name === "string" ? row.name.trim() : "";
+    const website = typeof row?.website === "string" ? row.website.trim() : "";
+    if (!fc || !name || !/^https?:\/\//i.test(website)) continue;
+    if (existingLabels[fc]?.label) continue;
+    const slug = slugFromName(name) || "partner";
+    const pda = pk(row.pda);
+    patch[fc] = {
+      label: name,
+      launchpadId: slug,
+      website,
+      evidence: pda
+        ? `DBC PartnerMetadata PDA ${pda}: fee_claimer@8 == ${fc}; on-chain name=${name}, website=${website}`
+        : `DBC PartnerMetadata: fee_claimer@8 == ${fc}; on-chain name=${name}, website=${website}`,
+    };
+  }
+  return patch;
+}

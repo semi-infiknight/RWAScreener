@@ -14,6 +14,9 @@ type Meta = {
   count: number;
   /** True pool/group total when list is capped (e.g. launches limit=200 of 448). */
   total?: number | null;
+  labeled_count?: number;
+  unlabeled_count?: number;
+  unlabeled_pool_count?: number;
 };
 
 type Launch = {
@@ -33,12 +36,22 @@ type Launchpad = {
   label: string | null;
   website: string | null;
   x: string | null;
+  labeled?: boolean;
+  launchpadId?: string | null;
+  partner_metadata?: {
+    pda: string;
+    name: string;
+    website: string;
+    logo?: string | null;
+  } | null;
   pool_count: number;
   config_count: number;
   quote_mint_count: number;
   last_seen_at: string | null;
   sample_quote_symbols: string[];
 };
+
+type PadFilter = "all" | "labeled" | "unlabeled";
 
 type Quote = {
   mint: string;
@@ -128,6 +141,8 @@ function categorySortKey(key: string): string {
 export function StagingScreener() {
   const [tab, setTab] = useState<Tab>("launchpads");
   const [query, setQuery] = useState("");
+  const [padFilter, setPadFilter] = useState<PadFilter>("unlabeled");
+  const [claimerFilter, setClaimerFilter] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [meta, setMeta] = useState<Meta | null>(null);
@@ -139,13 +154,29 @@ export function StagingScreener() {
     {},
   );
 
-  const load = useCallback(async (active: Tab) => {
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const sp = new URLSearchParams(window.location.search);
+    const t = sp.get("tab");
+    if (t === "launchpads" || t === "launches" || t === "quotes") setTab(t);
+    const pads = sp.get("pads");
+    if (pads === "all" || pads === "labeled" || pads === "unlabeled") {
+      setPadFilter(pads);
+    }
+    const fc = sp.get("fee_claimer")?.trim();
+    if (fc) setClaimerFilter(fc);
+  }, []);
+
+  const load = useCallback(async (active: Tab, feeClaimer?: string | null) => {
     setLoading(true);
     setError(null);
     try {
+      const launchQs = new URLSearchParams({ limit: "200" });
+      const fc = feeClaimer?.trim();
+      if (fc) launchQs.set("fee_claimer", fc);
       const path =
         active === "launches"
-          ? "/api/staging/launches?limit=200"
+          ? `/api/staging/launches?${launchQs.toString()}`
           : active === "launchpads"
             ? "/api/staging/launchpads"
             : "/api/staging/quotes";
@@ -200,25 +231,30 @@ export function StagingScreener() {
   }, []);
 
   useEffect(() => {
-    void load(tab);
-  }, [tab, load]);
+    void load(tab, claimerFilter);
+  }, [tab, claimerFilter, load]);
 
   const filteredLaunchpads = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return launchpads;
     return launchpads.filter((lp) => {
+      const labeled = Boolean(lp.labeled ?? lp.label);
+      if (padFilter === "labeled" && !labeled) return false;
+      if (padFilter === "unlabeled" && labeled) return false;
+      if (!q) return true;
       const label = (lp.label || "").toLowerCase();
       const fee = lp.fee_claimer.toLowerCase();
       const site = (lp.website || "").toLowerCase();
+      const pm = (lp.partner_metadata?.name || "").toLowerCase();
       const samples = (lp.sample_quote_symbols || []).join(" ").toLowerCase();
       return (
         label.includes(q) ||
         fee.includes(q) ||
         site.includes(q) ||
+        pm.includes(q) ||
         samples.includes(q)
       );
     });
-  }, [launchpads, query]);
+  }, [launchpads, query, padFilter]);
 
   const filteredQuotes = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -316,6 +352,7 @@ export function StagingScreener() {
                 onClick={() => {
                   setTab(id);
                   setQuery("");
+                  if (id !== "launches") setClaimerFilter(null);
                 }}
               >
                 {label}
@@ -327,6 +364,19 @@ export function StagingScreener() {
               <span>
                 source <strong>{meta.source}</strong>
               </span>
+              {tab === "launchpads" ? (
+                <span>
+                  labeled <strong>{meta.labeled_count ?? "—"}</strong>
+                  {" · "}
+                  unlabeled <strong>{meta.unlabeled_count ?? "—"}</strong>
+                  {meta.unlabeled_pool_count != null ? (
+                    <>
+                      {" "}
+                      ({meta.unlabeled_pool_count} pools)
+                    </>
+                  ) : null}
+                </span>
+              ) : null}
               <span>
                 {meta.total != null && meta.total > meta.count ? (
                   <>
@@ -351,6 +401,48 @@ export function StagingScreener() {
           ) : null}
         </div>
 
+        {tab === "launchpads" ? (
+          <div className="staging-desk-filters" role="group" aria-label="Claimer filter">
+            {(
+              [
+                ["unlabeled", "Unlabeled"],
+                ["labeled", "Labeled"],
+                ["all", "All"],
+              ] as const
+            ).map(([id, label]) => (
+              <button
+                key={id}
+                type="button"
+                className={
+                  padFilter === id
+                    ? "staging-tab staging-tab-active"
+                    : "staging-tab"
+                }
+                onClick={() => setPadFilter(id)}
+              >
+                {label}
+              </button>
+            ))}
+            <span className="staging-desk-hint">
+              Names only after PartnerMetadata or mint+config proof. Else pubkey.
+            </span>
+          </div>
+        ) : null}
+
+        {tab === "launches" && claimerFilter ? (
+          <div className="staging-desk-filters">
+            <span className="staging-desk-hint">
+              fee_claimer <span className="mono">{shortPk(claimerFilter, 8)}</span>
+            </span>
+            <button
+              type="button"
+              className="staging-tab"
+              onClick={() => setClaimerFilter(null)}
+            >
+              Clear
+            </button>
+          </div>
+        ) : null}
         {tab === "launchpads" || tab === "quotes" ? (
           <label className="search-list">
             <span className="sr-only">
@@ -389,7 +481,9 @@ export function StagingScreener() {
               <div className="empty">
                 {launchpads.length === 0
                   ? "No launchpads indexed yet. Empty is honest."
-                  : "No launchpads match."}
+                  : padFilter === "unlabeled"
+                    ? "No unlabeled claimers — every indexed fee_claimer is labeled, or none match search."
+                    : "No launchpads match."}
               </div>
             ) : (
               <div className="pad-table-wrap">
@@ -410,11 +504,21 @@ export function StagingScreener() {
                   </thead>
                   <tbody>
                     {filteredLaunchpads.map((lp, idx) => {
+                      const labeled = Boolean(lp.labeled ?? lp.label);
                       const name = lp.label || shortPk(lp.fee_claimer, 6);
+                      const pm = lp.partner_metadata;
                       return (
                         <tr key={lp.fee_claimer} className="vs-row pad-row">
                           <td className="col-name">
-                            <span className="pad-name-link staging-name-static">
+                            <button
+                              type="button"
+                              className="pad-name-link staging-name-btn"
+                              onClick={() => {
+                                setClaimerFilter(lp.fee_claimer);
+                                setTab("launches");
+                              }}
+                              aria-label={`Launches for ${name}`}
+                            >
                               <span
                                 className="avatar"
                                 style={{
@@ -425,14 +529,28 @@ export function StagingScreener() {
                                 {initials(name)}
                               </span>
                               <span className="identity">
-                                <div className="name">{name}</div>
+                                <div className="name">
+                                  {name}
+                                  {!labeled ? (
+                                    <span className="staging-unlabeled">pubkey</span>
+                                  ) : null}
+                                </div>
                                 <div className="domain">
-                                  {lp.website
+                                  {labeled && lp.website
                                     ? domainOf(lp.website)
                                     : shortPk(lp.fee_claimer, 8)}
                                 </div>
+                                {pm && !labeled ? (
+                                  <div className="domain">
+                                    on-chain {pm.name} (not labeled)
+                                  </div>
+                                ) : pm && labeled ? (
+                                  <div className="domain">
+                                    PartnerMetadata {pm.name}
+                                  </div>
+                                ) : null}
                               </span>
-                            </span>
+                            </button>
                           </td>
                           <td className="num">{lp.pool_count.toLocaleString()}</td>
                           <td className="num hide-sm">
@@ -446,7 +564,7 @@ export function StagingScreener() {
                             {(lp.sample_quote_symbols || []).join(", ") || "—"}
                           </td>
                           <td className="col-action">
-                            {lp.website ? (
+                            {lp.website && labeled ? (
                               <a
                                 className="go-to-app go-to-app-table"
                                 href={lp.website}
@@ -481,7 +599,9 @@ export function StagingScreener() {
           ) : tab === "launches" ? (
             launches.length === 0 ? (
               <div className="empty">
-                No stock-quote launches indexed yet. Empty is honest.
+                {claimerFilter
+                  ? "No stock-quote launches for this fee_claimer."
+                  : "No stock-quote launches indexed yet. Empty is honest."}
               </div>
             ) : (
               <div className="pad-table-wrap">

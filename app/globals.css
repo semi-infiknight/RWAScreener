@@ -1571,6 +1571,47 @@ td.col-name { display: flex; }
   text-decoration: none;
   pointer-events: none;
 }
+.staging-name-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  pointer-events: auto;
+}
+.staging-name-btn:hover .name {
+  color: #ffb347;
+}
+.staging-unlabeled {
+  display: inline-block;
+  margin-left: 0.4rem;
+  padding: 0.05rem 0.35rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  vertical-align: middle;
+}
+.staging-desk-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.65rem;
+  margin: 0 0 0.75rem;
+}
+.staging-desk-hint {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
 .staging-toolbar {
   display: flex;
   flex-wrap: wrap;

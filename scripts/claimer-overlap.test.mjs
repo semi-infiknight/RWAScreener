@@ -113,8 +113,10 @@ describe("launchpad-labels.json invariants", () => {
   it("does not invent Bags/Perpspad/ClawPump/LFOwn/StonkOptions claimers", () => {
     for (const [fc, row] of Object.entries(map)) {
       const id = String(row.launchpadId || "").toLowerCase();
+      const evidence = String(row.evidence || "");
+      const pmProven = /PartnerMetadata/i.test(evidence);
       assert.equal(
-        FORBIDDEN_INVENTED_IDS.includes(id),
+        FORBIDDEN_INVENTED_IDS.includes(id) && !pmProven,
         false,
         `invented ${id} for ${fc}`,
       );

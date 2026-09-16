@@ -1,0 +1,28 @@
+{
+  "updated_at": "2026-09-16T05:30:00.000Z",
+  "notes": [
+    "Observed DBC PartnerMetadata (program dbcij3…, disc [68,68,130,19,16,209,98,156], fee_claimer@8).",
+    "gPA 2026-09-16: 576 PartnerMetadata accounts; 0 unlabeled staging claimers named. Ember Curve and OTC Desks have no PartnerMetadata.",
+    "Do not treat this file as a label map — labels stay in launchpad-labels.json."
+  ],
+  "by_fee_claimer": {
+    "Fgi5M4W2VzoHWbvcv6RWJRVcJu91frZ18ttGJzMJZu1z": {
+      "pda": "6ZZrNPme8cLg19B6DtdB4QhyH6Jfy83JRABahojGY78B",
+      "name": "PURPS",
+      "website": "https://purps.lol/",
+      "logo": "https://purps.lol/purps-mark-1000.png"
+    },
+    "5x2DYtWmhT4SV2jkpTa561DVdkX8mrUi9y5AxkCCjaxN": {
+      "pda": "2pyyxvQgQX7ndcEqrbshFWy2drWstEqxHL3vFjdrqnqr",
+      "name": "RevShare",
+      "website": "https://revshare.dev",
+      "logo": "https://avatars.githubusercontent.com/u/revshare"
+    },
+    "2gymU5YgYvfxmjTThCvVZV695Mw22Eq4YpZzF1vRJfKc": {
+      "pda": "8Hv5UuWBzh1SjYewCaXTjQFyLXMw9ffoCgHZp5mg5eJs",
+      "name": "Ethics Launch",
+      "website": "https://www.ethics.ltd",
+      "logo": "https://www.ethics.ltd/icon-512.png"
+    }
+  }
+}

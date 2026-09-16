@@ -8,6 +8,7 @@ import {
 import { dataPath } from "./paths";
 import { normalizeStagingStatus } from "./status";
 import { resolveQuoteCategory } from "./category";
+import { decorateLaunchpad, launchpadDeskStats } from "./decorate-launchpads";
 import type {
   StagingLaunch,
   StagingLaunchpad,
@@ -204,19 +205,21 @@ export function loadFileBundle(): FileBundle {
   }
 
   const launchpads: StagingLaunchpad[] = [...byClaimer.values()]
-    .map((a) => ({
-      fee_claimer: a.fee_claimer,
-      label: a.fee_claimer !== "unknown" ? labels[a.fee_claimer]?.label ?? null : null,
-      website:
-        a.fee_claimer !== "unknown" ? labels[a.fee_claimer]?.website ?? null : null,
-      x: a.fee_claimer !== "unknown" ? labels[a.fee_claimer]?.x ?? null : null,
-      pool_count: a.pool_count,
-      config_count: a.configs.size,
-      quote_mint_count: a.quotes.size,
-      first_seen_at: a.first,
-      last_seen_at: a.last,
-      sample_quote_symbols: a.sample_symbols,
-    }))
+    .map((a) =>
+      decorateLaunchpad({
+        fee_claimer: a.fee_claimer,
+        label: a.fee_claimer !== "unknown" ? labels[a.fee_claimer]?.label ?? null : null,
+        website:
+          a.fee_claimer !== "unknown" ? labels[a.fee_claimer]?.website ?? null : null,
+        x: a.fee_claimer !== "unknown" ? labels[a.fee_claimer]?.x ?? null : null,
+        pool_count: a.pool_count,
+        config_count: a.configs.size,
+        quote_mint_count: a.quotes.size,
+        first_seen_at: a.first,
+        last_seen_at: a.last,
+        sample_quote_symbols: a.sample_symbols,
+      }),
+    )
     .sort((a, b) => b.pool_count - a.pool_count || (b.last_seen_at || "").localeCompare(a.last_seen_at || ""));
 
   const usage = new Map<string, { count: number; last: string | null }>();
@@ -268,5 +271,6 @@ export function fileMeta(
     cutoff_iso: DBC_021_CUTOFF_ISO,
     allowlist_count: bundle.allowlist_count,
     count,
+    ...launchpadDeskStats(bundle.launchpads),
   };
 }
