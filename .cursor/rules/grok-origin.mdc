@@ -1,0 +1,11 @@
+---
+description: Origin of the intel monitor (Grok CLI, Sep 2026) — embeddings not LLM, builder buckets, no second intel website.
+globs: packages/intel/**/*,docs/ETHOS.md,docs/TODO.md,docs/GROK-ORIGIN.md
+alwaysApply: false
+---
+
+# Grok origin (compressed)
+
+Full text: `docs/GROK-ORIGIN.md`. Raw transcripts: `docs/archive/meteco/docs-grok/` — do not re-implement from those.
+
+Intel is **fast semantic** (`bge-small-en-v1.5` + few-shot buckets), not keyword scrapers and not a slow LLM-per-tweet. Public UI is **meteora.fyi only**. The Grok-era solbigweek clone (time filters, leaderboard site) is retired. Live Railway is **rwascreener** `intel` + `scanner`; do not revive project `787deca8-…`.

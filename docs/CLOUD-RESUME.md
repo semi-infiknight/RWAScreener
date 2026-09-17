@@ -12,7 +12,8 @@ Public product: **https://www.meteora.fyi** (DBC screener + ecosystem feed). Int
 4. `.cursor/rules/ethos.mdc` — always-on product rules
 5. `.cursor/plans/` — how we got here (especially `vesper-interest-graph.md`, `stocklana-builders-project-graph.md`, `merge-intel-into-rwascreener.md`, `pad-first-dbc-feed.md`)
 6. `docs/brand.md` — brand pass **deferred**
-7. `docs/archive/meteco/` — Cursor + Grok chats from the old meteco workspace (redacted). Full unredacted local copy: `archive/meteco-private/` (gitignored).
+7. `docs/GROK-ORIGIN.md` — compressed Grok CLI origin (not the 30k-line transcripts)
+8. `docs/archive/meteco/` — Cursor + Grok raw archive (redacted). Full unredacted local copy: `archive/meteco-private/` (gitignored).
 
 ## Live Railway (`rwascreener`, `7ede8677-ff5f-44cf-911e-fa8bb4100695`, env `production`)
 
@@ -41,7 +42,7 @@ GitHub → web auto-deploy has been flaky; if a push does not appear on meteora.
 
 ## Secrets (never commit)
 
-Scanner/intel need `X_BEARER_TOKEN` + `INGEST_TOKEN` on Railway. Local X keys historically lived in `meteco/.env` (gitignored). Do not paste them into git or chat.
+Scanner/intel need `X_BEARER_TOKEN` (+ `X_API_KEY` / `X_API_SECRET`) and `INGEST_TOKEN` on Railway. Those X keys are set on **intel** and **scanner**. Local copy is gitignored `.env`. Do not paste them into git or chat.
 
 ## Still open
 
