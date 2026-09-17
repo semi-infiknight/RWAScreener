@@ -1,6 +1,6 @@
 # Roadmap
 
-Operator intent for the public feed/monitor (including not-yet-done asks) lives in **docs/ETHOS.md**. Do not drop those prompts when picking up a ticket.
+Operator intent for the public feed/monitor (including not-yet-done asks) lives in **docs/ETHOS.md**. Open checklist: **docs/TODO.md**. Do not drop those prompts when picking up a ticket.
 
 ## Phase 0 — Spec kit + static ecosystem
 - [x] SPEC + PATTERNS + AGENTS

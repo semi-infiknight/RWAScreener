@@ -6,11 +6,12 @@ Public product: **https://www.meteora.fyi** (DBC screener + ecosystem feed). Int
 
 ## Read in order
 
-1. `docs/ETHOS.md` — operator intent, including still-open asks
-2. `AGENTS.md` — topology and Railway IDs
-3. `.cursor/rules/ethos.mdc` — always-on product rules
-4. `.cursor/plans/` — how we got here (especially `vesper-interest-graph.md`, `stocklana-builders-project-graph.md`, `merge-intel-into-rwascreener.md`, `pad-first-dbc-feed.md`)
-5. `docs/brand.md` — brand pass **deferred**
+1. `docs/TODO.md` — open feed/intel checklist
+2. `docs/ETHOS.md` — operator intent, including still-open asks
+3. `AGENTS.md` — topology and Railway IDs
+4. `.cursor/rules/ethos.mdc` — always-on product rules
+5. `.cursor/plans/` — how we got here (especially `vesper-interest-graph.md`, `stocklana-builders-project-graph.md`, `merge-intel-into-rwascreener.md`, `pad-first-dbc-feed.md`)
+6. `docs/brand.md` — brand pass **deferred**
 
 ## Live Railway (`rwascreener`, `7ede8677-ff5f-44cf-911e-fa8bb4100695`, env `production`)
 

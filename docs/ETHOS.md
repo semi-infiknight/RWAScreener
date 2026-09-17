@@ -107,7 +107,7 @@ Hourly (or better) X lookup of feed IDs → tombstone. Do not keep rendering del
 
 ## Still open — do not make the operator repeat these
 
-These were asked for and are **not fully done**. Treat them as current requirements.
+Canonical checklist: **`docs/TODO.md`**. Those were asked for and are **not fully done**. Treat them as current requirements.
 
 1. **Semantic vs scraper** — feed should read as “understood relevance,” not allowlist + regex. Keep improving bucket examples and DBC-lane judgment.
 2. **Unknown builders** — standing search must still catch people integrating DBC who are not on the pad table yet.
@@ -118,8 +118,9 @@ These were asked for and are **not fully done**. Treat them as current requireme
 7. **Memes bucket vs public lane** — culture bucket exists; public ecosystem lane stays builder/DBC/drama. Do not dump shitposts back on the homepage without being asked.
 8. **Pad-first ranking** — tried, buried fresh posts, **reverted to newest-first**. Do not reintroduce a rank that hides today’s StonkOptions/Ember/ChainRot.
 9. **Project knowledge graph** — v0 is `GET /api/projects` + harvested timelines. Not a full graph DB yet. Keep adding Stocklana/DBC builder handles as they surface. Stocklana’s 13 submissions are not listed publicly on the hackathon page.
-10. **Vesper interest** — v0 live: reads her @/replies/quotes (`GET /api/vesper-interest`), harvests new handles same scan, feed bypass without changing newest-first rank. No Following/Likes API (app bearer). Example post: https://x.com/vesper792/status/2100474095473455266 (`stardotfun`, `getstonkoptions`, `adamcreates_`).
+10. **Vesper interest** — v0 live: reads her @/replies/quotes (`GET /api/vesper-interest`), harvests new handles same scan, feed bypass without changing newest-first rank. No Following/Likes API (app bearer). Personal @s currently leak into the list. Example: https://x.com/vesper792/status/2100474095473455266 (`stardotfun`, `getstonkoptions`, `adamcreates_`).
 11. **X credit budget** — hourly scan; 402 = credits gone. Do not spam live search while iterating filters.
+12. **Ops leftovers** — operator can delete old meteco / meteora-intel Railway; persist intel model cache across redeploys; GitHub auto-deploy for web is flaky (`railway up -s web`).
 
 ---
 
