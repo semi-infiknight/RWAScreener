@@ -12,7 +12,7 @@ This is a **live semantic monitor and second brain** of Meteora DBC / screener-p
 **Do**
 
 - Default public lane = overlooked ecosystem movement (pads on meteora.fyi, DBC builders, pad drama). Official Meteora is a **separate** lane.
-- Harvest like an X list (Vesper, pads, official) **then follow who Vesper is actually quoting/replying to**, plus standing search; classify with BGE few-shots in `packages/intel/src/buckets.ts`.
+- Harvest like an X list (Vesper, pads, official) **then follow who Vesper is actually quoting/replying to**, plus standing search; classify with BGE few-shots in `packages/intel/src/buckets.ts`. Homepage keeps **DBC/pad posts**, not people. Mention-only `@` is not a timeline dump.
 - Newest relevant first. Infinite scroll. Heading **Meteora Ecosystem feed**. Native masonry cards.
 - Tombstone posts deleted on X. Search queries: all languages. Vesper (`@vesper792`) is the relevance prior.
 - Intel lives in this repo + rwascreener Railway (`intel` + `scanner`). `METEORA_INTEL_URL=http://${{intel.RAILWAY_PRIVATE_DOMAIN}}:8080`.

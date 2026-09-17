@@ -4,6 +4,7 @@ import {
   hasEcosystemAnchor,
   isDexEventBotSpam,
   isLpArmyNoise,
+  isPublicEcosystemPost,
   isRetailFeedSpam,
   LIST_FEED_HANDLES,
 } from "../src/ecosystem-anchor.js";
@@ -69,6 +70,34 @@ describe("ecosystem anchors", () => {
         "$BLEND 140K\n\nhb7QGTtC8sXSQVAymn7aRdtbN3kdDwbQyihtHiipump\n\nPump 曲线，讲的是 Meteora 那套。",
       ),
       true,
+    );
+  });
+
+  it("judges the post, not the person", () => {
+    const dbc =
+      "There are 1238 stocks that Meteora DBC allows you to pair against. Checkout meteora.fyi/qoutes";
+    assert.equal(isPublicEcosystemPost(dbc, "semiii", "infra_bot_indexer", false), true);
+    assert.equal(isPublicEcosystemPost("gm lunch in KL", "semiii", "hackathon_builder", false), false);
+    assert.equal(
+      isPublicEcosystemPost("gladiators on meteora dbc lmao", "degen", "memes_meteora_ecosystem"),
+      false,
+    );
+    assert.equal(
+      isPublicEcosystemPost(
+        "Indexing new Meteora DBC pools for our trading bot",
+        "botter",
+        "infra_bot_indexer",
+      ),
+      false,
+    );
+    assert.equal(
+      isPublicEcosystemPost(
+        "Passionate article about Art on Solana",
+        "degenghosty",
+        "pad_live_on_dbc",
+        false,
+      ),
+      false,
     );
   });
 });

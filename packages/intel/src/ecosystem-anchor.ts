@@ -1,4 +1,5 @@
 import { WATCHED_BUILDER_HANDLES } from "./project-graph.js";
+import { ECOSYSTEM_FEED_BUCKETS, type BucketId } from "./buckets.js";
 
 /** Text / handle anchors for “this is Meteora ecosystem,” including screener pads. */
 
@@ -46,6 +47,10 @@ export function isTrackedProjectAccount(username?: string): boolean {
 const DBC_FOCUS_RE =
   /\b(dbc|dynamic bonding curve|bonding curve|invent|fun launch|poolconfig|partner config|dynamic-bonding-curve)\b/;
 
+/** The post is doing DBC/screener work — not just name-dropping the letters. */
+const DBC_BUILDER_TALK_RE =
+  /pair(ed|ing)? against|quote mint|meteora\.fyi|partner config|poolconfig|launchpad|stocklana|fun launch|fee.?claimer|xstocks?|tokenized stock|dynamic bonding curve/;
+
 const PAD_DRAMA_RE =
   /embercurve|ember curve|embercurvefun|lfown|letsfuckingown|bags\.fm|bagsapp|perpspad|clawpump|stonkoptions|star\.fun|getstonk|ethicslaunch|ethics\.ltd|revshare|otc.?labs/;
 
@@ -66,6 +71,13 @@ export function hasDbcFocus(text: string): boolean {
   return DBC_FOCUS_RE.test(text.toLowerCase());
 }
 
+export function isDbcBuilderTalk(text: string): boolean {
+  const t = text.toLowerCase();
+  if (!DBC_FOCUS_RE.test(t)) return false;
+  if (/\b(trading bot|dexevents|check events)\b/.test(t)) return false;
+  return DBC_BUILDER_TALK_RE.test(t);
+}
+
 /** Public ecosystem lane: tracked pads, DBC/Invent builders, or named pad drama. */
 export function isDbcLanePost(
   text: string,
@@ -78,6 +90,27 @@ export function isDbcLanePost(
     return true;
   }
   return false;
+}
+
+/**
+ * Homepage membership is the post, not the person.
+ * A DBC/quote-screener tweet from anyone (including @semiii) stays;
+ * their lunch / Avalanche / hustle posts do not — even if Vesper @'d them.
+ */
+export function isPublicEcosystemPost(
+  text: string,
+  username?: string,
+  bucket?: string,
+  suppressed = false,
+): boolean {
+  if (isCompetitorPadAccount(username)) return false;
+  if (isRetailFeedSpam(text, username)) return false;
+  if (isTrackedProjectAccount(username)) return true;
+  // BGE often files real DBC/screener posts as infra/noise. The text decides.
+  if (isDbcBuilderTalk(text) && bucket !== "memes_meteora_ecosystem") return true;
+  if (suppressed) return false;
+  if (!bucket || !ECOSYSTEM_FEED_BUCKETS.has(bucket as BucketId)) return false;
+  return isDbcLanePost(text, username, bucket);
 }
 
 export function isLpArmyNoise(text: string): boolean {

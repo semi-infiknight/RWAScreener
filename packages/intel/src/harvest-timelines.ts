@@ -61,7 +61,7 @@ export async function harvestListFeed(opts: {
   return out;
 }
 
-/** After reading Vesper's timeline, pull accounts she is actually talking to. */
+/** After reading Vesper's timeline, pull accounts she quoted or replied to. */
 export async function harvestVesperInterestTargets(
   vesperPosts: SearchedPost[],
   opts: { tweetStartTime: string; maxTweets?: number; cap?: number },

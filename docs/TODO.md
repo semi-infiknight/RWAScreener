@@ -14,7 +14,7 @@ Uncheck nothing that is a **standing decision** without the operator saying so.
 - [ ] **Premium feed chrome** — masonry + native cards are in; a real brand/premium pass is still deferred (`docs/brand.md`).
 - [ ] **Memes vs public lane** — culture bucket exists; homepage stays builder/DBC/drama (do not dump shitposts back).
 - [ ] **Knowledge graph** — v0 is `GET /api/projects` + harvested timelines, not a graph DB. Stocklana’s 13 submissions still aren’t listed on the hackathon page.
-- [ ] **Vesper interest depth** — v0 is mentions/replies/quotes only. No Following/Likes (app bearer). Personal @s (`semiii`, `playmatejaylene`) currently sit in the interest list next to pads.
+- [x] **Vesper interest leak** — public feed no longer bypasses noise/DBC gates for anyone she `@`’d; harvest is quote/reply only. Interest API can still list mentions. No Following/Likes (app bearer).
 - [ ] **X credit budget** — hourly scan; 402 means stop burning search.
 - [x] **Ops leftovers** — old meteco folder deleted 2026-09-17; leftover Railway `meteora-intel` (`787deca8`) deletion requested after exporting 2,697 mentions into rwascreener intel. Intel model cache still re-downloads after intel redeploys. GitHub auto-deploy for web is flaky (`railway up -s web`).
 

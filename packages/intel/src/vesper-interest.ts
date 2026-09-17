@@ -8,7 +8,7 @@ import type { SearchedPost } from "./x-client.js";
 
 export const VESPER_HANDLE = "vesper792";
 
-/** Mega / official accounts — not “who Vesper is currently building with.” */
+/** Mega / official / competitor — not a denylist of people. */
 const SKIP_INTEREST = new Set([
   VESPER_HANDLE,
   ...OFFICIAL_HANDLES,
@@ -19,6 +19,7 @@ const SKIP_INTEREST = new Set([
   "elonmusk",
   "pmarc",
   "aeyakovenko",
+  "support",
   ...COMPETITOR_PAD_HANDLES,
 ]);
 
@@ -124,12 +125,18 @@ export function persistVesperInterest(hits: InterestHit[]): void {
   );
 }
 
+function isQuoteOrReply(hit: InterestHit): boolean {
+  return hit.via.includes("quote") || hit.via.includes("reply");
+}
+
 /** Handles to timeline-harvest this scan (not already on the standing list). */
 export function harvestTargetsFromInterest(hits: InterestHit[], cap = 12): string[] {
   const standing = new Set(LIST_FEED_HANDLES.map((h) => h.toLowerCase()));
   const out: string[] = [];
   for (const hit of hits) {
     if (standing.has(hit.handle)) continue;
+    // Bare @mentions are not a harvest prior — that dumped DearS / AVAX / art quotes.
+    if (!isQuoteOrReply(hit)) continue;
     out.push(hit.handle);
     if (out.length >= cap) break;
   }

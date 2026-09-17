@@ -65,6 +65,30 @@ describe("vesper interest", () => {
     assert.deepEqual(targets, ["freshpadxyz"]);
   });
 
+  it("does not harvest mention-only handles — people are not banned", () => {
+    const hits = interestFromVesperPosts([
+      vesperPost({ text: "gm @DearS_o_n @semiii @support" }),
+      vesperPost({
+        text: "this from @ChainRot_app",
+        isQuote: true,
+        quotedAuthors: [{ id: "c", username: "ChainRot_app" }],
+      }),
+      vesperPost({
+        text: "gm",
+        isReply: true,
+        repliedTo: { id: "n", username: "freshpadxyz" },
+      }),
+    ]);
+    const handles = hits.map((h) => h.handle);
+    assert.ok(handles.includes("semiii"));
+    assert.ok(handles.includes("dears_o_n"));
+    assert.ok(!handles.includes("support"));
+    const targets = harvestTargetsFromInterest(hits, 12);
+    assert.ok(!targets.includes("dears_o_n"));
+    assert.ok(!targets.includes("semiii"));
+    assert.deepEqual(targets, ["freshpadxyz"]);
+  });
+
   it("derives current interest from stored Vesper posts", () => {
     const row = {
       id: "vp1",

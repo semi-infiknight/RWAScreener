@@ -8,7 +8,7 @@ Intel **reads** `@vesper792` posts, replies, quotes, and @-mentions so it knows 
 - Parse Vesper's own posts: @mentions, reply-to, quoted authors
 - Persist rolling `vesper-interest.json` on the intel volume
 - Same-scan: harvest timelines of top interest handles (cap)
-- Treat those handles like watched builders in the public feed (bypass noise; **newest-first still**)
+- Harvest quote/reply targets only (not mention-only `@`). Public feed does **not** bypass noise/DBC gates for interest handles.
 - `GET /api/vesper-interest`
 - ETHOS + tests
 - Ingest https://x.com/vesper792/status/2100474095473455266

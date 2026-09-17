@@ -233,16 +233,46 @@ describe("site feed / time windows / leaderboard", () => {
     assert.ok(feed.some((m) => m.id === "st2"));
   });
 
-  it("keeps accounts Vesper is currently talking to, even if BGE says noise", () => {
+  it("does not dump Vesper @-mention timelines that fail DBC/noise gates", () => {
     const vesper = mention("vp1", "vesper792", "2026-09-16T14:00:00.000Z", "hackathon_builder", {
+      text: "lol @DearS_o_n @marccolcer @degenghosty",
+    });
+    const hustle = mention("ds1", "DearS_o_n", "2026-09-16T14:10:00.000Z", "noise_retail_hype", {
+      suppressed: true,
+      text: "Unemployed at 25. Millionaire at 32. Philippians 4:13.",
+    });
+    const avax = mention("mc1", "marccolcer", "2026-09-16T14:12:00.000Z", "noise_retail_hype", {
+      suppressed: true,
+      text: "Insomniac announces blockchain integration, taps Avalanche and Uptop",
+    });
+    const art = mention("gh1", "degenghosty", "2026-09-16T14:14:00.000Z", "pad_live_on_dbc", {
+      text: "Passionate article about Art on Solana",
+    });
+    const feed = filterFeed([...ROWS, vesper, hustle, avax, art], { window: "all", now: NOW });
+    assert.ok(!feed.some((m) => ["ds1", "mc1", "gh1"].includes(m.id)));
+  });
+
+  it("still shows a DBC builder post even if Vesper also @ them", () => {
+    const vesper = mention("vp2", "vesper792", "2026-09-16T14:00:00.000Z", "hackathon_builder", {
       text: "this @freshpadxyz stocklana dbc clip launch is the one",
     });
-    const row = mention("fp1", "freshpadxyz", "2026-09-16T14:10:00.000Z", "noise_retail_hype", {
-      suppressed: true,
-      text: "clip launches as a coin paired with a stock",
+    const row = mention("fp1", "freshpadxyz", "2026-09-16T14:10:00.000Z", "builder_integrating_sdk", {
+      text: "shipping our Meteora DBC partner config this week",
     });
     const feed = filterFeed([...ROWS, vesper, row], { window: "all", now: NOW });
     assert.ok(feed.some((m) => m.id === "fp1"));
+  });
+
+  it("keeps a DBC post from anyone, drops the rest of that timeline", () => {
+    const dbc = mention("semi-dbc", "semiii", "2026-09-16T14:00:00.000Z", "infra_bot_indexer", {
+      text: "There are 1238 stocks that Meteora DBC allows you to pair against. Why has no one launched against 1,155 of these?",
+    });
+    const lunch = mention("semi-gm", "semiii", "2026-09-16T14:05:00.000Z", "hackathon_builder", {
+      text: "lunch in KL then maybe a rave",
+    });
+    const feed = filterFeed([...ROWS, dbc, lunch], { window: "all", now: NOW });
+    assert.ok(feed.some((m) => m.id === "semi-dbc"));
+    assert.ok(!feed.some((m) => m.id === "semi-gm"));
   });
 
   it("hides LaunchOnSF / StonkFun competitor posts even if they look like pad news", () => {

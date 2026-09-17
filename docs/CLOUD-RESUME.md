@@ -37,7 +37,7 @@ GitHub → web auto-deploy has been flaky; if a push does not appear on meteora.
 - Screener-style heading lockup (no logo, no header animation).
 - List harvest (Vesper, official, screener pads + watched builders).
 - Project graph v0: `GET /api/projects`.
-- Vesper interest v0: read her mentions/replies/quotes → `GET /api/vesper-interest` → harvest + feed bypass. No Following/Likes APIs.
+- Vesper interest v0: read her mentions/replies/quotes → `GET /api/vesper-interest`. Harvest quote/reply only; **no** public-feed bypass. No Following/Likes APIs.
 - Stocklana watch: ChainRot, NousPad, StockLaunchDBC_, EmojiFun.
 
 ## Secrets (never commit)
