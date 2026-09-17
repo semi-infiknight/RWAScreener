@@ -97,6 +97,13 @@ export function isOfficial(m: MentionRecord): boolean {
   return OFFICIAL_HANDLES.has(handle);
 }
 
+/** Root tweets only in posts; self-thread continues count as replies. */
+export function isFeedReply(m: MentionRecord): boolean {
+  if (m.isReply) return true;
+  if (m.conversationId && m.conversationId !== m.id) return true;
+  return false;
+}
+
 export function filterFeed(
   mentions: MentionRecord[],
   query: FeedQuery = {},
@@ -124,7 +131,7 @@ export function filterFeed(
       );
     })
     .filter((m) => (lane === "official" ? isOfficial(m) : !isOfficial(m)))
-    .filter((m) => (postType === "replies" ? Boolean(m.isReply) : !m.isReply))
+    .filter((m) => (postType === "replies" ? isFeedReply(m) : !isFeedReply(m)))
     .filter((m) => inWindow(m, window, now))
     .filter((m) => (bucket ? m.classification.primary === bucket : true))
     .filter((m) => {

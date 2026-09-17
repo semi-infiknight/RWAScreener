@@ -80,6 +80,7 @@ export async function recordFromRaw(item: IngestPost): Promise<MentionRecord> {
     media: toMentionMedia(item.media),
     isQuote: item.isQuote,
     isReply: item.isReply,
+    conversationId: item.post.conversation_id,
     metrics: item.post.public_metrics
       ? {
           likes: item.post.public_metrics.like_count,

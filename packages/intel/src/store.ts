@@ -35,8 +35,10 @@ export type MentionRecord = {
   media?: MentionMedia[];
   /** Post quotes another post (referenced_tweets) */
   isQuote?: boolean;
-  /** Post is a reply to another post (referenced_tweets type replied_to) */
+  /** Post is a reply — including a reply to yourself (thread continue). */
   isReply?: boolean;
+  /** X conversation root id. When this differs from `id`, the post is in a thread. */
+  conversationId?: string;
   metrics?: {
     likes?: number;
     replies?: number;

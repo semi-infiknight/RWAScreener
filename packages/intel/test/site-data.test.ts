@@ -33,7 +33,7 @@ function mention(
   username: string,
   createdAt: string,
   primary: BucketId,
-  extra: { lead?: number; suppressed?: boolean; text?: string } = {},
+  extra: { lead?: number; suppressed?: boolean; text?: string; isReply?: boolean; conversationId?: string } = {},
 ): MentionRecord {
   return {
     id,
@@ -44,6 +44,8 @@ function mention(
     queryId: "test",
     author: { id, username, name: username },
     classification: cls(primary, extra),
+    isReply: extra.isReply,
+    conversationId: extra.conversationId,
   };
 }
 
@@ -297,6 +299,23 @@ describe("site feed / time windows / leaderboard", () => {
     });
     const feed = filterFeed([...ROWS, row], { window: "all", now: NOW });
     assert.ok(!feed.some((m) => m.id === "so-link"));
+  });
+
+  it("counts self-thread continues as replies, not posts", () => {
+    const root = mention("root1", "getstonkoptions", "2026-09-16T14:13:22.000Z", "pad_live_on_dbc", {
+      text: "Dear .gov employees, verify with work email on DBC",
+      conversationId: "root1",
+    });
+    const cont = mention("root1-r", "getstonkoptions", "2026-09-16T14:13:23.000Z", "pad_live_on_dbc", {
+      text: "Keep your work email handy — more tickers coming",
+      conversationId: "root1",
+    });
+    const posts = filterFeed([...ROWS, root, cont], { window: "all", now: NOW, postType: "posts" });
+    const replies = filterFeed([...ROWS, root, cont], { window: "all", now: NOW, postType: "replies" });
+    assert.ok(posts.some((m) => m.id === "root1"));
+    assert.ok(!posts.some((m) => m.id === "root1-r"));
+    assert.ok(replies.some((m) => m.id === "root1-r"));
+    assert.ok(!replies.some((m) => m.id === "root1"));
   });
 });
 

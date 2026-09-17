@@ -15,7 +15,9 @@ import type { XMedia, XPost, XUser } from "./x-client.js";
  * Local store (default):
  *   npm run rehydrate
  * Against the live site (export → enrich → upsert back):
- *   npm run rehydrate -- --remote=https://web-production-a5814.up.railway.app
+ *   npm run rehydrate -- --remote=https://intel-production-65e2.up.railway.app
+ * Cheap path (current public posts lane only, ~3 lookups):
+ *   npm run rehydrate -- --remote=… --only-feed
  * Requires X_BEARER_TOKEN; remote mode requires INGEST_TOKEN.
  */
 
@@ -24,6 +26,7 @@ const REMOTE = process.argv
   ?.split("=")[1]
   ?.replace(/\/$/, "");
 const DRY = process.argv.includes("--dry");
+const ONLY_FEED = process.argv.includes("--only-feed");
 
 type LookupResponse = {
   data?: XPost[];
@@ -35,7 +38,7 @@ async function lookupBatch(ids: string[]): Promise<Map<string, MentionRecord>> {
   const bearer = requireBearerToken();
   const params = new URLSearchParams({
     ids: ids.join(","),
-    "tweet.fields": "attachments,author_id,referenced_tweets",
+    "tweet.fields": "attachments,author_id,conversation_id,referenced_tweets",
     expansions: "attachments.media_keys,author_id",
     "media.fields": "url,preview_image_url,type,width,height",
     "user.fields": "username,name,description,public_metrics,profile_image_url,verified",
@@ -70,7 +73,11 @@ async function lookupBatch(ids: string[]): Promise<Map<string, MentionRecord>> {
         ? { id: author.id, avatarUrl: author.profile_image_url, verified: author.verified }
         : undefined,
       isQuote: post.referenced_tweets?.some((r) => r.type === "quoted") || undefined,
-      isReply: post.referenced_tweets?.some((r) => r.type === "replied_to") || undefined,
+      isReply:
+        post.referenced_tweets?.some((r) => r.type === "replied_to") ||
+        (Boolean(post.conversation_id) && post.conversation_id !== post.id) ||
+        undefined,
+      conversationId: post.conversation_id,
     } as unknown as MentionRecord);
   }
   return out;
@@ -93,6 +100,10 @@ function mergeEnrichment(
   }
   if (enr.isReply !== undefined && rec.isReply !== enr.isReply) {
     next.isReply = enr.isReply;
+    changed = true;
+  }
+  if (enr.conversationId && rec.conversationId !== enr.conversationId) {
+    next.conversationId = enr.conversationId;
     changed = true;
   }
   const avatarUrl = enr.author?.avatarUrl ?? rec.author?.avatarUrl;
@@ -145,17 +156,40 @@ async function pushRemote(base: string, records: MentionRecord[]): Promise<numbe
   return saved;
 }
 
+async function fetchFeedIds(base: string): Promise<Set<string>> {
+  const ids = new Set<string>();
+  for (let page = 1; page <= 40; page++) {
+    const res = await fetch(
+      `${base}/api/feed?lane=ecosystem&window=all&type=posts&page=${page}&limit=50`,
+    );
+    if (!res.ok) throw new Error(`feed page ${page} failed (${res.status})`);
+    const body = (await res.json()) as { posts?: { id: string }[]; hasMore?: boolean };
+    for (const p of body.posts ?? []) ids.add(p.id);
+    if (!body.hasMore) break;
+  }
+  return ids;
+}
+
 async function main() {
   const records = REMOTE ? await fetchRemoteRecords(REMOTE) : loadMentions();
   console.log(`rehydrate: ${records.length} stored records${REMOTE ? ` (remote ${REMOTE})` : " (local)"}`);
 
-  const needsMedia = records.filter(
-    (r) =>
-      (!r.media && !r.author?.avatarUrl) ||
-      r.author?.verified === undefined ||
-      r.isReply === undefined,
-  ).filter((r) => !r.id.startsWith("demo-"));
-  console.log(`rehydrate: ${needsMedia.length} records missing media/avatar/verified/reply-flag`);
+  let needsMedia = records
+    .filter(
+      (r) =>
+        (!r.media && !r.author?.avatarUrl) ||
+        r.author?.verified === undefined ||
+        r.isReply === undefined ||
+        !r.conversationId,
+    )
+    .filter((r) => !r.id.startsWith("demo-"));
+  if (ONLY_FEED) {
+    const base = REMOTE || "https://intel-production-65e2.up.railway.app";
+    const feedIds = await fetchFeedIds(base);
+    needsMedia = records.filter((r) => feedIds.has(r.id));
+    console.log(`rehydrate: --only-feed ${feedIds.size} public post ids`);
+  }
+  console.log(`rehydrate: ${needsMedia.length} records to lookup`);
 
   let enriched = 0;
   const updated: MentionRecord[] = [];

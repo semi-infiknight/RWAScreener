@@ -28,6 +28,7 @@ export type XPost = {
   text: string;
   created_at?: string;
   author_id?: string;
+  conversation_id?: string;
   in_reply_to_user_id?: string;
   lang?: string;
   entities?: {
@@ -144,9 +145,11 @@ export function postsFromXResponse(
       author: post.author_id ? users.get(post.author_id) : undefined,
       media: media.length ? media : undefined,
       isQuote: post.referenced_tweets?.some((r) => r.type === "quoted") || undefined,
-      isReply: post.referenced_tweets?.some((r) => r.type === "replied_to")
-        ? true
-        : undefined,
+      isReply:
+        post.referenced_tweets?.some((r) => r.type === "replied_to") ||
+        (Boolean(post.conversation_id) && post.conversation_id !== post.id)
+          ? true
+          : undefined,
       repliedTo,
       quotedAuthors: quotedAuthors.length ? quotedAuthors : undefined,
       queryId,
