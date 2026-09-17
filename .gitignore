@@ -19,3 +19,6 @@ data/fee-claimer-attribution.md
 # Intel JSONL store + HuggingFace cache (packages/intel/.gitignore also covers these)
 packages/intel/data/*.jsonl
 packages/intel/.cache/
+
+# Full unredacted meteco handoff (Cursor chats, Grok CLI sessions, .env)
+archive/meteco-private/

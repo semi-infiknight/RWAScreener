@@ -7,6 +7,7 @@
 ## Read first
 - **docs/CLOUD-RESUME.md** — handoff for a new session (live topology + what’s already shipped)
 - **docs/TODO.md** — open feed/intel checklist
+- **docs/archive/meteco/** — Cursor/Grok chat archive from the old meteco folder
 - **docs/ETHOS.md** — operator intent for the ecosystem monitor/feed (keep even if unimplemented)
 - docs/SPEC.md
 - docs/PATTERNS.md
