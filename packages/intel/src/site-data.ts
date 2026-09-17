@@ -1,6 +1,7 @@
 import type { BucketId } from "./buckets.js";
 import { BUCKET_BY_ID, ECOSYSTEM_FEED_BUCKETS, OFFICIAL_HANDLES } from "./buckets.js";
-import { isDbcLanePost, isRetailFeedSpam, isScreenerPadAccount } from "./ecosystem-anchor.js";
+import { isDbcLanePost, isRetailFeedSpam, isTrackedProjectAccount } from "./ecosystem-anchor.js";
+import { isVesperInterestAccount, vesperInterestHandleSet } from "./vesper-interest.js";
 import type { MentionRecord } from "./store.js";
 
 export type TimeWindow = "all" | "today" | "week" | "last_week";
@@ -103,22 +104,26 @@ export function filterFeed(
   const bucket = query.bucket || "";
   const lane = query.lane ?? "ecosystem";
   const postType = query.postType ?? "posts";
+  const vesperInterest = vesperInterestHandleSet(mentions, 14, now);
 
   return mentions
     .filter((m) => !m.deletedAt)
     .filter((m) => {
       if (query.includeNoise) return true;
-      if (isScreenerPadAccount(m.author?.username)) return true;
+      if (isTrackedProjectAccount(m.author?.username)) return true;
+      if (isVesperInterestAccount(m.author?.username, vesperInterest)) return true;
       return !isNoise(m);
     })
     .filter((m) => {
       if (query.includeNoise) return true;
-      if (isScreenerPadAccount(m.author?.username)) return true;
+      if (isTrackedProjectAccount(m.author?.username)) return true;
+      if (isVesperInterestAccount(m.author?.username, vesperInterest)) return true;
       return !isRetailFeedSpam(m.text || "", m.author?.username);
     })
     .filter((m) => {
       if (query.includeNoise || lane !== "ecosystem") return true;
-      if (isScreenerPadAccount(m.author?.username)) return true;
+      if (isTrackedProjectAccount(m.author?.username)) return true;
+      if (isVesperInterestAccount(m.author?.username, vesperInterest)) return true;
       if (!ECOSYSTEM_FEED_BUCKETS.has(m.classification.primary)) return false;
       return isDbcLanePost(m.text || "", m.author?.username, m.classification.primary);
     })

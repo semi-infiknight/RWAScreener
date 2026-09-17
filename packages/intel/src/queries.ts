@@ -124,6 +124,12 @@ const HACKATHON_QUERIES: { id: string; query: string; note: string }[] = [
     query:
       `(hackathon OR bounty OR "demo day" OR Colosseum OR Superteam) (Meteora OR @MeteoraAG OR DBC OR DAMM OR DLMM) -is:retweet ${LP_ARMY_NOT} ${DEX_EVENT_NOT}`,
   },
+  {
+    id: "stocklana_dbc",
+    note: "Stocklana + DBC/stock-quote launchpads (ChainRot-class builder updates)",
+    query:
+      `(Stocklana OR stocklana OR from:ChainRot_app OR from:StockLaunchDBC_ OR from:NousPad OR from:EmojiFunDotXyz) (Meteora OR @MeteoraAG OR @MeteoraEco OR DBC OR "bonding curve" OR launchpad) -is:retweet ${LP_ARMY_NOT} ${DEX_EVENT_NOT}`,
+  },
 ];
 
 const MEME_QUERIES: { id: string; query: string; note: string }[] = [

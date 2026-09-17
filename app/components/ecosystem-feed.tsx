@@ -203,7 +203,14 @@ export function EcosystemFeed() {
 
   return (
     <section className="eco-feed" ref={sectionRef} aria-label="Meteora Ecosystem feed">
-      <h2 className="eco-feed-heading">Meteora Ecosystem feed</h2>
+      <header className="eco-feed-lockup">
+        <h2 className="hero-title eco-feed-title">
+          <span className="hero-title-text">
+            <span className="hero-title-brand">Meteora</span>
+            <span className="hero-title-light"> Ecosystem feed</span>
+          </span>
+        </h2>
+      </header>
       <div className="eco-feed-bar">
         {loaded && (
           <div className="eco-feed-toggles">

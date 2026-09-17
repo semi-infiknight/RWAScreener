@@ -1,5 +1,7 @@
 # meteora-intel
 
+Operator intent (lanes, spam, Vesper prior, live tombstones, no second website): **`../../docs/ETHOS.md`**.
+
 Local, builder-focused intel tracker for **Meteora**, **DBC (Dynamic Bonding Curve)**, related launch tech, and **launchpad leads**.
 
 It pulls recent X posts, then classifies them with a **free local sentence transformer** (`bge-small-en-v1.5` via `@xenova/transformers`) — cosine to bucket prototypes, not keyword rules and not an LLM “read then think” pass.

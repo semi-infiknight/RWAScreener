@@ -1,5 +1,10 @@
 import { LIST_FEED_HANDLES } from "./ecosystem-anchor.js";
 import {
+  harvestTargetsFromInterest,
+  interestFromVesperPosts,
+  persistVesperInterest,
+} from "./vesper-interest.js";
+import {
   fetchUserMentions,
   fetchUserTweets,
   lookupUsersByUsernames,
@@ -53,5 +58,46 @@ export async function harvestListFeed(opts: {
     }
   }
 
+  return out;
+}
+
+/** After reading Vesper's timeline, pull accounts she is actually talking to. */
+export async function harvestVesperInterestTargets(
+  vesperPosts: SearchedPost[],
+  opts: { tweetStartTime: string; maxTweets?: number; cap?: number },
+): Promise<SearchedPost[]> {
+  const hits = interestFromVesperPosts(vesperPosts);
+  persistVesperInterest(hits);
+  const targets = harvestTargetsFromInterest(hits, opts.cap ?? 12);
+  console.log(
+    `vesper-interest: ${hits.length} handles, harvesting ${targets.length}: ${targets.join(", ") || "(none)"}`,
+  );
+  if (targets.length === 0) return [];
+  const users = await lookupUsersByUsernames(targets);
+  const maxTweets = opts.maxTweets ?? 15;
+  const out: SearchedPost[] = [];
+  for (const handle of targets) {
+    const user = users.get(handle.toLowerCase());
+    if (!user) {
+      console.log(`  [vesper-int @${handle}] skip — not resolved`);
+      continue;
+    }
+    try {
+      const tweets = await fetchUserTweets({
+        userId: user.id,
+        queryId: `vesper_int_${handle}`,
+        startTime: opts.tweetStartTime,
+        maxResults: maxTweets,
+      });
+      console.log(`  [vesper-int @${handle}] tweets=${tweets.length}`);
+      out.push(...tweets);
+    } catch (err) {
+      if (err instanceof XSearchError && err.status === 402) {
+        console.error(`  [vesper-int @${handle}] 402 — stopping interest harvest`);
+        break;
+      }
+      console.error(`  [vesper-int @${handle}] ${String(err)}`);
+    }
+  }
   return out;
 }

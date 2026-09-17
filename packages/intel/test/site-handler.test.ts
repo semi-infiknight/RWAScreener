@@ -110,4 +110,22 @@ describe("shipped HTTP handler (Railway entry)", () => {
     const handles = after.posts.map((p) => p.author?.username);
     assert.ok(!handles.includes("launch_founder"));
   });
+
+  it("GET /api/projects returns the watched builder graph", async () => {
+    const { status, body } = await get("/api/projects");
+    assert.equal(status, 200);
+    const data = JSON.parse(body) as { count: number; projects: { handle: string }[] };
+    assert.ok(data.count >= 4);
+    const handles = data.projects.map((p) => p.handle);
+    assert.ok(handles.includes("chainrot_app"));
+    assert.ok(handles.includes("stocklaunchdbc_"));
+  });
+
+  it("GET /api/vesper-interest returns who she is talking to", async () => {
+    const { status, body } = await get("/api/vesper-interest");
+    assert.equal(status, 200);
+    const data = JSON.parse(body) as { handle: string; handles: { handle: string }[] };
+    assert.equal(data.handle, "vesper792");
+    assert.ok(Array.isArray(data.handles));
+  });
 });

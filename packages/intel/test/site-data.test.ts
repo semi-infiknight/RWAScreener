@@ -232,6 +232,18 @@ describe("site feed / time windows / leaderboard", () => {
     const feed = filterFeed([...ROWS, row], { window: "all", now: NOW });
     assert.ok(feed.some((m) => m.id === "st2"));
   });
+
+  it("keeps accounts Vesper is currently talking to, even if BGE says noise", () => {
+    const vesper = mention("vp1", "vesper792", "2026-09-16T14:00:00.000Z", "hackathon_builder", {
+      text: "this @freshpadxyz stocklana dbc clip launch is the one",
+    });
+    const row = mention("fp1", "freshpadxyz", "2026-09-16T14:10:00.000Z", "noise_retail_hype", {
+      suppressed: true,
+      text: "clip launches as a coin paired with a stock",
+    });
+    const feed = filterFeed([...ROWS, vesper, row], { window: "all", now: NOW });
+    assert.ok(feed.some((m) => m.id === "fp1"));
+  });
 });
 
 void (0 as unknown as TimeWindow);

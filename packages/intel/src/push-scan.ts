@@ -4,7 +4,7 @@ import {
   XSearchError,
   type SearchedPost,
 } from "./x-client.js";
-import { harvestListFeed } from "./harvest-timelines.js";
+import { harvestListFeed, harvestVesperInterestTargets } from "./harvest-timelines.js";
 import { sweepDeletedPosts } from "./sweep-deleted.js";
 
 /**
@@ -65,6 +65,25 @@ export async function runPushScan(): Promise<void> {
     });
     for (const item of listPosts) byId.set(item.post.id, item);
     console.log(`push-scan: list-feed ${listPosts.length} posts`);
+    const vesperPosts = listPosts.filter(
+      (p) => (p.author?.username ?? "").toLowerCase() === "vesper792",
+    );
+    try {
+      const extra = await harvestVesperInterestTargets(vesperPosts, {
+        tweetStartTime: listTweetSince,
+        maxTweets: 15,
+        cap: 12,
+      });
+      for (const item of extra) byId.set(item.post.id, item);
+      console.log(`push-scan: vesper-interest ${extra.length} posts`);
+    } catch (err) {
+      if (err instanceof XSearchError && err.status === 402) {
+        creditsOut = true;
+        console.error("push-scan: vesper-interest 402 credits depleted");
+      } else {
+        console.error(`push-scan: vesper-interest ${String(err)}`);
+      }
+    }
   } catch (err) {
     if (err instanceof XSearchError && err.status === 402) {
       creditsOut = true;

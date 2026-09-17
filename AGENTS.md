@@ -5,6 +5,7 @@
 2. **Quote screener (later):** niche tracker for Meteora DBC 0.2.1 stock-as-quote launches — seed badged quote mints → DBC pools after cutoff → group by config/fee_claimer → label launchpads.
 
 ## Read first
+- **docs/ETHOS.md** — operator intent for the ecosystem monitor/feed (keep even if unimplemented)
 - docs/SPEC.md
 - docs/PATTERNS.md
 - docs/ROADMAP.md
@@ -34,13 +35,13 @@ Lightweight stubs (no full monorepo rewrite yet): `packages/dbc`, `packages/db`,
 
 ## Intel (ecosystem X feed)
 
-API + hourly X scanner live in **`packages/intel`** (Node, BGE classifier, JSONL store). Public UI is this Next.js app (`/api/ecosystem-feed` proxies `METEORA_INTEL_URL`).
+API + hourly X scanner live in **`packages/intel`**. Public UI is this Next.js app (`/api/ecosystem-feed` proxies `METEORA_INTEL_URL`). Project timelines: intel `GET /api/projects`. Vesper interest: `GET /api/vesper-interest`. Operator intent: **`docs/ETHOS.md`**.
 
 Railway project **`rwascreener`**, services:
 
 - **`intel`** — `npm start`, volume `/data` (`METEORA_INTEL_DATA_DIR=/data`), healthcheck `/health`. Private URL for web/scanner.
 - **`scanner`** — `INTEL_ROLE=scanner`, cron `0 * * * *`, restart `NEVER`. `INGEST_URL` → intel private domain.
-- **`web`** — `METEORA_INTEL_URL=http://${{intel.RAILWAY_PRIVATE_DOMAIN}}:${{intel.PORT}}`
+- **`web`** — `METEORA_INTEL_URL=http://${{intel.RAILWAY_PRIVATE_DOMAIN}}:8080` (`${{intel.PORT}}` interpolates empty)
 
 Commands (from `packages/intel/`): `npm test`, `npm run typecheck`, `npm run site` (local :8787).
 

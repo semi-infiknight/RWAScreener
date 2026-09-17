@@ -1,0 +1,27 @@
+---
+description: Product ethos for the Meteora ecosystem monitor and DBC screener feed — operator intent that outlives incomplete implementations.
+alwaysApply: true
+---
+
+# Ethos (always)
+
+Full text: `docs/ETHOS.md`. If a prompt and the code disagree, **keep the prompt**.
+
+This is a **live semantic monitor and second brain** of Meteora DBC / screener-pad builders and drama — not a ticker scraper, not an LP army feed, not a static JSONL archive, not a second intel website. Keep per-project X timelines (what they are shipping). ChainRot-class Stocklana DBC builder updates are the shape of a good post.
+
+**Do**
+
+- Default public lane = overlooked ecosystem movement (pads on meteora.fyi, DBC builders, pad drama). Official Meteora is a **separate** lane.
+- Harvest like an X list (Vesper, pads, official) **then follow who Vesper is actually quoting/replying to**, plus standing search; classify with BGE few-shots in `packages/intel/src/buckets.ts`.
+- Newest relevant first. Infinite scroll. Heading **Meteora Ecosystem feed**. Native masonry cards.
+- Tombstone posts deleted on X. Search queries: all languages. Vesper (`@vesper792`) is the relevance prior.
+- Intel lives in this repo + rwascreener Railway (`intel` + `scanner`). `METEORA_INTEL_URL=http://${{intel.RAILWAY_PRIVATE_DOMAIN}}:8080`.
+
+**Do not**
+
+- LP army, ticker CA, dex-events/KOL bots, trading contests, generic demo-day, Arc-or-other-ecosystem fill.
+- Bucket tags, lead scores, post totals, time filters, View more, Tweet.html iframe columns.
+- Mix official into the default ecosystem feed. Rank pad-history above today’s announcement.
+- Recreate meteco / meteora-intel as a public site.
+
+Good-shaped posts: ChainRot, NousPad, Ethics, Dann, Vesper, Ember, StonkOptions **progress**. If the homepage looks like `$JOBLESS` / `$BLEND` / contests, it failed.

@@ -138,6 +138,8 @@ export const BUCKETS: Bucket[] = [
       "Hackathon build using Meteora DAMM v2 for the liquidity prize",
       "Building on Meteora DBC for the Superteam bounty — demo day Friday",
       "Our Colosseum entry is a permissionless pad on Dynamic Bonding Curve",
+      "We're in. ChainRot entered Stocklana — clip launches as a coin paired with a stock, powered by Meteora DBC",
+      "Stocklana build: launchpad on Meteora DBC with tokenized stocks as the quote asset",
     ],
   },
   {

@@ -14,6 +14,7 @@ describe("ecosystem anchors", () => {
   it("keeps screener pad handles without the word Meteora", () => {
     assert.equal(hasEcosystemAnchor("volume fell off a cliff this week", "embercurve"), true);
     assert.equal(hasEcosystemAnchor("Bags.fm volume fell off a cliff this week"), true);
+    assert.equal(hasEcosystemAnchor("clip launches as a coin", "ChainRot_app"), true);
   });
 
   it("drops unrelated ecosystems", () => {
@@ -80,6 +81,9 @@ describe("X list-feed seed", () => {
     assert.ok(LIST_FEED_HANDLES.includes("embercurve"));
     assert.ok(LIST_FEED_HANDLES.includes("embercurvefun"));
     assert.ok(LIST_FEED_HANDLES.includes("launchonsf"));
+    assert.ok(LIST_FEED_HANDLES.includes("chainrot_app"));
+    assert.ok(LIST_FEED_HANDLES.includes("nouspad"));
+    assert.ok(LIST_FEED_HANDLES.includes("stocklaunchdbc_"));
   });
 });
 
@@ -110,7 +114,13 @@ describe("postsFromXResponse", () => {
           },
         ],
         includes: {
-          users: [{ id: "u1", username: "vesper792" }, { id: "u2", username: "embercurve" }],
+          users: [
+            { id: "u1", username: "vesper792" },
+            { id: "u2", username: "embercurve" },
+            { id: "u9", username: "chainrot_app" },
+            { id: "u10", username: "nouspad" },
+          ],
+          tweets: [{ id: "9", text: "quoted pad update", author_id: "u10" }],
         },
       },
       "tl_test",
@@ -119,6 +129,8 @@ describe("postsFromXResponse", () => {
     assert.equal(posts[1]?.isReply, true);
     assert.notEqual(posts[2]?.isReply, true);
     assert.equal(posts[0]?.author?.username, "vesper792");
+    assert.equal(posts[0]?.quotedAuthors?.[0]?.username, "nouspad");
+    assert.equal(posts[1]?.repliedTo?.username, "chainrot_app");
     assert.equal(posts[0]?.queryId, "tl_test");
   });
 });
@@ -128,6 +140,7 @@ describe("standing search pool", () => {
     const ids = SEARCH_QUERIES.map((q) => q.id);
     assert.ok(ids.includes("vesper_footprint"));
     assert.ok(ids.includes("hackathon_meteora"));
+    assert.ok(ids.includes("stocklana_dbc"));
     const blob = SEARCH_QUERIES.map((q) => q.query).join("\n");
     assert.match(blob, /from:embercurve/);
     assert.match(blob, /from:embercurvefun/);

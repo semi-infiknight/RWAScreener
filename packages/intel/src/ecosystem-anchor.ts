@@ -1,3 +1,5 @@
+import { WATCHED_BUILDER_HANDLES } from "./project-graph.js";
+
 /** Text / handle anchors for “this is Meteora ecosystem,” including screener pads. */
 
 export const SCREENER_PAD_HANDLES = new Set(
@@ -18,11 +20,11 @@ export const SCREENER_PAD_HANDLES = new Set(
 );
 
 const ECOSYSTEM_TEXT_RE =
-  /solana|\$sol|meteora|@meteoraag|@meteoraeco|@vesper792|vesper|dbc|damm|dlmm|invent|embercurve|ember curve|embercurvefun|lfown|letsfuckingown|bags\.fm|bagsapp|perpspad|clawpump|stonkoptions|star\.fun|launchonsf|ethics\.ltd|ethicslaunch|revshare|otcdesks|otc.?labs/;
+  /solana|\$sol|meteora|@meteoraag|@meteoraeco|@vesper792|vesper|dbc|damm|dlmm|invent|stocklana|chainrot|nouspad|stocklaunch|embercurve|ember curve|embercurvefun|lfown|letsfuckingown|bags\.fm|bagsapp|perpspad|clawpump|stonkoptions|star\.fun|launchonsf|ethics\.ltd|ethicslaunch|revshare|otcdesks|otc.?labs/;
 
 export function hasEcosystemAnchor(text: string, username?: string): boolean {
   const handle = (username ?? "").toLowerCase().replace(/^@/, "");
-  if (isScreenerPadAccount(handle)) return true;
+  if (isTrackedProjectAccount(handle)) return true;
   if (handle === "vesper792" || handle === "meteoraag" || handle === "meteoraeco") return true;
   return ECOSYSTEM_TEXT_RE.test(text.toLowerCase());
 }
@@ -30,6 +32,16 @@ export function hasEcosystemAnchor(text: string, username?: string): boolean {
 export function isScreenerPadAccount(username?: string): boolean {
   const handle = (username ?? "").toLowerCase().replace(/^@/, "");
   return Boolean(handle) && SCREENER_PAD_HANDLES.has(handle);
+}
+
+export function isWatchedBuilderAccount(username?: string): boolean {
+  const handle = (username ?? "").toLowerCase().replace(/^@/, "");
+  return Boolean(handle) && WATCHED_BUILDER_HANDLES.includes(handle);
+}
+
+/** Screener pads + DBC/stock/hackathon builders we keep a timeline on. */
+export function isTrackedProjectAccount(username?: string): boolean {
+  return isScreenerPadAccount(username) || isWatchedBuilderAccount(username);
 }
 
 const DBC_FOCUS_RE =
@@ -48,7 +60,7 @@ export function isDbcLanePost(
   username?: string,
   bucket?: string,
 ): boolean {
-  if (isScreenerPadAccount(username)) return true;
+  if (isTrackedProjectAccount(username)) return true;
   if (hasDbcFocus(text)) return true;
   if (bucket === "pad_ecosystem_drama" && PAD_DRAMA_RE.test(text.toLowerCase())) {
     return true;
@@ -115,9 +127,12 @@ export function isRetailFeedSpam(text: string, username?: string): boolean {
 
 /** Accounts whose posts + mentions make the ecosystem “Following” column. */
 export const LIST_FEED_HANDLES = [
-  "vesper792",
-  "meteoraag",
-  "meteoraeco",
-  ...SCREENER_PAD_HANDLES,
+  ...new Set([
+    "vesper792",
+    "meteoraag",
+    "meteoraeco",
+    ...SCREENER_PAD_HANDLES,
+    ...WATCHED_BUILDER_HANDLES,
+  ]),
 ];
 

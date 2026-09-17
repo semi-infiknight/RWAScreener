@@ -14,6 +14,8 @@ import {
   type PostType,
   type TimeWindow,
 } from "./site-data.js";
+import { projectTimelines } from "./project-graph.js";
+import { interestFromMentions } from "./vesper-interest.js";
 
 const WINDOWS = new Set<TimeWindow>(["all", "today", "week", "last_week"]);
 
@@ -244,6 +246,30 @@ export async function handleRequest(req: IncomingMessage, res: ServerResponse) {
         limit,
         hasMore: start + posts.length < feed.length,
         posts,
+      }),
+      "application/json; charset=utf-8",
+    );
+    return;
+  }
+  if (url.pathname === "/api/projects") {
+    const projects = projectTimelines(mentions);
+    send(
+      res,
+      200,
+      JSON.stringify({ count: projects.length, projects }),
+      "application/json; charset=utf-8",
+    );
+    return;
+  }
+  if (url.pathname === "/api/vesper-interest") {
+    const handles = interestFromMentions(mentions);
+    send(
+      res,
+      200,
+      JSON.stringify({
+        handle: "vesper792",
+        count: handles.length,
+        handles,
       }),
       "application/json; charset=utf-8",
     );

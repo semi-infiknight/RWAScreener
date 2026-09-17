@@ -30,6 +30,9 @@ export type XPost = {
   author_id?: string;
   in_reply_to_user_id?: string;
   lang?: string;
+  entities?: {
+    mentions?: { username?: string; id?: string }[];
+  };
   attachments?: { media_keys?: string[] };
   referenced_tweets?: { type: string; id: string }[];
   public_metrics?: {
@@ -47,12 +50,16 @@ export type SearchedPost = {
   media?: XMedia[];
   isQuote?: boolean;
   isReply?: boolean;
+  /** Who this reply is to (expanded in_reply_to_user_id). */
+  repliedTo?: XUser;
+  /** Authors of quoted posts (expanded referenced_tweets). */
+  quotedAuthors?: XUser[];
   queryId: string;
 };
 
 type SearchResponse = {
   data?: XPost[];
-  includes?: { users?: XUser[]; media?: XMedia[] };
+  includes?: { users?: XUser[]; media?: XMedia[]; tweets?: XPost[] };
   meta?: { next_token?: string; result_count?: number; newest_id?: string };
   errors?: unknown[];
   title?: string;
@@ -99,7 +106,8 @@ export type SearchOpts = {
 
 const TWEET_FIELDS =
   "created_at,public_metrics,author_id,lang,conversation_id,in_reply_to_user_id,entities,attachments,referenced_tweets";
-const EXPANSIONS = "author_id,attachments.media_keys,referenced_tweets.id";
+const EXPANSIONS =
+  "author_id,in_reply_to_user_id,attachments.media_keys,referenced_tweets.id,referenced_tweets.id.author_id";
 const USER_FIELDS = "username,name,description,public_metrics,verified,profile_image_url";
 const MEDIA_FIELDS = "url,preview_image_url,type,width,height";
 
@@ -113,11 +121,24 @@ export function postsFromXResponse(
   const mediaByKey = new Map(
     (body.includes?.media ?? []).map((m) => [m.media_key, m] as const),
   );
+  const refTweets = new Map(
+    (body.includes?.tweets ?? []).map((t) => [t.id, t] as const),
+  );
   return (body.data ?? []).map((post) => {
     const keys = post.attachments?.media_keys ?? [];
     const media = keys
       .map((k) => mediaByKey.get(k))
       .filter((m): m is XMedia => Boolean(m));
+    const quotedAuthors: XUser[] = [];
+    for (const ref of post.referenced_tweets ?? []) {
+      if (ref.type !== "quoted") continue;
+      const quoted = refTweets.get(ref.id);
+      const author = quoted?.author_id ? users.get(quoted.author_id) : undefined;
+      if (author) quotedAuthors.push(author);
+    }
+    const repliedTo = post.in_reply_to_user_id
+      ? users.get(post.in_reply_to_user_id)
+      : undefined;
     return {
       post,
       author: post.author_id ? users.get(post.author_id) : undefined,
@@ -128,6 +149,8 @@ export function postsFromXResponse(
         post.in_reply_to_user_id !== post.author_id
           ? true
           : undefined,
+      repliedTo,
+      quotedAuthors: quotedAuthors.length ? quotedAuthors : undefined,
       queryId,
     };
   });
