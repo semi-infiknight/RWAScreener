@@ -1,0 +1,23 @@
+---
+description: Work and land on main without asking — no feature-branch ceremony.
+alwaysApply: true
+---
+
+# Land on main
+
+This repo ships from **`main`**. Do not wait to be told to merge or commit.
+
+**Do**
+
+- Make the change **on `main`**. Do not open a feature branch, PR, or worktree unless the operator names one.
+- When the work is done (tests/typecheck that the change needs), **commit on `main`** with a focused message. Do not ask “want me to commit?”
+- **Push `origin main`**. Fast-forward leftover `cursor/*` (or similar) branches into `main` and delete them — do not leave them sitting and report “not touched.”
+- If intel/web behavior changed, deploy the matching Railway service after push (`intel`/`scanner` from `packages/intel`, `web` if the Next app changed). GitHub auto-deploy is flaky.
+
+**Do not**
+
+- Create `cursor/…` branches for routine fixes.
+- Ask whether to merge a one-commit agent branch that is already the intended mainline change.
+- Force-push, amend pushed commits, or commit `.env` / secrets / `.tmp-*.png`.
+
+**Exceptions (ask once):** prod DB migrations, deleting Railway projects, force-push, or the operator said “don’t commit.”
