@@ -141,6 +141,9 @@ export function knownMentionIds(): Set<string> {
 
 export function saveMention(record: MentionRecord) {
   appendJsonl(getMentionsPath(), record);
+  // Invalidate the mtime memo like the other mutators — an append landing in
+  // the same mtime tick would otherwise leave loadMentions() serving stale rows.
+  mentionMemo = null;
 }
 
 export function saveRun(run: RunRecord) {
