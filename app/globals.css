@@ -1748,6 +1748,95 @@ td.col-name { display: flex; }
 }
 .eco-feed-title {
   pointer-events: auto;
+  margin: 0;
+}
+.eco-feed-heading-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.42rem;
+  position: relative;
+  max-width: 100%;
+  flex-wrap: nowrap;
+}
+.eco-feed-info-wrap {
+  position: relative;
+  flex-shrink: 0;
+  align-self: center;
+  margin-top: 0.18em;
+}
+.eco-feed-info {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 99px;
+  background: none;
+  color: color-mix(in srgb, var(--muted) 72%, transparent);
+  cursor: help;
+  pointer-events: auto;
+}
+.eco-feed-info:hover,
+.eco-feed-info:focus-visible,
+.eco-feed-info[aria-expanded="true"] {
+  color: var(--text);
+}
+.eco-feed-info:focus-visible {
+  outline: 2px solid var(--accent-2);
+  outline-offset: 2px;
+}
+.eco-feed-tip {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  z-index: 8;
+  width: max-content;
+  max-width: min(16.5rem, calc(100vw - 2rem));
+  padding: 0.5rem 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel);
+  color: color-mix(in srgb, var(--text) 88%, var(--muted));
+  font-size: 0.75rem;
+  font-weight: 450;
+  letter-spacing: 0.005em;
+  line-height: 1.4;
+  text-align: left;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.38);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translate(-50%, 4px);
+  transition: opacity 120ms ease, transform 120ms ease, visibility 0s linear 120ms;
+}
+.eco-feed-info-wrap:hover .eco-feed-tip,
+.eco-feed-info:focus-visible + .eco-feed-tip,
+.eco-feed-info[aria-expanded="true"] + .eco-feed-tip {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, 0);
+  transition-delay: 80ms, 80ms, 0s;
+}
+@media (max-width: 560px) {
+  .eco-feed-tip {
+    left: auto;
+    right: 0;
+    transform: translate(0, 4px);
+  }
+  .eco-feed-info-wrap:hover .eco-feed-tip,
+  .eco-feed-info:focus-visible + .eco-feed-tip,
+  .eco-feed-info[aria-expanded="true"] + .eco-feed-tip {
+    transform: translate(0, 0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .eco-feed-tip {
+    transform: translate(-50%, 0);
+    transition: opacity 80ms ease, visibility 0s linear 80ms;
+  }
 }
 /* .eco-feed-heading { margin: 0 0 12px; font-size: 22px; font-weight: 650; letter-spacing: -0.03em; color: var(--text); } */
 .eco-feed-bar { display: flex; flex-direction: column; align-items: flex-start; gap: 4px 0; margin-bottom: 16px; }

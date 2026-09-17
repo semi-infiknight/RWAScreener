@@ -112,6 +112,58 @@ function fmtCount(n?: number): string {
   return `${(n / 1_000_000).toFixed(1).replace(/\.0$/, "")}M`;
 }
 
+const FEED_ABOUT =
+  "Realtime feed of projects building on Meteora DBC (non-curated).";
+
+function FeedAboutHint() {
+  const [pinned, setPinned] = useState(false);
+  const wrapRef = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    if (!pinned) return;
+    const onPointer = (e: PointerEvent) => {
+      if (!wrapRef.current?.contains(e.target as Node)) setPinned(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setPinned(false);
+    };
+    document.addEventListener("pointerdown", onPointer);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("pointerdown", onPointer);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [pinned]);
+
+  return (
+    <span className="eco-feed-info-wrap" ref={wrapRef}>
+      <button
+        type="button"
+        className="eco-feed-info"
+        aria-label="About this feed"
+        aria-describedby="eco-feed-about-tip"
+        aria-expanded={pinned}
+        onClick={() => setPinned((v) => !v)}
+      >
+        <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+          <circle cx="8" cy="8" r="6.25" fill="none" stroke="currentColor" strokeWidth="1.25" />
+          <circle cx="8" cy="5.15" r="0.85" fill="currentColor" />
+          <path
+            d="M8 7.15v4.1"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.35"
+            strokeLinecap="round"
+          />
+        </svg>
+      </button>
+      <span id="eco-feed-about-tip" role="tooltip" className="eco-feed-tip">
+        {FEED_ABOUT}
+      </span>
+    </span>
+  );
+}
+
 export function EcosystemFeed() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(false);
@@ -234,12 +286,15 @@ export function EcosystemFeed() {
   return (
     <section className="eco-feed" ref={sectionRef} aria-label="Meteora Ecosystem feed">
       <header className="eco-feed-lockup">
-        <h2 className="hero-title eco-feed-title">
-          <span className="hero-title-text">
-            <span className="hero-title-brand">Meteora</span>
-            <span className="hero-title-light"> Ecosystem feed</span>
-          </span>
-        </h2>
+        <div className="eco-feed-heading-row">
+          <h2 className="hero-title eco-feed-title">
+            <span className="hero-title-text">
+              <span className="hero-title-brand">Meteora</span>
+              <span className="hero-title-light"> Ecosystem feed</span>
+            </span>
+          </h2>
+          <FeedAboutHint />
+        </div>
       </header>
       <div className="eco-feed-bar">
         {loaded && (
