@@ -1,0 +1,6 @@
+[build]
+builder = "NIXPACKS"
+
+# Deploy settings live in per-service config on rwascreener:
+# intel         → npm start, INTEL_ROLE unset, healthcheck /health, volume /data
+# intel-scanner → npm start, INTEL_ROLE=scanner, cron "0 * * * *", NEVER restart

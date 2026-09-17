@@ -8,6 +8,7 @@ import {
 } from "../lib/pad-aggregates";
 import type { Project } from "../lib/projects";
 import { isScreenerLive } from "../lib/projects";
+import { EcosystemFeed } from "./components/ecosystem-feed";
 import { formatUsd } from "../lib/tokens";
 import {
   HOME_METRICS_CACHE,
@@ -553,6 +554,8 @@ export function EcosystemExplorer({
             Build on Meteora DBC →
           </a>
         </div>
+
+        <EcosystemFeed />
       </div>
     </div>
   );

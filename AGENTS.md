@@ -30,9 +30,23 @@
 ## Stack
 Next.js + Postgres + Helius webhooks + @meteora-ag/dynamic-bonding-curve-sdk worker.
 
-Lightweight stubs (no full monorepo rewrite yet): `packages/dbc`, `packages/db`, `apps/indexer`, `scripts/dbc-backfill.mjs`.
+Lightweight stubs (no full monorepo rewrite yet): `packages/dbc`, `packages/db`, `packages/intel`, `apps/indexer`, `scripts/dbc-backfill.mjs`.
+
+## Intel (ecosystem X feed)
+
+API + hourly X scanner live in **`packages/intel`** (Node, BGE classifier, JSONL store). Public UI is this Next.js app (`/api/ecosystem-feed` proxies `METEORA_INTEL_URL`).
+
+Railway project **`rwascreener`**, services:
+
+- **`intel`** — `npm start`, volume `/data` (`METEORA_INTEL_DATA_DIR=/data`), healthcheck `/health`. Private URL for web/scanner.
+- **`scanner`** — `INTEL_ROLE=scanner`, cron `0 * * * *`, restart `NEVER`. `INGEST_URL` → intel private domain.
+- **`web`** — `METEORA_INTEL_URL=http://${{intel.RAILWAY_PRIVATE_DOMAIN}}:${{intel.PORT}}`
+
+Commands (from `packages/intel/`): `npm test`, `npm run typecheck`, `npm run site` (local :8787).
+
+Do not run the old `meteora-intel` Railway project (`787deca8-…`) after cutover.
 
 ## Deploy
 Railway project **`rwascreener`** (`7ede8677-ff5f-44cf-911e-fa8bb4100695`, env `production`).
-Web + worker + Postgres land here. Do **not** deploy into `oracle`.
+Web + worker + Postgres + intel + scanner land here. Do **not** deploy into `oracle`.
 Do **not** provision Railway from stubs.

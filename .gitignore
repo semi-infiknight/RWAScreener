@@ -15,3 +15,7 @@ data/dbc-backfill-result.json
 # Fee claimer aggregation report (derived from gitignored backfill)
 data/fee-claimer-attribution.json
 data/fee-claimer-attribution.md
+
+# Intel JSONL store + HuggingFace cache (packages/intel/.gitignore also covers these)
+packages/intel/data/*.jsonl
+packages/intel/.cache/

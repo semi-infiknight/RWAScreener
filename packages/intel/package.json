@@ -1,0 +1,35 @@
+{
+  "name": "meteora-intel",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Local-transformer intel tracker for Meteora / DBC builder & launchpad mentions on X",
+  "scripts": {
+    "scan": "tsx src/cli.ts scan",
+    "backfill": "tsx src/cli.ts scan --backfill --seed --pages=4 --max=100 --since=2025-01-01",
+    "report": "tsx src/cli.ts report",
+    "leads": "tsx src/cli.ts leads",
+    "classify-demo": "tsx src/cli.ts classify-demo",
+    "probe": "tsx scripts/probe-intelligence.ts",
+    "start": "tsx src/boot.ts",
+    "site": "tsx src/site-server.ts",
+    "push-scan": "tsx src/push-scan.ts",
+    "sweep-deleted": "tsx src/sweep-deleted.ts",
+    "rehydrate": "tsx src/rehydrate.ts",
+    "reclassify": "tsx src/reclassify.ts",
+    "test": "tsx --test --test-concurrency=1 test/*.test.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@xenova/transformers": "^2.17.2",
+    "dotenv": "^16.4.7",
+    "tsx": "^4.19.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.10",
+    "typescript": "^5.8.2"
+  }
+}

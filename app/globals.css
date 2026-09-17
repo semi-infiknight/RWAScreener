@@ -1731,3 +1731,68 @@ td.col-name { display: flex; }
 .staging-quote-category .pad-table-wrap {
   border-top: 1px solid var(--border);
 }
+
+/* ===== Ecosystem Feed (below DBC screener) ===== */
+.eco-feed { max-width: 100%; margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--border); }
+.eco-feed-heading { margin: 0 0 12px; font-size: 22px; font-weight: 650; letter-spacing: -0.03em; color: var(--text); }
+.eco-feed-bar { display: flex; flex-direction: column; align-items: flex-start; gap: 4px 0; margin-bottom: 16px; }
+/* .eco-feed-status { margin: 0; font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 8px; } */
+/* .eco-feed-dot { width: 5px; height: 5px; border-radius: 99px; background: var(--accent); display: inline-block; } */
+.eco-feed-toggles { display: flex; flex-wrap: wrap; gap: 4px 16px; align-items: center; }
+.eco-tabs { display: flex; flex-wrap: wrap; gap: 2px; }
+.eco-tab { min-height: 40px; padding: 0 8px; border: 0; background: none; font-size: 13px; color: var(--muted); cursor: pointer; box-shadow: inset 0 -1px 0 transparent; }
+.eco-tab.is-active { color: var(--text); box-shadow: inset 0 -1px 0 var(--accent); }
+.eco-tab:hover { color: var(--text); }
+.eco-tab:focus-visible, .eco-type-opt:focus-visible, .eco-card:focus-visible {
+  outline: 2px solid var(--accent-2);
+  outline-offset: 2px;
+}
+.eco-type-toggle { display: inline-flex; padding: 2px; border: 1px solid var(--border); border-radius: 999px; }
+.eco-type-opt { min-height: 40px; padding: 0 14px; border-radius: 999px; font-size: 12px; color: var(--muted); background: none; border: none; cursor: pointer; transition: background 100ms cubic-bezier(0, 0, 0.2, 1), color 100ms cubic-bezier(0, 0, 0.2, 1); }
+.eco-type-opt.is-active { background: var(--text); color: var(--bg); }
+.eco-type-opt:not(.is-active):hover { color: var(--text); }
+.eco-feed-loading, .eco-feed-empty { padding: 32px; text-align: center; color: var(--muted); font-size: 14px; }
+.eco-feed-empty p { margin: 0; }
+.eco-feed-placeholder { height: 200px; border-radius: 12px; background: var(--panel); }
+.eco-feed-masonry { column-count: 3; column-gap: 16px; }
+.eco-card {
+  display: inline-block;
+  width: 100%;
+  margin: 0 0 16px;
+  padding: 14px 14px 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--panel);
+  overflow: hidden;
+  break-inside: avoid;
+  text-decoration: none;
+  color: inherit;
+  content-visibility: auto;
+  contain-intrinsic-size: 320px 220px;
+}
+.eco-card:hover { border-color: color-mix(in srgb, var(--text) 18%, var(--border)); }
+.eco-card-header { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 10px; }
+.eco-avatar { width: 40px; height: 40px; border-radius: 999px; object-fit: cover; flex: none; }
+.eco-avatar-letter { display: grid; place-items: center; background: color-mix(in srgb, var(--text) 8%, var(--panel)); font-weight: 600; }
+.eco-card-who { flex: 1; display: flex; flex-direction: column; min-width: 0; line-height: 1.3; }
+.eco-card-name { font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 4px; }
+.eco-card-meta { color: var(--muted); font-size: 13px; }
+.eco-card-text { margin: 0 0 10px; line-height: 1.45; font-size: 15px; white-space: pre-wrap; word-break: break-word; }
+.eco-media { display: grid; gap: 2px; margin: 0 -14px 10px; }
+.eco-media-1 { grid-template-columns: 1fr; }
+.eco-media-2, .eco-media-3, .eco-media-4 { grid-template-columns: 1fr 1fr; }
+.eco-media-img { width: 100%; max-height: 280px; object-fit: cover; display: block; background: #000; }
+.eco-card-footer { display: flex; align-items: center; gap: 16px; color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; }
+.eco-eng { display: inline-flex; align-items: center; gap: 5px; min-height: 24px; }
+.eco-icon { width: 14px; height: 14px; flex: none; }
+.eco-feed-sentinel { height: 1px; width: 100%; }
+.eco-feed-loading-more { padding: 16px; }
+@media (prefers-reduced-motion: reduce) {
+  .eco-type-opt { transition: none; }
+}
+@media (max-width: 900px) {
+  .eco-feed-masonry { column-count: 2; }
+}
+@media (max-width: 560px) {
+  .eco-feed-masonry { column-count: 1; }
+}
