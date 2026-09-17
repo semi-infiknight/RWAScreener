@@ -1,6 +1,6 @@
 # Cloud agent resume (2026-09-17)
 
-This repo **`semi-infiknight/RWAScreener` `main`** is the source of truth. The old local folder `~/Vibecode/meteco` is **not a git repo** and is not on GitHub — do not resume work there.
+This repo **`semi-infiknight/RWAScreener` `main`** is the source of truth. The old local folder `~/Vibecode/meteco` was **deleted 2026-09-17** after merge (chats, Grok origin, X keys, intel code). Do not recreate it.
 
 Public product: **https://www.meteora.fyi** (DBC screener + ecosystem feed). Intel is API + hourly scanner only.
 
@@ -26,7 +26,7 @@ Public product: **https://www.meteora.fyi** (DBC screener + ecosystem feed). Int
 
 Web → intel: `METEORA_INTEL_URL=http://${{intel.RAILWAY_PRIVATE_DOMAIN}}:8080` (`${{intel.PORT}}` interpolates **empty**).
 
-Do **not** deploy into Railway project `oracle`. Do **not** revive old `meteora-intel` project `787deca8-…`. Operator may delete that leftover.
+Do **not** deploy into Railway project `oracle`. Do **not** recreate a `meteora-intel` Railway project. The leftover `787deca8-…` project was deleted 2026-09-17 after its store was upserted into rwascreener intel.
 
 GitHub → web auto-deploy has been flaky; if a push does not appear on meteora.fyi, `railway up -s web -y -c`. Intel/scanner: `railway up -s intel|scanner --path-as-root packages/intel`.
 

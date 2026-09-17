@@ -16,7 +16,7 @@ Uncheck nothing that is a **standing decision** without the operator saying so.
 - [ ] **Knowledge graph** — v0 is `GET /api/projects` + harvested timelines, not a graph DB. Stocklana’s 13 submissions still aren’t listed on the hackathon page.
 - [ ] **Vesper interest depth** — v0 is mentions/replies/quotes only. No Following/Likes (app bearer). Personal @s (`semiii`, `playmatejaylene`) currently sit in the interest list next to pads.
 - [ ] **X credit budget** — hourly scan; 402 means stop burning search.
-- [ ] **Ops leftovers** — old meteco / meteora-intel Railway can still be deleted by the operator; intel model cache still re-downloads after web/intel redeploys; GitHub did not auto-deploy web (last ship was `railway up -s web`).
+- [x] **Ops leftovers** — old meteco folder deleted 2026-09-17; leftover Railway `meteora-intel` (`787deca8`) deletion requested after exporting 2,697 mentions into rwascreener intel. Intel model cache still re-downloads after intel redeploys. GitHub auto-deploy for web is flaky (`railway up -s web`).
 
 ## Standing (do not undo)
 

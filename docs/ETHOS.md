@@ -120,7 +120,7 @@ Canonical checklist: **`docs/TODO.md`**. Those were asked for and are **not full
 9. **Project knowledge graph** — v0 is `GET /api/projects` + harvested timelines. Not a full graph DB yet. Keep adding Stocklana/DBC builder handles as they surface. Stocklana’s 13 submissions are not listed publicly on the hackathon page.
 10. **Vesper interest** — v0 live: reads her @/replies/quotes (`GET /api/vesper-interest`), harvests new handles same scan, feed bypass without changing newest-first rank. No Following/Likes API (app bearer). Personal @s currently leak into the list. Example: https://x.com/vesper792/status/2100474095473455266 (`stardotfun`, `getstonkoptions`, `adamcreates_`).
 11. **X credit budget** — hourly scan; 402 = credits gone. Do not spam live search while iterating filters.
-12. **Ops leftovers** — operator can delete old meteco / meteora-intel Railway; persist intel model cache across redeploys; GitHub auto-deploy for web is flaky (`railway up -s web`).
+12. **Ops leftovers** — local `~/Vibecode/meteco` deleted 2026-09-17; leftover Railway `meteora-intel` (`787deca8`) deletion requested after 2,697 mentions were upserted into rwascreener intel. Persist intel model cache across redeploys still open. GitHub auto-deploy for web is flaky (`railway up -s web`).
 
 ---
 
