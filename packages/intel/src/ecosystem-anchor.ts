@@ -8,7 +8,6 @@ export const SCREENER_PAD_HANDLES = new Set(
     "embercurvefun",
     "lfowndotfun",
     "getstonkoptions",
-    "launchonsf",
     "stardotfun",
     "bagsapp",
     "perpspadfun",
@@ -20,7 +19,7 @@ export const SCREENER_PAD_HANDLES = new Set(
 );
 
 const ECOSYSTEM_TEXT_RE =
-  /solana|\$sol|meteora|@meteoraag|@meteoraeco|@vesper792|vesper|dbc|damm|dlmm|invent|stocklana|chainrot|nouspad|stocklaunch|embercurve|ember curve|embercurvefun|lfown|letsfuckingown|bags\.fm|bagsapp|perpspad|clawpump|stonkoptions|star\.fun|launchonsf|ethics\.ltd|ethicslaunch|revshare|otcdesks|otc.?labs/;
+  /solana|\$sol|meteora|@meteoraag|@meteoraeco|@vesper792|vesper|dbc|damm|dlmm|invent|stocklana|chainrot|nouspad|stocklaunch|embercurve|ember curve|embercurvefun|lfown|letsfuckingown|bags\.fm|bagsapp|perpspad|clawpump|stonkoptions|star\.fun|ethics\.ltd|ethicslaunch|revshare|otcdesks|otc.?labs/;
 
 export function hasEcosystemAnchor(text: string, username?: string): boolean {
   const handle = (username ?? "").toLowerCase().replace(/^@/, "");
@@ -48,7 +47,20 @@ const DBC_FOCUS_RE =
   /\b(dbc|dynamic bonding curve|bonding curve|invent|fun launch|poolconfig|partner config|dynamic-bonding-curve)\b/;
 
 const PAD_DRAMA_RE =
-  /embercurve|ember curve|embercurvefun|lfown|letsfuckingown|bags\.fm|bagsapp|perpspad|clawpump|stonkoptions|star\.fun|launchonsf|getstonk|ethicslaunch|ethics\.ltd|revshare|otc.?labs/;
+  /embercurve|ember curve|embercurvefun|lfown|letsfuckingown|bags\.fm|bagsapp|perpspad|clawpump|stonkoptions|star\.fun|getstonk|ethicslaunch|ethics\.ltd|revshare|otc.?labs/;
+
+/**
+ * Pads we accidentally treated as StonkOptions aliases.
+ * LaunchOnSF = StonkFun on Backpack — competitor, not Meteora DBC.
+ */
+export const COMPETITOR_PAD_HANDLES = new Set(
+  ["launchonsf", "stonkfun"].map((h) => h.toLowerCase()),
+);
+
+export function isCompetitorPadAccount(username?: string): boolean {
+  const handle = (username ?? "").toLowerCase().replace(/^@/, "");
+  return Boolean(handle) && COMPETITOR_PAD_HANDLES.has(handle);
+}
 
 export function hasDbcFocus(text: string): boolean {
   return DBC_FOCUS_RE.test(text.toLowerCase());

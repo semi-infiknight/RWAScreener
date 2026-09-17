@@ -244,6 +244,14 @@ describe("site feed / time windows / leaderboard", () => {
     const feed = filterFeed([...ROWS, vesper, row], { window: "all", now: NOW });
     assert.ok(feed.some((m) => m.id === "fp1"));
   });
+
+  it("hides LaunchOnSF / StonkFun competitor posts even if they look like pad news", () => {
+    const row = mention("sf1", "LaunchOnSF", "2026-09-17T04:00:00.000Z", "pad_live_on_dbc", {
+      text: "Hold memes. Stack RWAs. Launch coins paired with 49 RWAs from @Backpack on StonkFun.",
+    });
+    const feed = filterFeed([...ROWS, row], { window: "all", now: NOW });
+    assert.ok(!feed.some((m) => m.id === "sf1"));
+  });
 });
 
 void (0 as unknown as TimeWindow);

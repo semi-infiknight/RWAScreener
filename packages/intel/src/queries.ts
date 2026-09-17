@@ -105,9 +105,9 @@ const PAD_WATCH_QUERIES: { id: string; query: string; note: string }[] = [
   },
   {
     id: "pad_watch_b",
-    note: "Perpspad · ClawPump · StonkOptions / star.fun",
+    note: "Perpspad · ClawPump · StonkOptions / star.fun (not LaunchOnSF / StonkFun)",
     query:
-      "(Perpspad OR perpspad.fun OR from:perpspadfun OR ClawPump OR clawpump.tech OR from:clawpumptech OR StonkOptions OR star.fun OR from:getstonkoptions OR from:LaunchOnSF OR from:stardotfun) -is:retweet",
+      "(Perpspad OR perpspad.fun OR from:perpspadfun OR ClawPump OR clawpump.tech OR from:clawpumptech OR StonkOptions OR star.fun OR from:getstonkoptions OR from:stardotfun) -is:retweet",
   },
   {
     id: "pad_watch_c",

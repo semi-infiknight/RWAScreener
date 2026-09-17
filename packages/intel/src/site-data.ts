@@ -1,6 +1,11 @@
 import type { BucketId } from "./buckets.js";
 import { BUCKET_BY_ID, ECOSYSTEM_FEED_BUCKETS, OFFICIAL_HANDLES } from "./buckets.js";
-import { isDbcLanePost, isRetailFeedSpam, isTrackedProjectAccount } from "./ecosystem-anchor.js";
+import {
+  isCompetitorPadAccount,
+  isDbcLanePost,
+  isRetailFeedSpam,
+  isTrackedProjectAccount,
+} from "./ecosystem-anchor.js";
 import { isVesperInterestAccount, vesperInterestHandleSet } from "./vesper-interest.js";
 import type { MentionRecord } from "./store.js";
 
@@ -108,6 +113,7 @@ export function filterFeed(
 
   return mentions
     .filter((m) => !m.deletedAt)
+    .filter((m) => !isCompetitorPadAccount(m.author?.username))
     .filter((m) => {
       if (query.includeNoise) return true;
       if (isTrackedProjectAccount(m.author?.username)) return true;

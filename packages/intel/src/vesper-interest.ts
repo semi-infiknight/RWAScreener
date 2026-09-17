@@ -2,7 +2,7 @@ import { writeFileSync, mkdirSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import { OFFICIAL_HANDLES } from "./buckets.js";
 import { getDataDir } from "./config.js";
-import { LIST_FEED_HANDLES } from "./ecosystem-anchor.js";
+import { COMPETITOR_PAD_HANDLES, LIST_FEED_HANDLES } from "./ecosystem-anchor.js";
 import type { MentionRecord } from "./store.js";
 import type { SearchedPost } from "./x-client.js";
 
@@ -19,6 +19,7 @@ const SKIP_INTEREST = new Set([
   "elonmusk",
   "pmarc",
   "aeyakovenko",
+  ...COMPETITOR_PAD_HANDLES,
 ]);
 
 const AT_RE = /@([A-Za-z0-9_]{1,15})/g;

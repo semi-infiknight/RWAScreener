@@ -80,7 +80,9 @@ describe("X list-feed seed", () => {
     assert.ok(LIST_FEED_HANDLES.includes("bagsapp"));
     assert.ok(LIST_FEED_HANDLES.includes("embercurve"));
     assert.ok(LIST_FEED_HANDLES.includes("embercurvefun"));
-    assert.ok(LIST_FEED_HANDLES.includes("launchonsf"));
+    assert.ok(!LIST_FEED_HANDLES.includes("launchonsf"));
+    assert.ok(LIST_FEED_HANDLES.includes("getstonkoptions"));
+    assert.ok(LIST_FEED_HANDLES.includes("stardotfun"));
     assert.ok(LIST_FEED_HANDLES.includes("chainrot_app"));
     assert.ok(LIST_FEED_HANDLES.includes("nouspad"));
     assert.ok(LIST_FEED_HANDLES.includes("stocklaunchdbc_"));
@@ -144,7 +146,8 @@ describe("standing search pool", () => {
     const blob = SEARCH_QUERIES.map((q) => q.query).join("\n");
     assert.match(blob, /from:embercurve/);
     assert.match(blob, /from:embercurvefun/);
-    assert.match(blob, /from:LaunchOnSF/);
+    assert.doesNotMatch(blob, /from:LaunchOnSF/);
+    assert.match(blob, /from:getstonkoptions/);
     assert.match(blob, /from:BagsApp/);
     assert.match(blob, /from:vesper792/);
     assert.match(blob, /LParmy/);
