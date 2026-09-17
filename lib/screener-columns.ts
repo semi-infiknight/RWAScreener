@@ -113,6 +113,17 @@ const PENDING: ScreenerColumns = {
   buy: false,
 };
 
+/** Stonk Options indexer catalog: price, mcap, vol, holders, age (no liq/spark/%). */
+const STONKOPTIONS: ScreenerColumns = {
+  ...ALL_OFF,
+  price: true,
+  fdv: true,
+  volume: true,
+  holders: true,
+  age: true,
+  buy: false,
+};
+
 const BY_PAD: Record<string, ScreenerColumns> = {
   ethics: ETHICS,
   embercurve: EMBER,
@@ -122,7 +133,7 @@ const BY_PAD: Record<string, ScreenerColumns> = {
   lfgown: LFGOWN,
   revshare: REVSHARE,
   otcdesks: OTCDESKS,
-  stardotfun: PENDING,
+  stardotfun: STONKOPTIONS,
 };
 
 export function screenerColumnsFor(launchpadId: string): ScreenerColumns {

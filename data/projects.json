@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-09-12T16:17:26Z",
+  "updatedAt": "2026-09-18T00:00:00Z",
   "disclaimer": "",
   "statuses": [
     "live",
@@ -104,18 +104,18 @@
       "id": "stardotfun",
       "displayName": "StonkOptions",
       "slug": "stardotfun",
-      "website": "https://star.fun",
+      "website": "https://stonkoptions.xyz",
       "x": "https://x.com/getstonkoptions",
       "docs": "https://star-fun.gitbook.io/star",
-      "summary": "Programmable ownership for internet startups. Star is a fundraising launchpad for builders: launch an on-chain token sale where backers fund your project in less than a week — fast fundraising for next-gen founders. The Internet's Benefits Department.",
+      "summary": "Launch stock-paired tokens that pay employees in their own company’s tokenized stock. Stonk Options is powered by Star; trading fees fund employee rewards.",
       "built": [
-        "On-chain token sales instead of pitching VCs (≤7 day raises)",
-        "Dynamic Price or Fixed Price raise models with configurable targets",
-        "Choose vesting; 12.5% of raised USDC locked into post-sale AMM liquidity",
-        "Launch now or schedule into discovery; social or wallet signup",
-        "Keep 100% company equity while bootstrapping community ownership"
+        "Create a stock-paired token (xStocks quote) on Meteora DBC",
+        "Trading fees split: 70% employee rewards, 10% creator, 20% platform",
+        "20bps platform fee toward $STAR buybacks and treasury",
+        "Work-email / proof-of-employment verification for claims",
+        "Star.fun ecosystem parent (fundraising for internet startups)"
       ],
-      "status": "integrating",
+      "status": "live",
       "verified": [
         "public_site",
         "x_handle",
@@ -123,8 +123,8 @@
       ],
       "contact": "unknown",
       "dbc": {
-        "integrated": null,
-        "evidence": "Integrating Meteora DBC — not live for launches yet; star.fun ecosystem context confirmed by owner.",
+        "integrated": true,
+        "evidence": "Live Meteora DBC launches on stonkoptions.xyz; indexer catalog (indexer.canary.stonkoptions.xyz/v2/catalog) returns dbcPoolAddress + phase dbc/damm_v2 (observed 2026-09-18).",
         "configKeys": [],
         "feeClaimers": []
       },
@@ -132,6 +132,10 @@
         {
           "label": "StonkOptions X",
           "url": "https://x.com/getstonkoptions"
+        },
+        {
+          "label": "stonkoptions.xyz",
+          "url": "https://stonkoptions.xyz"
         },
         {
           "label": "star.fun",
@@ -146,13 +150,13 @@
           "url": "https://star-fun.gitbook.io/star"
         }
       ],
-      "notes": "Empty screener until live. Ecosystem parent: star.fun.",
+      "notes": "Ecosystem parent: star.fun.",
       "ecosystem": {
         "name": "Star",
         "website": "https://star.fun",
         "x": "https://x.com/stardotfun"
       },
-      "screenerLive": false,
+      "screenerLive": true,
       "icon": "/avatars/stardotfun.jpg",
       "github": null,
       "devX": null,

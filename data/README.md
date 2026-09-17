@@ -26,7 +26,7 @@ Labels describe **what we know** and **our relationship**. They are **not** endo
 Per-launchpad screener rows. Shape is defined in `lib/tokens.ts`.
 
 - **Bags** rows are refreshed from the Bags public API (real mints). Metrics stay `null` until a pricing source is wired — never invent numbers.
-- **StonkOptions / star.fun** (`launchpadId: stardotfun`) stays empty while `screenerLive: false`.
+- **StonkOptions** (`launchpadId: stardotfun`) live feed: `indexer.canary.stonkoptions.xyz/v2/catalog`.
 - Other launchpads may still be draft frontend seeds.
 
 ### Refresh Bags tokens
@@ -49,7 +49,7 @@ Source of truth for the **quote screener** is **quote → pool → config**, not
 - 61 Backed xStocks. Mints from mint authority `S7vYFFWH6BjJyEsdrPQpqpYTqLTrPRK6KW3VwsJuRaS`; names from `xstocks-metadata.backed.fi`.
 - Fields: `mint`, `symbol`, `name`, `badge_verified_at` (null until Checker), `meta`.
 - Do not invent mint addresses. Do not expand this list from Bags / other pad APIs.
-- `tokens.json` Bags rows stay as **temporary UI fill** for the ecosystem dashboard. StonkOptions (`stardotfun`) stays empty while `screenerLive: false`.
+- `tokens.json` Bags rows stay as **temporary UI fill** for the ecosystem dashboard. StonkOptions (`stardotfun`) is live from the pad indexer, not `tokens.json`.
 
 ## Launchpad labels (`launchpad-labels.json`)
 

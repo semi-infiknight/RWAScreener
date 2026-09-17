@@ -18,7 +18,7 @@
     "indexer:serve": "node apps/indexer/index.mjs serve",
     "discover:badges": "node packages/dbc/discover-badges.mjs",
     "enrich:quote-logos": "node packages/dbc/enrich-quote-logos.mjs",
-    "test": "node --test scripts/claimer-overlap.test.mjs"
+    "test": "node --test scripts/claimer-overlap.test.mjs && node --experimental-strip-types --test lib/stonkoptions.test.ts"
   },
   "dependencies": {
     "@meteora-ag/dynamic-bonding-curve-sdk": "^1.5.12",

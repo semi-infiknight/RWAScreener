@@ -21,6 +21,7 @@ import { fetchPerpspadTokens } from "./perpspad";
 import { getProject, isScreenerLive, projects } from "./projects";
 import { fetchOtcDesksTokens } from "./otcdesks";
 import { fetchRevShareTokens } from "./revshare";
+import { fetchStonkOptionsTokens } from "./stonkoptions";
 import type { TokenRow } from "./tokens";
 
 export type PadSummaryRow = PadAggregate & {
@@ -49,6 +50,8 @@ async function loadPadTokens(padId: string): Promise<TokenRow[]> {
       return fetchRevShareTokens({ phase: "fast" });
     case "otcdesks":
       return fetchOtcDesksTokens({ phase: "fast" });
+    case "stardotfun":
+      return fetchStonkOptionsTokens({ phase: "fast" });
     default:
       return [];
   }
