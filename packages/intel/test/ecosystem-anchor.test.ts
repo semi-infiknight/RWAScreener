@@ -107,6 +107,14 @@ describe("ecosystem anchors", () => {
       false,
     );
     assert.equal(
+      isPublicEcosystemPost(
+        "Set to Launched on Jupiter Studio(Dynamic Bonding curve). Quote asset:.Solana",
+        "Sulyman08136",
+        "pad_live_on_dbc",
+      ),
+      false,
+    );
+    assert.equal(
       isPublicEcosystemPost("https://t.co/vJqd3kmsrE", "getstonkoptions", "pad_live_on_dbc"),
       false,
     );

@@ -45,7 +45,7 @@ export function isTrackedProjectAccount(username?: string): boolean {
 }
 
 const DBC_FOCUS_RE =
-  /\b(dbc|dynamic-bonding-curve|dynamic bonding curve|poolconfig|partner config|fun launch)\b|\binvent\b|(meteora.{0,48}bonding curve|bonding curve.{0,48}meteora)/;
+  /\b(dbc|dynamic-bonding-curve|poolconfig|partner config|fun launch)\b|\binvent\b|(meteora.{0,48}bonding curve|bonding curve.{0,48}meteora)/;
 
 /** The post is doing DBC/screener work — not just name-dropping the letters. */
 const DBC_BUILDER_TALK_RE =
