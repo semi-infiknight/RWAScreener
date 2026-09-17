@@ -92,6 +92,26 @@ describe("ecosystem anchors", () => {
     );
     assert.equal(
       isPublicEcosystemPost(
+        "Introducing a meme-coin launchpad built on Arc with a bonding curve",
+        "Lolpadarc",
+        "noise_retail_hype",
+      ),
+      false,
+    );
+    assert.equal(
+      isPublicEcosystemPost(
+        "SunPump is the launchpad. A meme token starts on a bonding curve.",
+        "thenameisdlord",
+        "noise_retail_hype",
+      ),
+      false,
+    );
+    assert.equal(
+      isPublicEcosystemPost("https://t.co/vJqd3kmsrE", "getstonkoptions", "pad_live_on_dbc"),
+      false,
+    );
+    assert.equal(
+      isPublicEcosystemPost(
         "Passionate article about Art on Solana",
         "degenghosty",
         "pad_live_on_dbc",
@@ -158,7 +178,7 @@ describe("postsFromXResponse", () => {
     );
     assert.equal(posts[0]?.isQuote, true);
     assert.equal(posts[1]?.isReply, true);
-    assert.notEqual(posts[2]?.isReply, true);
+    assert.equal(posts[2]?.isReply, true);
     assert.equal(posts[0]?.author?.username, "vesper792");
     assert.equal(posts[0]?.quotedAuthors?.[0]?.username, "nouspad");
     assert.equal(posts[1]?.repliedTo?.username, "chainrot_app");

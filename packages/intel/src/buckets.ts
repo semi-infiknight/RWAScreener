@@ -266,7 +266,6 @@ export const ECOSYSTEM_FEED_BUCKETS: ReadonlySet<BucketId> = new Set([
   "pad_ecosystem_drama",
   "hackathon_builder",
   "ecosystem_integration",
-  "competitor_pain",
 ]);
 
 /** Ranked above drama/competitor once pad accounts are pulled to the top. */

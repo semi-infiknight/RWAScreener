@@ -45,14 +45,18 @@ export function isTrackedProjectAccount(username?: string): boolean {
 }
 
 const DBC_FOCUS_RE =
-  /\b(dbc|dynamic bonding curve|bonding curve|invent|fun launch|poolconfig|partner config|dynamic-bonding-curve)\b/;
+  /\b(dbc|dynamic-bonding-curve|dynamic bonding curve|poolconfig|partner config|fun launch)\b|\binvent\b|(meteora.{0,48}bonding curve|bonding curve.{0,48}meteora)/;
 
 /** The post is doing DBC/screener work — not just name-dropping the letters. */
 const DBC_BUILDER_TALK_RE =
   /pair(ed|ing)? against|quote mint|meteora\.fyi|partner config|poolconfig|launchpad|stocklana|fun launch|fee.?claimer|xstocks?|tokenized stock|dynamic bonding curve/;
 
 const PAD_DRAMA_RE =
-  /embercurve|ember curve|embercurvefun|lfown|letsfuckingown|bags\.fm|bagsapp|perpspad|clawpump|stonkoptions|star\.fun|getstonk|ethicslaunch|ethics\.ltd|revshare|otc.?labs/;
+  /embercurve|ember curve|embercurvefun|lfown|letsfuckingown|bags\.fm|bagsapp|perpspad|clawpump|stonkoptions|star\.fun|getstonk|ethicslaunch|ethics\.ltd|revshare|otc.?labs|stocklana|chainrot|nouspad/;
+
+/** Other chains / pads talking “bonding curve” as if that were this feed. */
+const OFF_METEORA_ECOSYSTEM_RE =
+  /lolpadarc|sunpump|robinhood chain|(?:^|[^a-z])pons(?:[^a-z]|$)|basestonk|akadotfun|numa_arc|on arc(?:[^a-z]|$)|arc-based|arc-native|circle l1/;
 
 /**
  * Pads we accidentally treated as StonkOptions aliases.
@@ -65,6 +69,19 @@ export const COMPETITOR_PAD_HANDLES = new Set(
 export function isCompetitorPadAccount(username?: string): boolean {
   const handle = (username ?? "").toLowerCase().replace(/^@/, "");
   return Boolean(handle) && COMPETITOR_PAD_HANDLES.has(handle);
+}
+
+export function isOffMeteoraEcosystem(text: string): boolean {
+  const t = text.toLowerCase();
+  if (/\bmeteora\b|\bdbc\b|\bstocklana\b|embercurve|getstonk/.test(t)) return false;
+  return OFF_METEORA_ECOSYSTEM_RE.test(t);
+}
+
+/** Naked t.co / URL cards are thread remnants, not posts. */
+export function isBareLinkPost(text: string): boolean {
+  const t = text.trim();
+  if (!t) return true;
+  return /^(https?:\/\/\S+)(\s+https?:\/\/\S+)*$/i.test(t);
 }
 
 export function hasDbcFocus(text: string): boolean {
@@ -105,6 +122,8 @@ export function isPublicEcosystemPost(
 ): boolean {
   if (isCompetitorPadAccount(username)) return false;
   if (isRetailFeedSpam(text, username)) return false;
+  if (isOffMeteoraEcosystem(text)) return false;
+  if (isBareLinkPost(text)) return false;
   if (isTrackedProjectAccount(username)) return true;
   // BGE often files real DBC/screener posts as infra/noise. The text decides.
   if (isDbcBuilderTalk(text) && bucket !== "memes_meteora_ecosystem") return true;

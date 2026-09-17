@@ -282,6 +282,22 @@ describe("site feed / time windows / leaderboard", () => {
     const feed = filterFeed([...ROWS, row], { window: "all", now: NOW });
     assert.ok(!feed.some((m) => m.id === "sf1"));
   });
+
+  it("hides Arc / generic bonding-curve pads from the ecosystem lane", () => {
+    const arc = mention("arc1", "Lolpadarc", "2026-09-16T14:00:00.000Z", "noise_retail_hype", {
+      text: "Introducing a meme-coin launchpad built on Arc. Anyone can create a token on a bonding curve.",
+    });
+    const feed = filterFeed([...ROWS, arc], { window: "all", now: NOW });
+    assert.ok(!feed.some((m) => m.id === "arc1"));
+  });
+
+  it("hides bare t.co thread replies even from tracked pads", () => {
+    const row = mention("so-link", "getstonkoptions", "2026-09-16T14:13:23.000Z", "pad_live_on_dbc", {
+      text: "https://t.co/vJqd3kmsrE",
+    });
+    const feed = filterFeed([...ROWS, row], { window: "all", now: NOW });
+    assert.ok(!feed.some((m) => m.id === "so-link"));
+  });
 });
 
 void (0 as unknown as TimeWindow);
