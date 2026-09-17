@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 /**
  * Meteora ecosystem feed — classified posts from meteora-intel as native
@@ -37,6 +37,29 @@ type FeedData = {
 };
 
 const PAGE = 24;
+
+/**
+ * Manual masonry columns (CSS multicol reflows the whole container on every
+ * infinite-scroll append and defeats content-visibility). Round-robin keeps
+ * card i in column i%cols stable across appends, so existing cards never
+ * re-layout or re-render when a page lands.
+ */
+function useColumnCount(): number {
+  const [cols, setCols] = useState(3);
+  useEffect(() => {
+    const mq2 = globalThis.matchMedia("(max-width: 900px)");
+    const mq1 = globalThis.matchMedia("(max-width: 560px)");
+    const update = () => setCols(mq1.matches ? 1 : mq2.matches ? 2 : 3);
+    update();
+    mq2.addEventListener("change", update);
+    mq1.addEventListener("change", update);
+    return () => {
+      mq2.removeEventListener("change", update);
+      mq1.removeEventListener("change", update);
+    };
+  }, []);
+  return cols;
+}
 
 // Time windows (All / Today / This week) — hidden for now; API still defaults to all.
 // const WINDOWS = [
@@ -102,6 +125,13 @@ export function EcosystemFeed() {
   const scrollArmedRef = useRef(false);
   const sectionRef = useRef<HTMLElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
+  const cols = useColumnCount();
+
+  const columns = useMemo(() => {
+    const out: Post[][] = Array.from({ length: cols }, () => []);
+    for (let i = 0; i < posts.length; i++) out[i % cols]!.push(posts[i]!);
+    return out;
+  }, [posts, cols]);
 
   useEffect(() => {
     if (loaded) return;
@@ -259,8 +289,12 @@ export function EcosystemFeed() {
         ) : (
           <>
             <div className="eco-feed-masonry">
-              {posts.map((p) => (
-                <FeedCard key={p.id} post={p} />
+              {columns.map((col, i) => (
+                <div className="eco-feed-col" key={i}>
+                  {col.map((p) => (
+                    <FeedCard key={p.id} post={p} />
+                  ))}
+                </div>
               ))}
             </div>
             {hasMore ? (
@@ -284,7 +318,7 @@ export function EcosystemFeed() {
   );
 }
 
-function FeedCard({ post }: { post: Post }) {
+const FeedCard = memo(function FeedCard({ post }: { post: Post }) {
   const handle = post.author?.username || "unknown";
   const name = post.author?.name || handle;
   const when = relativeTime(post.createdAt);
@@ -307,6 +341,7 @@ function FeedCard({ post }: { post: Post }) {
             width={40}
             height={40}
             loading="lazy"
+            decoding="async"
             className="eco-avatar"
             referrerPolicy="no-referrer"
           />
@@ -339,6 +374,7 @@ function FeedCard({ post }: { post: Post }) {
               }
               alt=""
               loading="lazy"
+              decoding="async"
               className="eco-media-img"
               referrerPolicy="no-referrer"
             />
@@ -365,4 +401,6 @@ function FeedCard({ post }: { post: Post }) {
       </div>
     </a>
   );
-}
+});
+
+FeedCard.displayName = "FeedCard";

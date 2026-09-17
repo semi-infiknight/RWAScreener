@@ -1769,9 +1769,13 @@ td.col-name { display: flex; }
 .eco-feed-loading, .eco-feed-empty { padding: 32px; text-align: center; color: var(--muted); font-size: 14px; }
 .eco-feed-empty p { margin: 0; }
 .eco-feed-placeholder { height: 200px; border-radius: 12px; background: var(--panel); }
-.eco-feed-masonry { column-count: 3; column-gap: 16px; }
+/* Manual columns (see ecosystem-feed.tsx): flex, not multicol — appends only
+   re-layout the column they land in, and content-visibility actually skips
+   offscreen cards (multicol fragmentation defeats it). */
+.eco-feed-masonry { display: flex; gap: 16px; align-items: flex-start; }
+.eco-feed-col { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; }
 .eco-card {
-  display: inline-block;
+  display: block;
   width: 100%;
   margin: 0 0 16px;
   padding: 14px 14px 12px;
@@ -1779,6 +1783,8 @@ td.col-name { display: flex; }
   border-radius: 12px;
   background: var(--panel);
   overflow: hidden;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 320px;
   break-inside: avoid;
   text-decoration: none;
   color: inherit;
@@ -1796,7 +1802,9 @@ td.col-name { display: flex; }
 .eco-media { display: grid; gap: 2px; margin: 0 -14px 10px; }
 .eco-media-1 { grid-template-columns: 1fr; }
 .eco-media-2, .eco-media-3, .eco-media-4 { grid-template-columns: 1fr 1fr; }
-.eco-media-img { width: 100%; max-height: 280px; object-fit: cover; display: block; background: #000; }
+/* Fixed heights: zero reflow when twimg media lands (object-fit already crops). */
+.eco-media-img { width: 100%; height: 280px; object-fit: cover; display: block; background: #000; }
+.eco-media-2 .eco-media-img, .eco-media-3 .eco-media-img, .eco-media-4 .eco-media-img { height: 140px; }
 .eco-card-footer { display: flex; align-items: center; gap: 16px; color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; }
 .eco-eng { display: inline-flex; align-items: center; gap: 5px; min-height: 24px; }
 .eco-icon { width: 14px; height: 14px; flex: none; }
@@ -1805,9 +1813,5 @@ td.col-name { display: flex; }
 @media (prefers-reduced-motion: reduce) {
   .eco-type-opt { transition: none; }
 }
-@media (max-width: 900px) {
-  .eco-feed-masonry { column-count: 2; }
-}
-@media (max-width: 560px) {
-  .eco-feed-masonry { column-count: 1; }
-}
+/* Column count for the masonry is driven by matchMedia in the component
+   (manual columns) — no CSS breakpoints needed here. */

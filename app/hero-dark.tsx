@@ -97,6 +97,8 @@ export function HeroDark() {
     let w = 0;
     let h = 0;
     let raf = 0;
+    let running = false;
+    let inView = true;
     let last = performance.now();
     let spawnAt = 1.2;
     const clusters: Cluster[] = [];
@@ -297,15 +299,43 @@ export function HeroDark() {
       pointer.active = false;
     };
 
+    // Don't burn frames while the hero is scrolled off or the tab is hidden.
+    const start = () => {
+      if (running || !inView || document.hidden) return;
+      running = true;
+      last = performance.now();
+      raf = requestAnimationFrame(draw);
+    };
+    const stop = () => {
+      running = false;
+      cancelAnimationFrame(raf);
+    };
+    const io = new IntersectionObserver(
+      (entries) => {
+        inView = Boolean(entries[0]?.isIntersecting);
+        if (inView) start();
+        else stop();
+      },
+      { threshold: 0 },
+    );
+    io.observe(wrap);
+    const onVisibility = () => {
+      if (document.hidden) stop();
+      else start();
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+
     resize();
-    raf = requestAnimationFrame(draw);
+    start();
     window.addEventListener("resize", resize);
     wrap.addEventListener("pointermove", onMove);
     wrap.addEventListener("pointerleave", onLeave);
     wrap.addEventListener("pointerdown", onMove);
 
     return () => {
-      cancelAnimationFrame(raf);
+      stop();
+      io.disconnect();
+      document.removeEventListener("visibilitychange", onVisibility);
       window.removeEventListener("resize", resize);
       wrap.removeEventListener("pointermove", onMove);
       wrap.removeEventListener("pointerleave", onLeave);
