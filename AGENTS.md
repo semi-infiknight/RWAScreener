@@ -5,6 +5,7 @@
 2. **Quote screener (later):** niche tracker for Meteora DBC 0.2.1 stock-as-quote launches — seed badged quote mints → DBC pools after cutoff → group by config/fee_claimer → label launchpads.
 
 ## Read first
+- **docs/CLOUD-RESUME.md** — handoff for a new session (live topology + what’s already shipped)
 - **docs/ETHOS.md** — operator intent for the ecosystem monitor/feed (keep even if unimplemented)
 - docs/SPEC.md
 - docs/PATTERNS.md

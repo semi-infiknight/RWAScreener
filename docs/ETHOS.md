@@ -114,7 +114,7 @@ These were asked for and are **not fully done**. Treat them as current requireme
 3. **All languages** — queries are agnostic; classifier is English. Non-English DBC/pad posts will be under-bucketed until we have a better gate.
 4. **Edited posts** — deleted is tombstoned; edits are not a first-class live update.
 5. **Founder handles** — pad accounts yes; founders when `projects.json` has them. Do not invent `devX`.
-6. **Premium feed chrome** — masonry + native cards shipped; a full brand/premium pass was deferred (`brand.md` in old meteco). Heading exists; visual density should stay Big Week–like (variable card size).
+6. **Premium feed chrome** — masonry + native cards shipped; a full brand/premium pass was deferred (`docs/brand.md`). Heading exists; visual density should stay Big Week–like (variable card size).
 7. **Memes bucket vs public lane** — culture bucket exists; public ecosystem lane stays builder/DBC/drama. Do not dump shitposts back on the homepage without being asked.
 8. **Pad-first ranking** — tried, buried fresh posts, **reverted to newest-first**. Do not reintroduce a rank that hides today’s StonkOptions/Ember/ChainRot.
 9. **Project knowledge graph** — v0 is `GET /api/projects` + harvested timelines. Not a full graph DB yet. Keep adding Stocklana/DBC builder handles as they surface. Stocklana’s 13 submissions are not listed publicly on the hackathon page.
