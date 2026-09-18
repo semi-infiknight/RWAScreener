@@ -409,7 +409,10 @@ export function EcosystemExplorer({
               <span className="hero-title-light"> DBC Screener</span>
             </span>
           </h1>
-          <p className="hero-sub">limited to stock quote mint pairs</p>
+          {/* <p className="hero-sub">limited to stock quote mint pairs</p> */}
+          <p className="hero-sub">
+            platforms integrating meteora&apos;s dynamic bonding curve
+          </p>
         </div>
       </section>
 
