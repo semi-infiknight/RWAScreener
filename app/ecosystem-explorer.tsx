@@ -22,6 +22,7 @@ import {
   writeStale,
 } from "../lib/client-stale-cache";
 import { HeroDark } from "./hero-dark";
+import { PageHeroHeading } from "./components/page-hero-heading";
 
 const PAGE_SIZE = 15;
 const AVATAR_COLORS = [
@@ -393,27 +394,17 @@ export function EcosystemExplorer({
     <div className="page">
       <section className="hero">
         <HeroDark />
-        <div className="hero-lockup">
-          <h1 className="hero-title">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              className="hero-title-mark"
-              src="/favicon.svg"
-              alt=""
-              width={48}
-              height={48}
-            />
-            <span className="hero-title-text">
+        {/* meteco mark left in /favicon.svg for tab icon; do not render in hero */}
+        <PageHeroHeading
+          title={
+            <>
               <span className="hero-title-light">The </span>
               <span className="hero-title-brand">Meteora</span>
               <span className="hero-title-light"> DBC Screener</span>
-            </span>
-          </h1>
-          {/* <p className="hero-sub">limited to stock quote mint pairs</p> */}
-          <p className="hero-sub">
-            platforms integrating meteora&apos;s dynamic bonding curve
-          </p>
-        </div>
+            </>
+          }
+          subline="platforms integrating meteora's dynamic bonding curve"
+        />
       </section>
 
       <div className="shell">

@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { EcosystemFeed, FeedAboutHint } from "../components/ecosystem-feed";
+import { EcosystemFeed, FEED_ABOUT } from "../components/ecosystem-feed";
+import { PageHeroHeading } from "../components/page-hero-heading";
 import { SiteSearchNav } from "../components/site-search-nav";
 import { HeroDark } from "../hero-dark";
 
@@ -12,17 +13,15 @@ export function FeedExplorer() {
     <div className="page">
       <section className="hero">
         <HeroDark />
-        <div className="hero-lockup">
-          <div className="eco-feed-heading-row">
-            <h1 className="hero-title eco-feed-title">
-              <span className="hero-title-text">
-                <span className="hero-title-brand">Meteora</span>
-                <span className="hero-title-light"> Ecosystem feed</span>
-              </span>
-            </h1>
-            <FeedAboutHint />
-          </div>
-        </div>
+        <PageHeroHeading
+          title={
+            <>
+              <span className="hero-title-brand">Meteora</span>
+              <span className="hero-title-light"> Ecosystem feed</span>
+            </>
+          }
+          subline={FEED_ABOUT}
+        />
       </section>
 
       <div className="shell">

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { PageHeroHeading } from "../components/page-hero-heading";
 import { SiteSearchNav } from "../components/site-search-nav";
 import { HeroDark } from "../hero-dark";
 
@@ -150,23 +151,16 @@ export function QuotesExplorer() {
     <div className="page">
       <section className="hero">
         <HeroDark />
-        <div className="hero-lockup">
-          <h1 className="hero-title">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              className="hero-title-mark"
-              src="/favicon.svg"
-              alt=""
-              width={48}
-              height={48}
-            />
-            <span className="hero-title-text">
-              <span className="hero-title-light">DBC </span>
-              <span className="hero-title-brand">Quotes</span>
-            </span>
-          </h1>
-          <p className="hero-sub">badged quote mints on Meteora DBC</p>
-        </div>
+        {/* meteco mark left in /favicon.svg for tab icon; do not render in hero */}
+        <PageHeroHeading
+          title={
+            <>
+              <span className="hero-title-brand">RWA</span>
+              <span className="hero-title-light"> tokens</span>
+            </>
+          }
+          subline="pair with any of these tokens on Meteora DBC"
+        />
       </section>
 
       <div className="shell">

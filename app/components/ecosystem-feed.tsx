@@ -112,10 +112,11 @@ function fmtCount(n?: number): string {
   return `${(n / 1_000_000).toFixed(1).replace(/\.0$/, "")}M`;
 }
 
-const FEED_ABOUT =
+export const FEED_ABOUT =
   "Realtime feed of projects building on Meteora DBC (non-curated).";
 
-export function FeedAboutHint() {
+/* Info bubble retired — copy now lives as the /feed hero subline.
+function FeedAboutHint() {
   const [pinned, setPinned] = useState(false);
   const wrapRef = useRef<HTMLSpanElement>(null);
 
@@ -163,6 +164,7 @@ export function FeedAboutHint() {
     </span>
   );
 }
+*/
 
 export function EcosystemFeed({
   eager = false,
@@ -300,15 +302,13 @@ export function EcosystemFeed({
     >
       {hideHeader ? null : (
         <header className="eco-feed-lockup">
-          <div className="eco-feed-heading-row">
-            <h2 className="hero-title eco-feed-title">
-              <span className="hero-title-text">
-                <span className="hero-title-brand">Meteora</span>
-                <span className="hero-title-light"> Ecosystem feed</span>
-              </span>
-            </h2>
-            <FeedAboutHint />
-          </div>
+          <h2 className="hero-title">
+            <span className="hero-title-text">
+              <span className="hero-title-brand">Meteora</span>
+              <span className="hero-title-light"> Ecosystem feed</span>
+            </span>
+          </h2>
+          <p className="hero-sub">{FEED_ABOUT}</p>
         </header>
       )}
       <div className="eco-feed-bar">

@@ -214,7 +214,7 @@ button, input { font: inherit; color: inherit; }
 .shell {
   width: 100%;
   max-width: 980px;
-  margin: 0 auto 4rem;
+  margin: 0 auto 1.75rem;
   padding-inline: 1rem;
   box-sizing: border-box;
 }
@@ -1449,7 +1449,7 @@ td.col-name { display: flex; }
 
   .shell {
     padding-inline: 0.75rem;
-    margin-bottom: 2.5rem;
+    margin-bottom: 1.25rem;
   }
   .search-list {
     width: calc(100% - 1rem);
@@ -1852,6 +1852,7 @@ td.col-name { display: flex; }
   pointer-events: auto;
   margin: 0;
 }
+/* Feed info bubble retired — heading + subline use shared PageHeroHeading.
 .eco-feed-heading-row {
   display: inline-flex;
   align-items: center;
@@ -1903,7 +1904,6 @@ td.col-name { display: flex; }
   background: var(--panel);
   color: color-mix(in srgb, var(--text) 88%, var(--muted));
   font-size: 0.75rem;
-  font-weight: 450;
   letter-spacing: 0.005em;
   line-height: 1.4;
   text-align: left;
@@ -1940,6 +1940,7 @@ td.col-name { display: flex; }
     transition: opacity 80ms ease, visibility 0s linear 80ms;
   }
 }
+*/
 /* .eco-feed-heading { margin: 0 0 12px; font-size: 22px; font-weight: 650; letter-spacing: -0.03em; color: var(--text); } */
 .eco-feed-bar { display: flex; flex-direction: column; align-items: flex-start; gap: 4px 0; margin-bottom: 16px; }
 /* .eco-feed-status { margin: 0; font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 8px; } */
