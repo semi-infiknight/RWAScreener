@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { MotionRoot } from "./components/motion-root";
+import { SiteFooter } from "./components/site-footer";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -18,7 +19,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <MotionRoot>{children}</MotionRoot>
+        <MotionRoot>
+          {children}
+          <SiteFooter />
+        </MotionRoot>
       </body>
     </html>
   );
