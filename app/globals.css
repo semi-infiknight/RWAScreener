@@ -47,6 +47,61 @@ button, input { font: inherit; color: inherit; }
   overflow-x: clip;
 }
 
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.65rem 1.25rem;
+  background: rgba(7, 7, 8, 0.86);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+}
+.site-header-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  flex-shrink: 0;
+}
+.site-header-brand-text {
+  font-size: 0.95rem;
+}
+.site-header-nav {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.55rem;
+  margin-left: auto;
+}
+.site-header-link {
+  color: var(--muted);
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 0.4rem 0.55rem;
+}
+.site-header-link:hover,
+.site-header-link.is-active {
+  color: var(--text);
+}
+.site-header-cta {
+  background: var(--accent);
+  color: var(--accent-ink) !important;
+  border-radius: 999px;
+  padding: 0.55rem 1rem;
+  font-weight: 700;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+.site-header-cta:hover {
+  background: var(--accent-2);
+}
+
 .topnav {
   position: sticky;
   top: 0;

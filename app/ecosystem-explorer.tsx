@@ -664,19 +664,6 @@ export function EcosystemExplorer({
           ) : null}
         </div>
 
-        <div className="footer-cta">
-          <Link href="/quotes" className="footer-cta-secondary">
-            Quotes
-          </Link>
-          <a
-            href="https://docs.meteora.ag/core-products/dbc/what-is-dbc"
-            target="_blank"
-            rel="noreferrer"
-          >
-            Build on Meteora DBC →
-          </a>
-        </div>
-
         <EcosystemFeed />
       </div>
     </div>
