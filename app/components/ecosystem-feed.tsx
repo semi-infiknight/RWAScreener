@@ -324,7 +324,7 @@ export function EcosystemFeed({
                   className={`eco-tab ${lane === l ? "is-active" : ""}`}
                   onClick={() => setLane(l)}
                 >
-                  {l === "official" ? "Official" : "Ecosystem"}
+                  {l === "official" ? "Meteora accounts" : "Ecosystem Projects"}
                 </button>
               ))}
             </div>
