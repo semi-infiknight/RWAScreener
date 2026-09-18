@@ -1,5 +1,5 @@
 {
-  "note": "Launchpad platform tokens only. Jupiter-verified mints with a matching pad website. Do not invent mints. Bags / Revshare omitted until an official CA is verified.",
+  "note": "Launchpad platform tokens only. Prefer Jupiter-verified mints with a matching pad website. Do not invent mints. Revshare omitted until an official CA is verified.",
   "tokens": [
     {
       "launchpadId": "embercurve",
@@ -37,6 +37,13 @@
       "symbol": "ETHICS",
       "mint": "3SXQSMVWTf6rZaJiXn3tHNpNEKLeTK1FShFR3s4fxSUR",
       "website": "https://ethics.ltd"
+    },
+    {
+      "launchpadId": "bags",
+      "symbol": "BAGS",
+      "mint": "6ZM6Dz4z9kDWoeBxrB33qV48B6fWMJiFT2s3aVVfBAGS",
+      "website": "https://bags.fm/6ZM6Dz4z9kDWoeBxrB33qV48B6fWMJiFT2s3aVVfBAGS",
+      "note": "Official $BAGS on bags.fm (BagsApp / @BagsApp). Not Jupiter-verified; mcap may be thin."
     },
     {
       "launchpadId": "otcdesks",

@@ -9,6 +9,23 @@ import {
 const known = new Set(["embercurve", "bags", "stardotfun"]);
 
 describe("platform token seed", () => {
+  it("accepts the official Bags $BAGS mint", () => {
+    const rows = parsePlatformTokenSeed(
+      {
+        tokens: [
+          {
+            launchpadId: "bags",
+            symbol: "BAGS",
+            mint: "6ZM6Dz4z9kDWoeBxrB33qV48B6fWMJiFT2s3aVVfBAGS",
+          },
+        ],
+      },
+      known,
+    );
+    assert.equal(rows.length, 1);
+    assert.equal(rows[0].symbol, "BAGS");
+  });
+
   it("accepts a verified mint for a known pad", () => {
     const rows = parsePlatformTokenSeed(
       {

@@ -55,8 +55,9 @@ Source of truth for the **quote screener** is **quote → pool → config**, not
 
 Optional homepage **Token** column: each launchpad’s own token + Jupiter mcap.
 
-- Only Jupiter-verified mints with a matching pad website.
-- Never invent a mint. Bags / Revshare stay blank until an official CA is verified.
+- Prefer Jupiter-verified mints with a matching pad website.
+- Never invent a mint. Revshare stays blank until an official CA is verified.
+- BAGS: `6ZM6Dz4z9kDWoeBxrB33qV48B6fWMJiFT2s3aVVfBAGS` from the official bags.fm token page (`$BAGS` / BagsApp / @BagsApp).
 - STAR on Stonk Options is the Star.fun ecosystem token (buybacks), not a pad-issued token.
 
 ## Launchpad labels (`launchpad-labels.json`)
