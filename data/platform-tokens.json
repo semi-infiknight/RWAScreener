@@ -39,11 +39,10 @@
       "website": "https://ethics.ltd"
     },
     {
-      "launchpadId": "bags",
-      "symbol": "BAGS",
-      "mint": "6ZM6Dz4z9kDWoeBxrB33qV48B6fWMJiFT2s3aVVfBAGS",
-      "website": "https://bags.fm/6ZM6Dz4z9kDWoeBxrB33qV48B6fWMJiFT2s3aVVfBAGS",
-      "note": "Official $BAGS on bags.fm (BagsApp / @BagsApp). Not Jupiter-verified; mcap may be thin."
+      "launchpadId": "purps",
+      "symbol": "PURPS",
+      "mint": "purpFPo5voy6fEu8jxSCwVdMs1zyYEYAH6FBQvTYCZK",
+      "website": "https://purps.lol/"
     },
     {
       "launchpadId": "otcdesks",

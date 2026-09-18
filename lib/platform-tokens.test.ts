@@ -6,24 +6,24 @@ import {
   parsePlatformTokenSeed,
 } from "./platform-tokens-map.ts";
 
-const known = new Set(["embercurve", "bags", "stardotfun"]);
+const known = new Set(["embercurve", "purps", "stardotfun"]);
 
 describe("platform token seed", () => {
-  it("accepts the official Bags $BAGS mint", () => {
+  it("accepts the Jupiter-verified PURPS mint", () => {
     const rows = parsePlatformTokenSeed(
       {
         tokens: [
           {
-            launchpadId: "bags",
-            symbol: "BAGS",
-            mint: "6ZM6Dz4z9kDWoeBxrB33qV48B6fWMJiFT2s3aVVfBAGS",
+            launchpadId: "purps",
+            symbol: "PURPS",
+            mint: "purpFPo5voy6fEu8jxSCwVdMs1zyYEYAH6FBQvTYCZK",
           },
         ],
       },
       known,
     );
     assert.equal(rows.length, 1);
-    assert.equal(rows[0].symbol, "BAGS");
+    assert.equal(rows[0].symbol, "PURPS");
   });
 
   it("accepts a verified mint for a known pad", () => {
@@ -53,8 +53,8 @@ describe("platform token seed", () => {
             mint: "5dvXTZ5qwgafnHtwu3Ls3QrWx1U4LQsFeCuJgkk4QEC6",
           },
           {
-            launchpadId: "bags",
-            symbol: "BAGS",
+            launchpadId: "purps",
+            symbol: "PURPS",
             mint: "not-a-mint",
           },
           {

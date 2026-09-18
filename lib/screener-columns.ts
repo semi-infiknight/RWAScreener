@@ -50,9 +50,29 @@ const EMBER: ScreenerColumns = {
   buy: false,
 };
 
-/** Bags public launches: identity + icon + age only for now. */
+/** Bags public launches: identity + icon + age only (off homepage — not DBC). */
 const BAGS: ScreenerColumns = {
   ...ALL_OFF,
+  age: true,
+  buy: false,
+};
+
+/** Purps /api/public/coins: mcap + holders + age (no price/vol/liq). */
+const PURPS: ScreenerColumns = {
+  ...ALL_OFF,
+  fdv: true,
+  holders: true,
+  age: true,
+  buy: false,
+};
+
+/** Trends /v1/token/ranking: price, mcap, vol, holders, age (no liq/spark). */
+const TRENDS: ScreenerColumns = {
+  ...ALL_OFF,
+  price: true,
+  fdv: true,
+  volume: true,
+  holders: true,
   age: true,
   buy: false,
 };
@@ -128,6 +148,8 @@ const BY_PAD: Record<string, ScreenerColumns> = {
   ethics: ETHICS,
   embercurve: EMBER,
   bags: BAGS,
+  purps: PURPS,
+  trends: TRENDS,
   perpspad: PERPSPAD,
   clawpump: CLAWPUMP,
   lfgown: LFGOWN,

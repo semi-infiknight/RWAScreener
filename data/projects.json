@@ -173,7 +173,7 @@
       "summary": "Launch a coin and earn royalties from every trade. Bags is a creator-funding launchpad on Solana and Robinhood Chain — launch, trade, claim fees, and share royalties with fee claimers via the app, API, SDK, or CLI.",
       "built": [
         "Token Launch v2 with Bags Fee Share (explicit BPS, up to 100 claimers)",
-        "Meteora DBC launches plus DAMM v2 pools — including non-SOL quotes (xStocks / badged mints)",
+        "DAMM v2 pools — including non-SOL quotes (xStocks / badged mints)",
         "Partner keys, launch intent URLs, and claim flows for creators & partners",
         "Bags CLI + TypeScript SDK for programmatic launches and trades",
         "Robinhood Chain launches, trading, and index (dividend) tokens"
@@ -181,13 +181,12 @@
       "status": "live",
       "verified": [
         "docs_program_ids",
-        "dbc_program",
         "damm_v2"
       ],
       "contact": "unknown",
       "dbc": {
-        "integrated": true,
-        "evidence": "docs.bags.fm program IDs list Meteora DBC dbcij3LWUppWqq96dh6gJWwBifmcGfLSB5D4DuSMaqN",
+        "integrated": false,
+        "evidence": "Public Bags catalog is DAMM v2 / xStock launches, not Meteora DBC. Off the DBC homepage screener.",
         "configKeys": [],
         "feeClaimers": []
       },
@@ -206,11 +205,100 @@
         }
       ],
       "icon": "/avatars/bags.jpg",
-      "screenerLive": true,
+      "screenerLive": false,
       "github": "https://github.com/bagsfm",
       "devX": null,
       "devGithub": null,
       "sortOrder": 4
+    },
+    {
+      "id": "purps",
+      "displayName": "Purps",
+      "slug": "purps",
+      "website": "https://purps.lol/",
+      "x": "https://x.com/buypurps",
+      "docs": null,
+      "summary": "Meteora DBC launchpad with fee share, buybacks, and holder payouts on Solana.",
+      "built": [
+        "Public coins catalog with Meteora origin launches",
+        "DBC PartnerMetadata fee_claimer PURPS",
+        "Flagship PURPS token with live mcap"
+      ],
+      "status": "live",
+      "verified": [
+        "public_site",
+        "api_coins",
+        "dbc_partner_metadata"
+      ],
+      "contact": "unknown",
+      "dbc": {
+        "integrated": true,
+        "evidence": "DBC PartnerMetadata PDA 6ZZrNPme8cLg19B6DtdB4QhyH6Jfy83JRABahojGY78B: fee_claimer Fgi5M4W2VzoHWbvcv6RWJRVcJu91frZ18ttGJzMJZu1z; on-chain name=PURPS, website=https://purps.lol/. List SoT: GET /api/public/coins filtered to origin launchpad|meteora, chain=solana.",
+        "configKeys": [],
+        "feeClaimers": [
+          "Fgi5M4W2VzoHWbvcv6RWJRVcJu91frZ18ttGJzMJZu1z"
+        ]
+      },
+      "sources": [
+        {
+          "label": "Site",
+          "url": "https://purps.lol/"
+        },
+        {
+          "label": "X",
+          "url": "https://x.com/buypurps"
+        }
+      ],
+      "notes": "Screener: origin launchpad or meteora, Solana only. Graduation from launch.migrated. Metrics: mcap + holders + createdAt (no volume in payload).",
+      "icon": "/avatars/purps.jpg",
+      "screenerLive": true,
+      "github": null,
+      "devX": null,
+      "devGithub": null,
+      "sortOrder": 10
+    },
+    {
+      "id": "trends",
+      "displayName": "Trends",
+      "slug": "trends",
+      "website": "https://trends.fun/",
+      "x": "https://x.com/trendsdotfun",
+      "docs": null,
+      "summary": "Launch coins on Meteora DBC tied to X trends and creator rewards.",
+      "built": [
+        "Token ranking catalog with bonding-curve and migrate status",
+        "DBC config + bonding curve addresses on each row",
+        "24h volume, mcap, holders from the public ranking API"
+      ],
+      "status": "live",
+      "verified": [
+        "public_site",
+        "api_ranking"
+      ],
+      "contact": "unknown",
+      "dbc": {
+        "integrated": true,
+        "evidence": "api.trends.fun/v1/token/ranking rows include bonding_curve_address, config_address, and stats.migrate_status. Site trends.fun.",
+        "configKeys": [],
+        "feeClaimers": []
+      },
+      "sources": [
+        {
+          "label": "Site",
+          "url": "https://trends.fun/"
+        },
+        {
+          "label": "X",
+          "url": "https://x.com/trendsdotfun"
+        }
+      ],
+      "notes": "Screener: GET /v1/token/ranking (Origin trends.fun). migrate_status===2 graduated. No verified platform-token mint.",
+      "icon": "/avatars/trends.jpg",
+      "screenerLive": true,
+      "github": null,
+      "devX": null,
+      "devGithub": null,
+      "sortOrder": 11
     },
     {
       "id": "perpspad",

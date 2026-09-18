@@ -25,8 +25,10 @@ Labels describe **what we know** and **our relationship**. They are **not** endo
 
 Per-launchpad screener rows. Shape is defined in `lib/tokens.ts`.
 
-- **Bags** rows are refreshed from the Bags public API (real mints). Metrics stay `null` until a pricing source is wired — never invent numbers.
+- Bags is **not** on the DBC homepage screener (`screenerLive: false`). Public Bags launches are DAMM v2 / xStock, not DBC.
 - **StonkOptions** (`launchpadId: stardotfun`) live feed: `indexer.canary.stonkoptions.xyz/v2/catalog`.
+- **Purps** live feed: `purps.lol/api/public/coins` (`origin` launchpad|meteora, Solana).
+- **Trends** live feed: `api.trends.fun/v1/token/ranking`.
 - Other launchpads may still be draft frontend seeds.
 
 ### Refresh Bags tokens
@@ -57,8 +59,9 @@ Optional homepage **Token** column: each launchpad’s own token + Jupiter mcap.
 
 - Prefer Jupiter-verified mints with a matching pad website.
 - Never invent a mint. Revshare stays blank until an official CA is verified.
-- BAGS: `6ZM6Dz4z9kDWoeBxrB33qV48B6fWMJiFT2s3aVVfBAGS` from the official bags.fm token page (`$BAGS` / BagsApp / @BagsApp).
+- PURPS: `purpFPo5voy6fEu8jxSCwVdMs1zyYEYAH6FBQvTYCZK` (Jupiter, website purps.lol).
 - STAR on Stonk Options is the Star.fun ecosystem token (buybacks), not a pad-issued token.
+- Trends has no verified platform-token mint yet — Token column stays —.
 
 ## Launchpad labels (`launchpad-labels.json`)
 

@@ -1,7 +1,7 @@
 /**
  * Homepage launchpad rollups — shared by /api/pads/summary and SSR peek.
  */
-import { fetchBagsTokens } from "./bags";
+// import { fetchBagsTokens } from "./bags";
 import { fetchClawPumpTokens } from "./clawpump";
 import { fetchEmberCurveTokens } from "./embercurve";
 import { fetchEthicsTokens } from "./ethics";
@@ -20,8 +20,10 @@ import {
 import { fetchPerpspadTokens } from "./perpspad";
 import { getProject, isScreenerLive, projects } from "./projects";
 import { fetchOtcDesksTokens } from "./otcdesks";
+import { fetchPurpsTokens } from "./purps";
 import { fetchRevShareTokens } from "./revshare";
 import { fetchStonkOptionsTokens } from "./stonkoptions";
+import { fetchTrendsTokens } from "./trends";
 import type { TokenRow } from "./tokens";
 
 export type PadSummaryRow = PadAggregate & {
@@ -36,8 +38,13 @@ async function loadPadTokens(padId: string): Promise<TokenRow[]> {
       return fetchEmberCurveTokens({ phase: "fast" });
     case "lfgown":
       return fetchLfgownTokens({ enrichIcons: false });
-    case "bags":
-      return fetchBagsTokens({ phase: "fast" });
+    // Bags: not DBC — keep fetchBagsTokens for /api/pads/bags, not homepage.
+    // case "bags":
+    //   return fetchBagsTokens({ phase: "fast" });
+    case "purps":
+      return fetchPurpsTokens({ phase: "fast" });
+    case "trends":
+      return fetchTrendsTokens({ phase: "fast" });
     case "perpspad": {
       const body = await fetchPerpspadTokens({ phase: "fast" });
       return Array.isArray(body.tokens) ? body.tokens : [];
