@@ -57,11 +57,11 @@ function redisUrl(): string | undefined {
 
 export function padCacheKey(padId: string, phase: string): string {
   const p = phase === "fast" ? "fast" : "full";
-  return `padfeed:${padId}:${p}`;
+  return `padfeed:v2:${padId}:${p}`;
 }
 
 export function padSummaryCacheKey(padId: string): string {
-  return `padsummary:${padId}`;
+  return `padsummary:v2:${padId}`;
 }
 
 async function getRedis(): Promise<RedisClientType | null> {
