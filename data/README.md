@@ -61,7 +61,7 @@ Optional homepage **Token** column: each launchpad’s own token + Jupiter mcap.
 - Never invent a mint. Revshare stays blank until an official CA is verified.
 - PURPS: `purpFPo5voy6fEu8jxSCwVdMs1zyYEYAH6FBQvTYCZK` (Jupiter, website purps.lol).
 - STAR on Stonk Options is the Star.fun ecosystem token (buybacks), not a pad-issued token.
-- Trends has no verified platform-token mint yet — Token column stays —.
+- TRENDS (Trends App / Token Media, `@trendsdotrun` — not trends.fun): `3W3K5i4T2vARM1UzJHh48dw4uNhjtg3Wk8GS2inmNUZV` (official X bio CA + Jupiter id match; website App Store listing).
 
 ## Launchpad labels (`launchpad-labels.json`)
 

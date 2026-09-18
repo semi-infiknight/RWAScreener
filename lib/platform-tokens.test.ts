@@ -6,7 +6,7 @@ import {
   parsePlatformTokenSeed,
 } from "./platform-tokens-map.ts";
 
-const known = new Set(["embercurve", "purps", "stardotfun"]);
+const known = new Set(["embercurve", "purps", "stardotfun", "trends"]);
 
 describe("platform token seed", () => {
   it("accepts the Jupiter-verified PURPS mint", () => {
@@ -24,6 +24,30 @@ describe("platform token seed", () => {
     );
     assert.equal(rows.length, 1);
     assert.equal(rows[0].symbol, "PURPS");
+  });
+
+  it("accepts the Trends App TRENDS mint", () => {
+    const rows = parsePlatformTokenSeed(
+      {
+        tokens: [
+          {
+            launchpadId: "trends",
+            symbol: "TRENDS",
+            mint: "3W3K5i4T2vARM1UzJHh48dw4uNhjtg3Wk8GS2inmNUZV",
+            website:
+              "https://apps.apple.com/us/app/trends-social/id6754299493",
+          },
+        ],
+      },
+      known,
+    );
+    assert.equal(rows.length, 1);
+    assert.equal(rows[0].launchpadId, "trends");
+    assert.equal(rows[0].symbol, "TRENDS");
+    assert.equal(
+      rows[0].mint,
+      "3W3K5i4T2vARM1UzJHh48dw4uNhjtg3Wk8GS2inmNUZV",
+    );
   });
 
   it("accepts a verified mint for a known pad", () => {

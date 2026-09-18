@@ -14,7 +14,7 @@ import {
 import { projects } from "./projects";
 
 const JUPITER_UA = "meteora.fyi-platform-tokens/1.0";
-const CACHE_KEY = "pad:platform-tokens:v2";
+const CACHE_KEY = "pad:platform-tokens:v3";
 
 export type { PlatformTokenMap, PlatformTokenRow, PlatformTokenSeed };
 

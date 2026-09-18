@@ -49,6 +49,12 @@
       "symbol": "OTC",
       "mint": "MukLDtJ8Cx9DxLbeyLRSWPSposTMWuwHANbuaudpump",
       "website": "https://otcdesks.cash/"
+    },
+    {
+      "launchpadId": "trends",
+      "symbol": "TRENDS",
+      "mint": "3W3K5i4T2vARM1UzJHh48dw4uNhjtg3Wk8GS2inmNUZV",
+      "website": "https://apps.apple.com/us/app/trends-social/id6754299493"
     }
   ]
 }
