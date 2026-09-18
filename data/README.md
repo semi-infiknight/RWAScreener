@@ -51,6 +51,14 @@ Source of truth for the **quote screener** is **quote → pool → config**, not
 - Do not invent mint addresses. Do not expand this list from Bags / other pad APIs.
 - `tokens.json` Bags rows stay as **temporary UI fill** for the ecosystem dashboard. StonkOptions (`stardotfun`) is live from the pad indexer, not `tokens.json`.
 
+## Platform tokens (`platform-tokens.json`)
+
+Optional homepage **Token** column: each launchpad’s own token + Jupiter mcap.
+
+- Only Jupiter-verified mints with a matching pad website.
+- Never invent a mint. Bags / Revshare stay blank until an official CA is verified.
+- STAR on Stonk Options is the Star.fun ecosystem token (buybacks), not a pad-issued token.
+
 ## Launchpad labels (`launchpad-labels.json`)
 
 `fee_claimer → label` map. Only proven pad mappings (pad API / docs / on-chain pool+config overlap). Unknown claimers stay as pubkey — do not invent Bags / Perpspad / other pubkeys.

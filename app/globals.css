@@ -1490,6 +1490,22 @@ td.col-name { display: flex; }
 .pad-table .col-name {
   min-width: 12rem;
 }
+.pad-token {
+  display: flex;
+  flex-direction: column;
+  gap: 0.08rem;
+  line-height: 1.15;
+}
+.pad-token-sym {
+  font-size: 0.8rem;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+  color: #e4e4e7;
+}
+.pad-token-mcap {
+  font-size: 0.72rem;
+  color: #a1a1aa;
+}
 .pad-table .col-action {
   text-align: right;
   white-space: nowrap;

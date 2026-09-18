@@ -1,0 +1,48 @@
+{
+  "note": "Launchpad platform tokens only. Jupiter-verified mints with a matching pad website. Do not invent mints. Bags / Revshare omitted until an official CA is verified.",
+  "tokens": [
+    {
+      "launchpadId": "embercurve",
+      "symbol": "EMBER",
+      "mint": "5dvXTZ5qwgafnHtwu3Ls3QrWx1U4LQsFeCuJgkk4QEC6",
+      "website": "https://embercurve.fun"
+    },
+    {
+      "launchpadId": "lfgown",
+      "symbol": "LFOWN",
+      "mint": "5gDnzAC4EEFmTjFzFjHUXS7wx5Cdvi2NTKGZT61meta",
+      "website": "https://letsfuckingown.fun/"
+    },
+    {
+      "launchpadId": "stardotfun",
+      "symbol": "STAR",
+      "mint": "StargWr5r6r8gZSjmEKGZ1dmvKWkj79r2z1xqjFstar",
+      "website": "https://star.fun/",
+      "note": "Star.fun ecosystem token (Stonk Options buybacks STAR; pad has no separate token)."
+    },
+    {
+      "launchpadId": "perpspad",
+      "symbol": "PERPSPAD",
+      "mint": "PerPsCe2SJ7Q25CN4R5TTX4fmBdmknE2hQmqCt96fHL",
+      "website": "https://perpspad.fun/"
+    },
+    {
+      "launchpadId": "clawpump",
+      "symbol": "CLAW",
+      "mint": "739dnZEG4yaBWFsY8L8ZwrfhGG6dhtCSercW8Umspump",
+      "website": "https://www.clawpump.tech/"
+    },
+    {
+      "launchpadId": "ethics",
+      "symbol": "ETHICS",
+      "mint": "3SXQSMVWTf6rZaJiXn3tHNpNEKLeTK1FShFR3s4fxSUR",
+      "website": "https://ethics.ltd"
+    },
+    {
+      "launchpadId": "otcdesks",
+      "symbol": "OTC",
+      "mint": "MukLDtJ8Cx9DxLbeyLRSWPSposTMWuwHANbuaudpump",
+      "website": "https://otcdesks.cash/"
+    }
+  ]
+}

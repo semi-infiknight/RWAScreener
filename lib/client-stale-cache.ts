@@ -55,6 +55,10 @@ export function writeStale<T>(name: string, value: T): void {
 export const HOME_METRICS_CACHE = "home-pad-metrics";
 export const HOME_METRICS_MAX_AGE_MS = 10 * 60 * 1000;
 
+/** Homepage launchpad platform-token mcaps. */
+export const HOME_PLATFORM_TOKENS_CACHE = "home-platform-tokens";
+export const HOME_PLATFORM_TOKENS_MAX_AGE_MS = 10 * 60 * 1000;
+
 /** Live pad token list — keep up to 5 minutes. */
 export function padTokensCacheKey(padId: string): string {
   return `pad-tokens:${padId}`;

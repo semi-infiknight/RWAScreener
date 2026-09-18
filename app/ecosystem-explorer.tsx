@@ -10,9 +10,14 @@ import type { Project } from "../lib/projects";
 import { isScreenerLive } from "../lib/projects";
 import { EcosystemFeed } from "./components/ecosystem-feed";
 import { formatUsd } from "../lib/tokens";
+import type { PlatformTokenMap } from "../lib/platform-tokens-map";
+import { parsePlatformTokenSeed } from "../lib/platform-tokens-map";
+import platformTokenSeedFile from "../data/platform-tokens.json";
 import {
   HOME_METRICS_CACHE,
   HOME_METRICS_MAX_AGE_MS,
+  HOME_PLATFORM_TOKENS_CACHE,
+  HOME_PLATFORM_TOKENS_MAX_AGE_MS,
   readStale,
   writeStale,
 } from "../lib/client-stale-cache";
@@ -37,7 +42,8 @@ type SortKey =
   | "graduated"
   | "mcapUsd"
   | "volume24hUsd"
-  | "liquidityUsd";
+  | "liquidityUsd"
+  | "platformMcapUsd";
 
 type PadMetricsMap = Record<string, PadAggregate | undefined>;
 
@@ -113,10 +119,12 @@ function parsePadRow(body: unknown, resOk: boolean): PadAggregate | null {
 export function EcosystemExplorer({
   projects,
   initialMetrics = {},
+  initialPlatformTokens = {},
 }: {
   projects: Project[];
   /** SSR Redis peek — shared snapshot for every visitor, including first paint. */
   initialMetrics?: PadMetricsMap;
+  initialPlatformTokens?: PlatformTokenMap;
 }) {
   const [query, setQuery] = useState("");
   const [visible, setVisible] = useState(PAGE_SIZE);
@@ -129,6 +137,18 @@ export function EcosystemExplorer({
     const fromSession = stale?.value ?? {};
     return { ...fromSession, ...initialMetrics };
   });
+  const [platformTokens, setPlatformTokens] = useState<PlatformTokenMap>(
+    () => {
+      const stale = readStale<PlatformTokenMap>(
+        HOME_PLATFORM_TOKENS_CACHE,
+        HOME_PLATFORM_TOKENS_MAX_AGE_MS,
+      );
+      return { ...(stale?.value ?? {}), ...initialPlatformTokens };
+    },
+  );
+  const [platformTokensLoaded, setPlatformTokensLoaded] = useState(
+    () => Object.keys(initialPlatformTokens).length > 0,
+  );
   const [sort, setSort] = useState<SortKey>("sortOrder");
   const [asc, setAsc] = useState(true);
   /** False until a column header is clicked — default = curated sortOrder. */
@@ -226,6 +246,43 @@ export function EcosystemExplorer({
     };
   }, [projects, initialMetrics]);
 
+  useEffect(() => {
+    if (Object.keys(initialPlatformTokens).length > 0) {
+      writeStale(HOME_PLATFORM_TOKENS_CACHE, { ...initialPlatformTokens });
+    }
+    let cancelled = false;
+    const ac = new AbortController();
+    void (async () => {
+      try {
+        const res = await fetch("/api/pads/platform-tokens", {
+          signal: ac.signal,
+        });
+        const body = (await res.json().catch(() => ({}))) as {
+          tokens?: PlatformTokenMap;
+        };
+        if (cancelled || !res.ok || !body.tokens) {
+          if (!cancelled) setPlatformTokensLoaded(true);
+          return;
+        }
+        setPlatformTokens(body.tokens);
+        writeStale(HOME_PLATFORM_TOKENS_CACHE, body.tokens);
+      } catch (err) {
+        if (
+          cancelled ||
+          (err instanceof DOMException && err.name === "AbortError")
+        ) {
+          return;
+        }
+      } finally {
+        if (!cancelled) setPlatformTokensLoaded(true);
+      }
+    })();
+    return () => {
+      cancelled = true;
+      ac.abort();
+    };
+  }, [initialPlatformTokens]);
+
   const metricsPending = useMemo(() => {
     return projects.some((p) => isScreenerLive(p) && metrics[p.id] === undefined);
   }, [projects, metrics]);
@@ -248,6 +305,14 @@ export function EcosystemExplorer({
     // Hide when almost no pads report liq (after enrich).
     return n >= 2;
   }, [metrics, metricsPending]);
+
+  const platformSeedByPad = useMemo(() => {
+    const rows = parsePlatformTokenSeed(
+      platformTokenSeedFile,
+      new Set(projects.map((p) => p.id)),
+    );
+    return Object.fromEntries(rows.map((r) => [r.launchpadId, r]));
+  }, [projects]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -279,6 +344,17 @@ export function EcosystemExplorer({
           ? curatedOrder(a) - curatedOrder(b)
           : curatedOrder(b) - curatedOrder(a);
       }
+      if (sort === "platformMcapUsd") {
+        const aM = platformTokens[a.id]?.mcapUsd;
+        const bM = platformTokens[b.id]?.mcapUsd;
+        const aMissing = aM == null || Number.isNaN(aM);
+        const bMissing = bM == null || Number.isNaN(bM);
+        if (aMissing !== bMissing) return aMissing ? 1 : -1;
+        if (aMissing && bMissing) return curatedOrder(a) - curatedOrder(b);
+        return asc
+          ? (aM as number) - (bM as number)
+          : (bM as number) - (aM as number);
+      }
       const aLive = isScreenerLive(a);
       const bLive = isScreenerLive(b);
       const am = aLive ? metrics[a.id] : undefined;
@@ -295,7 +371,7 @@ export function EcosystemExplorer({
       return asc ? av - bv : bv - av;
     });
     return list;
-  }, [filtered, metrics, sort, asc, userSorted]);
+  }, [filtered, metrics, platformTokens, sort, asc, userSorted]);
 
   const shown = sorted.slice(0, visible);
 
@@ -370,6 +446,15 @@ export function EcosystemExplorer({
                 <thead>
                   <tr>
                     <th className="col-name">Name</th>
+                    <th>
+                      <button
+                        type="button"
+                        className="sort-btn"
+                        onClick={() => toggleSort("platformMcapUsd")}
+                      >
+                        Token{mark("platformMcapUsd")}
+                      </button>
+                    </th>
                     <th>
                       <button
                         type="button"
@@ -471,6 +556,40 @@ export function EcosystemExplorer({
                               </div>
                             </span>
                           </Link>
+                        </td>
+                        <td
+                          className="pad-token-cell"
+                          aria-busy={
+                            Boolean(platformSeedByPad[p.id]) &&
+                            platformTokens[p.id]?.mcapUsd == null &&
+                            !platformTokensLoaded
+                              ? true
+                              : undefined
+                          }
+                        >
+                          {(() => {
+                            const seed = platformSeedByPad[p.id];
+                            if (!seed) return "—";
+                            const tok = platformTokens[p.id];
+                            const symbol = tok?.symbol ?? seed.symbol;
+                            const mint = tok?.mint ?? seed.mint;
+                            return (
+                              <span
+                                className="pad-token"
+                                title={`${symbol} · ${mint}`}
+                              >
+                                <span className="pad-token-sym">{symbol}</span>
+                                <span className="pad-token-mcap num">
+                                  {tok?.mcapUsd == null &&
+                                  !platformTokensLoaded ? (
+                                    <CellLoader />
+                                  ) : (
+                                    formatUsd(tok?.mcapUsd ?? null)
+                                  )}
+                                </span>
+                              </span>
+                            );
+                          })()}
                         </td>
                         <td className="num" aria-busy={rowLoading || undefined}>
                           {fmtCount(m?.coins, rowLoading, live)}
