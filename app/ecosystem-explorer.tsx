@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import Link from "next/link";
-import { SiteDock } from "./components/site-dock";
+import { SiteSearchNav } from "./components/site-search-nav";
 import {
   FAILED_PAD_AGGREGATE,
   type PadAggregate,
@@ -418,28 +418,14 @@ export function EcosystemExplorer({
 
       <div className="shell">
         <div className="panel">
-          <label className="search search-list">
-            <SearchIcon />
-            <input
-              value={query}
-              onChange={(e) => {
-                setQuery(e.target.value);
-                setVisible(PAGE_SIZE);
-              }}
-              placeholder="Search"
-              aria-label="Search projects"
-            />
-            {query ? (
-              <button
-                type="button"
-                className="ext"
-                aria-label="Clear search"
-                onClick={() => setQuery("")}
-              >
-                ×
-              </button>
-            ) : null}
-          </label>
+          <SiteSearchNav
+            value={query}
+            onChange={(v) => {
+              setQuery(v);
+              setVisible(PAGE_SIZE);
+            }}
+            ariaLabel="Search projects"
+          />
 
           <div className="pad-table-wrap">
             {shown.length === 0 ? (
@@ -663,18 +649,8 @@ export function EcosystemExplorer({
             </div>
           ) : null}
         </div>
-
-        <SiteDock />
       </div>
     </div>
   );
 }
 
-function SearchIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" />
-      <path d="M20 20l-3.5-3.5" stroke="currentColor" strokeWidth="2" />
-    </svg>
-  );
-}

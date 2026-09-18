@@ -115,7 +115,7 @@ function fmtCount(n?: number): string {
 const FEED_ABOUT =
   "Realtime feed of projects building on Meteora DBC (non-curated).";
 
-function FeedAboutHint() {
+export function FeedAboutHint() {
   const [pinned, setPinned] = useState(false);
   const wrapRef = useRef<HTMLSpanElement>(null);
 
@@ -164,7 +164,10 @@ function FeedAboutHint() {
   );
 }
 
-export function EcosystemFeed({ eager = false }: { eager?: boolean } = {}) {
+export function EcosystemFeed({
+  eager = false,
+  hideHeader = false,
+}: { eager?: boolean; hideHeader?: boolean } = {}) {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -285,21 +288,29 @@ export function EcosystemFeed({ eager = false }: { eager?: boolean } = {}) {
 
   return (
     <section
-      className={eager ? "eco-feed eco-feed-page" : "eco-feed"}
+      className={
+        eager
+          ? hideHeader
+            ? "eco-feed eco-feed-page eco-feed-under-chrome"
+            : "eco-feed eco-feed-page"
+          : "eco-feed"
+      }
       ref={sectionRef}
       aria-label="Meteora Ecosystem feed"
     >
-      <header className="eco-feed-lockup">
-        <div className="eco-feed-heading-row">
-          <h2 className="hero-title eco-feed-title">
-            <span className="hero-title-text">
-              <span className="hero-title-brand">Meteora</span>
-              <span className="hero-title-light"> Ecosystem feed</span>
-            </span>
-          </h2>
-          <FeedAboutHint />
-        </div>
-      </header>
+      {hideHeader ? null : (
+        <header className="eco-feed-lockup">
+          <div className="eco-feed-heading-row">
+            <h2 className="hero-title eco-feed-title">
+              <span className="hero-title-text">
+                <span className="hero-title-brand">Meteora</span>
+                <span className="hero-title-light"> Ecosystem feed</span>
+              </span>
+            </h2>
+            <FeedAboutHint />
+          </div>
+        </header>
+      )}
       <div className="eco-feed-bar">
         {loaded && (
           <div className="eco-feed-toggles">

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { SiteDock } from "../components/site-dock";
+import { SiteSearchNav } from "../components/site-search-nav";
 import { HeroDark } from "../hero-dark";
 
 type Quote = {
@@ -171,25 +171,11 @@ export function QuotesExplorer() {
 
       <div className="shell">
         <div className="panel">
-          <label className="search search-list">
-            <SearchIcon />
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search"
-              aria-label="Search quotes"
-            />
-            {query ? (
-              <button
-                type="button"
-                className="ext"
-                aria-label="Clear search"
-                onClick={() => setQuery("")}
-              >
-                ×
-              </button>
-            ) : null}
-          </label>
+          <SiteSearchNav
+            value={query}
+            onChange={setQuery}
+            ariaLabel="Search quotes"
+          />
           {error ? <div className="empty">Error: {error}</div> : null}
           {loading ? (
             <div className="empty">Loading…</div>
@@ -309,18 +295,7 @@ export function QuotesExplorer() {
             </div>
           )}
         </div>
-
-        <SiteDock />
       </div>
     </div>
-  );
-}
-
-function SearchIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" />
-      <path d="M20 20l-3.5-3.5" stroke="currentColor" strokeWidth="2" />
-    </svg>
   );
 }
