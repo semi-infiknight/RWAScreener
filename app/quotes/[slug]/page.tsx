@@ -69,7 +69,7 @@ export default async function QuotePage({ params }: Props) {
     <div className="page">
       <main className="shell aarna-page">
         <nav className="aarna-crumbs" aria-label="Breadcrumb">
-          <Link href="/quotes">Quotes</Link>
+          <Link href="/quotes">RWA Tokens</Link>
           <span aria-hidden>›</span>
           <span>{q.symbol}</span>
         </nav>

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { EcosystemFeed } from "../components/ecosystem-feed";
+import { SiteDock } from "../components/site-dock";
 
 export const dynamic = "force-dynamic";
 
@@ -14,6 +15,7 @@ export default function FeedPage() {
     <div className="page">
       <div className="shell">
         <EcosystemFeed eager />
+        <SiteDock />
       </div>
     </div>
   );

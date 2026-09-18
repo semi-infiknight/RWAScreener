@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import Link from "next/link";
+import { SiteDock } from "./components/site-dock";
 import {
   FAILED_PAD_AGGREGATE,
   type PadAggregate,
@@ -663,24 +664,7 @@ export function EcosystemExplorer({
           ) : null}
         </div>
 
-        <nav className="footer-cta" aria-label="Site">
-          <div className="footer-cta-dock">
-            <Link href="/feed" className="footer-cta-secondary">
-              Feed
-            </Link>
-            <Link href="/quotes" className="footer-cta-secondary">
-              Quotes
-            </Link>
-            <a
-              className="footer-cta-primary"
-              href="https://docs.meteora.ag/core-products/dbc/what-is-dbc"
-              target="_blank"
-              rel="noreferrer"
-            >
-              Build on Meteora DBC →
-            </a>
-          </div>
-        </nav>
+        <SiteDock />
       </div>
     </div>
   );

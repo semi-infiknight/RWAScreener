@@ -430,6 +430,8 @@ button, input { font: inherit; color: inherit; }
   align-items: center;
   flex-wrap: wrap;
   gap: 0.75rem;
+  max-width: 100%;
+  overflow-x: auto;
 }
 .footer-cta a {
   background: var(--accent);
@@ -448,39 +450,127 @@ button, input { font: inherit; color: inherit; }
   color: var(--accent-2);
 }
 
-/* Connected bubble — iOS-style grouped dock under the pad table. */
+/* Connected bubble — mineral-wash liquid glass, jelly-soft segments. */
 .footer-cta-dock {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   display: inline-flex;
   align-items: center;
-  gap: 0.15rem;
-  padding: 0.28rem;
-  background: #0d0d0f;
-  border: 1px solid var(--border);
+  gap: 0.12rem;
+  max-width: 100%;
+  padding: 0.32rem;
   border-radius: 999px;
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.4);
+  background:
+    linear-gradient(165deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.04) 42%, rgba(255, 255, 255, 0.015) 100%),
+    rgba(16, 16, 20, 0.38);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.38),
+    inset 0 -12px 22px rgba(0, 0, 0, 0.32),
+    0 1px 0 rgba(255, 255, 255, 0.08),
+    0 18px 40px rgba(0, 0, 0, 0.38);
+  backdrop-filter: blur(32px) saturate(1.75);
+  -webkit-backdrop-filter: blur(32px) saturate(1.75);
+}
+.footer-cta-dock::before {
+  content: "";
+  position: absolute;
+  inset: -20%;
+  background-image: var(--wash);
+  background-size: cover;
+  opacity: 0.55;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  animation: dock-jelly-breathe 5.6s ease-in-out infinite;
+}
+.footer-cta-dock::after {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 46%;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.2),
+    rgba(255, 255, 255, 0)
+  );
+  pointer-events: none;
+}
+@keyframes dock-jelly-breathe {
+  0%,
+  100% {
+    transform: scale(1) translate3d(0, 0, 0);
+    opacity: 0.48;
+  }
+  50% {
+    transform: scale(1.08) translate3d(0, -1.5%, 0);
+    opacity: 0.72;
+  }
 }
 .footer-cta-dock a {
+  position: relative;
+  z-index: 1;
   border-radius: 999px;
-  padding: 0.7rem 1.15rem;
+  padding: 0.72rem 1.18rem;
   font-weight: 700;
   white-space: nowrap;
+  transform-origin: 50% 70%;
+  transition:
+    transform 280ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    background 160ms ease,
+    color 160ms ease,
+    box-shadow 160ms ease;
+}
+.footer-cta-dock a:hover {
+  transform: translateY(-1px) scale(1.04);
+}
+.footer-cta-dock a:active {
+  transform: scale(0.94);
 }
 .footer-cta-dock a.footer-cta-secondary {
-  background: transparent;
+  background: rgba(255, 255, 255, 0.04);
   color: var(--text);
   border: 0;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 .footer-cta-dock a.footer-cta-secondary:hover {
   color: var(--accent-2);
-  background: rgba(255, 106, 0, 0.08);
+  background: rgba(255, 106, 0, 0.12);
+}
+.footer-cta-dock a.footer-cta-secondary.is-current {
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    0 0 0 1px rgba(255, 255, 255, 0.08);
 }
 .footer-cta-dock a.footer-cta-primary {
-  background: var(--accent);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 168, 74, 0.96),
+    rgba(255, 106, 0, 0.88)
+  );
   color: var(--accent-ink);
   border: 0;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.42),
+    0 6px 16px rgba(255, 106, 0, 0.28);
 }
 .footer-cta-dock a.footer-cta-primary:hover {
-  background: var(--accent-2);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 186, 110, 1),
+    rgba(255, 122, 20, 0.95)
+  );
+}
+@media (max-width: 640px) {
+  .footer-cta-dock {
+    gap: 0.08rem;
+    padding: 0.24rem;
+  }
+  .footer-cta-dock a {
+    padding: 0.62rem 0.88rem;
+    font-size: 0.86rem;
+  }
 }
 
 .drawer-backdrop {
@@ -1953,6 +2043,15 @@ td.col-name { display: flex; }
 .eco-feed-loading-more { padding: 16px; }
 @media (prefers-reduced-motion: reduce) {
   .eco-type-opt { transition: none; }
+  .footer-cta-dock::before {
+    animation: none;
+  }
+  .footer-cta-dock a,
+  .footer-cta-dock a:hover,
+  .footer-cta-dock a:active {
+    transform: none;
+    transition: none;
+  }
 }
 /* Column count for the masonry is driven by matchMedia in the component
    (manual columns) — no CSS breakpoints needed here. */

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { SiteDock } from "../components/site-dock";
 import { HeroDark } from "../hero-dark";
 
 type Quote = {
@@ -309,18 +310,7 @@ export function QuotesExplorer() {
           )}
         </div>
 
-        <div className="footer-cta">
-          <a href="/" className="footer-cta-secondary">
-            Screener
-          </a>
-          <a
-            href="https://docs.meteora.ag/core-products/dbc/what-is-dbc"
-            target="_blank"
-            rel="noreferrer"
-          >
-            Build on Meteora DBC →
-          </a>
-        </div>
+        <SiteDock />
       </div>
     </div>
   );
