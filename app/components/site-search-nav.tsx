@@ -28,7 +28,7 @@ const NAV = [
   },
   {
     href: "/feed",
-    label: "Twitter feed",
+    label: "Twitter Feed",
     short: "Twitter",
     match: (p: string) => p === "/feed" || p.startsWith("/feed/"),
   },
