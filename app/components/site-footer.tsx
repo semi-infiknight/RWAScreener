@@ -1,4 +1,4 @@
-/** Quiet DBC/launch + Agents + official X — no site-nav echo, no LP pages. */
+/** Quiet DBC/launch + Agents + one ecosystem X — no site-nav echo, no LP pages. */
 const COLUMNS = [
   {
     label: "DBC",
@@ -35,11 +35,11 @@ const COLUMNS = [
     ],
   },
   {
-    label: "Meteora",
+    label: "Ecosystem",
     links: [
       {
-        href: "https://x.com/MeteoraAG",
-        label: "@MeteoraAG",
+        href: "https://x.com/MeteoraEco",
+        label: "@MeteoraEco",
       },
     ],
   },
@@ -48,7 +48,7 @@ const COLUMNS = [
 export function SiteFooter() {
   return (
     <footer className="site-footer">
-      <nav className="site-footer-inner" aria-label="DBC, Agents, and Meteora">
+      <nav className="site-footer-inner" aria-label="DBC, Agents, and ecosystem">
         {COLUMNS.map((col) => (
           <section key={col.label} className="site-footer-col">
             <h2 className="site-footer-label">{col.label}</h2>
