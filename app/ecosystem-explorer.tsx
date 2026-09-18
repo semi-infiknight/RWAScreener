@@ -8,7 +8,6 @@ import {
 } from "../lib/pad-aggregates";
 import type { Project } from "../lib/projects";
 import { isScreenerLive } from "../lib/projects";
-import { EcosystemFeed } from "./components/ecosystem-feed";
 import { formatUsd } from "../lib/tokens";
 import type { PlatformTokenMap } from "../lib/platform-tokens-map";
 import { parsePlatformTokenSeed } from "../lib/platform-tokens-map";
@@ -663,8 +662,6 @@ export function EcosystemExplorer({
             </div>
           ) : null}
         </div>
-
-        <EcosystemFeed />
       </div>
     </div>
   );

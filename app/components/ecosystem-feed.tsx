@@ -164,12 +164,12 @@ function FeedAboutHint() {
   );
 }
 
-export function EcosystemFeed() {
+export function EcosystemFeed({ eager = false }: { eager?: boolean } = {}) {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(false);
-  const [loaded, setLoaded] = useState(false);
+  const [loaded, setLoaded] = useState(eager);
   const [lane, setLane] = useState<Lane>("ecosystem");
   const [postType, setPostType] = useState<PostType>("posts");
   const pageRef = useRef(1);
@@ -284,7 +284,11 @@ export function EcosystemFeed() {
   }, [loaded, hasMore, loading, loadingMore, fetchPage, posts.length]);
 
   return (
-    <section className="eco-feed" ref={sectionRef} aria-label="Meteora Ecosystem feed">
+    <section
+      className={eager ? "eco-feed eco-feed-page" : "eco-feed"}
+      ref={sectionRef}
+      aria-label="Meteora Ecosystem feed"
+    >
       <header className="eco-feed-lockup">
         <div className="eco-feed-heading-row">
           <h2 className="hero-title eco-feed-title">

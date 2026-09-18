@@ -1809,6 +1809,7 @@ td.col-name { display: flex; }
 
 /* ===== Ecosystem Feed (below DBC screener) ===== */
 .eco-feed { max-width: 100%; margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--border); }
+.eco-feed-page { margin-top: 0; padding-top: 1.25rem; border-top: none; }
 .eco-feed-lockup {
   display: flex;
   flex-direction: column;
