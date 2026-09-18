@@ -259,40 +259,40 @@
     },
     {
       "id": "trends",
-      "displayName": "Trends",
+      "displayName": "Trends App",
       "slug": "trends",
-      "website": "https://trends.fun/",
-      "x": "https://x.com/trendsdotfun",
+      "website": "https://apps.apple.com/us/app/trends-social/id6754299493",
+      "x": "https://x.com/trendsdotrun",
       "docs": null,
-      "summary": "Launch coins on Meteora DBC tied to X trends and creator rewards.",
+      "summary": "Solana SocialFi app where creators get paid to post — iOS Trends App by Token Media.",
       "built": [
-        "Token ranking catalog with bonding-curve and migrate status",
-        "DBC config + bonding curve addresses on each row",
-        "24h volume, mcap, holders from the public ranking API"
+        "iOS app (trends social) with tokenized posts and creator fees",
+        "Meteora DBC program in the Token Media launch stack",
+        "X-native callouts from the app to the timeline"
       ],
       "status": "live",
       "verified": [
-        "public_site",
-        "api_ranking"
+        "public_x",
+        "app_store"
       ],
       "contact": "unknown",
       "dbc": {
         "integrated": true,
-        "evidence": "api.trends.fun/v1/token/ranking rows include bonding_curve_address, config_address, and stats.migrate_status. Site trends.fun.",
+        "evidence": "Token Media Trends App (App Store id 6754299493, bundle com.tokenmedia.blockparty) ships Meteora DBC program dbcij3LWUppWqq96dh6gJWwBifmcGfLSB5D4DuSMaqN in the launch client. Official X https://x.com/trendsdotrun (observed 2026-09-19).",
         "configKeys": [],
         "feeClaimers": []
       },
       "sources": [
         {
-          "label": "Site",
-          "url": "https://trends.fun/"
+          "label": "App Store",
+          "url": "https://apps.apple.com/us/app/trends-social/id6754299493"
         },
         {
           "label": "X",
-          "url": "https://x.com/trendsdotfun"
+          "url": "https://x.com/trendsdotrun"
         }
       ],
-      "notes": "Screener: GET /v1/token/ranking (Origin trends.fun). migrate_status===2 graduated. No verified platform-token mint.",
+      "notes": "Not trends.fun / @trendsdotfun. Public coin list API not published yet — homepage metrics stay — until a live catalog is mapped. Do not invent mints.",
       "icon": "/avatars/trends.jpg",
       "screenerLive": true,
       "github": null,

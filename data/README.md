@@ -28,7 +28,7 @@ Per-launchpad screener rows. Shape is defined in `lib/tokens.ts`.
 - Bags is **not** on the DBC homepage screener (`screenerLive: false`). Public Bags launches are DAMM v2 / xStock, not DBC.
 - **StonkOptions** (`launchpadId: stardotfun`) live feed: `indexer.canary.stonkoptions.xyz/v2/catalog`.
 - **Purps** live feed: `purps.lol/api/public/coins` (`origin` launchpad|meteora, Solana).
-- **Trends** live feed: `api.trends.fun/v1/token/ranking`.
+- **Trends App** (`@trendsdotrun`, App Store) — not trends.fun. Coin catalog not mapped yet.
 - Other launchpads may still be draft frontend seeds.
 
 ### Refresh Bags tokens

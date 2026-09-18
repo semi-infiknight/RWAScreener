@@ -66,14 +66,9 @@ const PURPS: ScreenerColumns = {
   buy: false,
 };
 
-/** Trends /v1/token/ranking: price, mcap, vol, holders, age (no liq/spark). */
+/** Trends App (@trendsdotrun) — no public coin fields yet. */
 const TRENDS: ScreenerColumns = {
   ...ALL_OFF,
-  price: true,
-  fdv: true,
-  volume: true,
-  holders: true,
-  age: true,
   buy: false,
 };
 

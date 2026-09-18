@@ -28,7 +28,8 @@ export async function GET(req: NextRequest) {
     const tokens = await fetchTrendsTokens({ phase: fast ? "fast" : "full" });
     return jsonCached(
       {
-        source: "https://api.trends.fun/v1/token/ranking",
+        source:
+          "Trends App (@trendsdotrun) — public DBC coin catalog not published yet",
         phase: fast ? "fast" : "full",
         count: tokens.length,
         tokens,
